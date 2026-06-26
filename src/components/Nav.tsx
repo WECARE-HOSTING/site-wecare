@@ -85,10 +85,10 @@ export default function Nav() {
 
         {/* Desktop nav links */}
         <nav className="wc-nav-links" style={{ display: "flex", alignItems: "center", gap: 26 }}>
-          <a className="wc-nav-link" href="#porque">Por que</a>
           <a className="wc-nav-link" href="#servicos">Serviços</a>
           <a className="wc-nav-link" href="#portfolio">Portfólio</a>
           <a className="wc-nav-link" href="#como-funciona">Como funciona</a>
+          <a className="wc-nav-link" href="#porque">Por que</a>
           <a className="wc-nav-link" href="#planos">Planos</a>
           <a
             href="https://wa.me/5511969760183?text=Quero%20avaliar%20o%20meu%20im%C3%B3vel%20para%20a%20WECARE%20fazer%20a%20gest%C3%A3o"
@@ -182,10 +182,10 @@ export default function Nav() {
         }}>
           <div className="wc-container">
             {[
-              { href: "#porque", label: "Por que WeCare" },
               { href: "#servicos", label: "Serviços" },
               { href: "#portfolio", label: "Portfólio" },
               { href: "#como-funciona", label: "Como funciona" },
+              { href: "#porque", label: "Por que WeCare" },
               { href: "#planos", label: "Planos" },
             ].map(link => (
               <a
