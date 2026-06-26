@@ -16,7 +16,7 @@ export default function ProofBar() {
           </div>
         </div>
 
-        <div data-reveal="" style={{ borderLeft: "1px solid var(--line-soft-dark)", paddingLeft: 32 }}>
+        <div data-reveal="" className="wc-proof-border" style={{ borderLeft: "1px solid var(--line-soft-dark)", paddingLeft: 32 }}>
           <div style={{ fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2.2rem, 1.6rem + 1.6vw, 3.1rem)", lineHeight: 1, color: "var(--ivory-100)" }}>
             10 anos
           </div>
@@ -25,7 +25,7 @@ export default function ProofBar() {
           </div>
         </div>
 
-        <div data-reveal="" style={{ borderLeft: "1px solid var(--line-soft-dark)", paddingLeft: 32 }}>
+        <div data-reveal="" className="wc-proof-border" style={{ borderLeft: "1px solid var(--line-soft-dark)", paddingLeft: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 50, height: 50, borderRadius: 999, border: "1px solid var(--gold-500)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold-300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

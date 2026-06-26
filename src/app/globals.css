@@ -175,6 +175,11 @@ section {
   box-shadow: var(--shadow);
 }
 
+/* Mobile hamburger — hidden by default, shown via media query */
+.wc-nav-mobile {
+  display: none;
+}
+
 /* Nav links */
 .wc-nav-link {
   font-size: 0.72rem;
@@ -278,6 +283,9 @@ details[open] .faq-chevron {
   .wc-nav-links {
     display: none !important;
   }
+  .wc-nav-mobile {
+    display: flex !important;
+  }
   .wc-proof-grid {
     grid-template-columns: 1fr 1fr !important;
   }
@@ -314,5 +322,60 @@ details[open] .faq-chevron {
   }
   .wc-plans-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ============================================================
+   Mobile small < 640px
+   ============================================================ */
+@media (max-width: 640px) {
+  .wc-container {
+    padding: 0 16px !important;
+  }
+
+  /* ProofBar — 1 col + remove inner left borders */
+  .wc-proof-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-proof-border {
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
+
+  /* Planos notes: 2 col → 1 col */
+  .wc-grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Portfolio: 2 col → 1 col, hide mosaic */
+  .wc-portfolio-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-portfolio-mosaic {
+    display: none !important;
+  }
+
+  /* Hero CTAs: stack vertically, primary full-width */
+  .wc-hero-ctas {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  .wc-hero-ctas > a:first-child {
+    display: block !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  /* CTA section: stack vertically, primary full-width */
+  .wc-cta-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  .wc-cta-group > a:first-child {
+    display: block !important;
+    text-align: center !important;
+    width: 100% !important;
   }
 }

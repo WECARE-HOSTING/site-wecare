@@ -68,7 +68,7 @@ export default function Hero() {
               Cuidado de alto padrão para imóveis em locação por temporada. Renda passiva de verdade — sem abrir mão do ativo, sem depreciar o que é seu.
             </p>
 
-            <div style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
+            <div className="wc-hero-ctas" style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
               <a
                 href="https://wa.me/5511969760183?text=Quero%20avaliar%20o%20meu%20im%C3%B3vel%20para%20a%20WECARE%20fazer%20a%20gest%C3%A3o"
                 target="_blank"

@@ -33,7 +33,7 @@ export default function CTAFinal() {
           <p style={{ fontSize: "1.1rem", lineHeight: 1.7, color: "var(--navy-100)", margin: "26px 0 36px", maxWidth: "52ch" }}>
             Avaliamos o seu imóvel sem compromisso. Se houver fit dos dois lados, seguimos para o contrato de gestão. Quem está, está bem.
           </p>
-          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
+          <div className="wc-cta-group" style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
             <a
               href={WA_LINK}
               target="_blank"
