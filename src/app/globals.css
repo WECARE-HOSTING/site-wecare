@@ -159,9 +159,12 @@ section {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
+  [data-reveal],
+  [data-stagger] > *,
+  [data-parallax] {
     opacity: 1 !important;
     transform: none !important;
+    visibility: visible !important;
     transition: none !important;
   }
 }
@@ -333,13 +336,37 @@ details[open] .faq-chevron {
     padding: 0 16px !important;
   }
 
-  /* ProofBar — 1 col + remove inner left borders */
+  /* 1. ProofBar — 1 col, separador horizontal entre stats */
   .wc-proof-grid {
     grid-template-columns: 1fr !important;
   }
   .wc-proof-border {
     border-left: none !important;
     padding-left: 0 !important;
+  }
+  .wc-proof-grid > * {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+  }
+  .wc-proof-grid > * + * {
+    border-top: 1px solid var(--line-soft-dark) !important;
+  }
+
+  /* 2. Visibilidade — mostrar imagem abaixo do card, sem sobreposição */
+  .wc-vis-image {
+    display: block !important;
+    margin-left: 0 !important;
+    min-height: 260px !important;
+    margin-top: 24px !important;
+  }
+  .wc-vis-card {
+    padding: 28px 20px !important;
+  }
+
+  /* 3. Planos — padding confortável, sem corte lateral */
+  .wc-plan-card {
+    padding: 28px 20px !important;
+    min-width: 0 !important;
   }
 
   /* Planos notes: 2 col → 1 col */
@@ -365,6 +392,24 @@ details[open] .faq-chevron {
     display: block !important;
     text-align: center !important;
     width: 100% !important;
+  }
+
+  /* 4. Historia — número menor, layout em coluna centralizada */
+  .wc-historia-nums {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+  }
+  .wc-historia-hero-num {
+    font-size: clamp(2.5rem, 8vw, 4rem) !important;
+  }
+
+  /* 5. Depoimentos — cards full-width com padding mínimo */
+  .wc-testimonial-card {
+    padding: 24px 20px 20px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
   }
 
   /* CTA section: stack vertically, primary full-width */

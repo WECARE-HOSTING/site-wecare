@@ -43,6 +43,7 @@ export default function ProofBar() {
 
         <p
           data-reveal=""
+          className="wc-proof-border"
           style={{ margin: 0, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "1.3rem", lineHeight: 1.5, color: "var(--ivory-100)", borderLeft: "1px solid var(--gold-500)", paddingLeft: 32 }}
         >
           "Só gerimos o que acreditamos que vai ganhar."

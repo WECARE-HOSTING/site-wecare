@@ -42,7 +42,7 @@ const hospedes = [
 function TestimonialCard({ quote, initials, name, role }: { quote: string; initials?: string; name: string; role: string }) {
   return (
     <figure
-      className="wc-card-hover"
+      className="wc-card-hover wc-testimonial-card"
       data-reveal=""
       style={{
         margin: 0,

@@ -10,14 +10,14 @@ export default function Historia() {
         </div>
 
         {/* Big number reveal */}
-        <div data-reveal="" style={{ display: "flex", alignItems: "baseline", gap: "4vw", flexWrap: "wrap", margin: "30px 0 0" }}>
+        <div data-reveal="" className="wc-historia-nums" style={{ display: "flex", alignItems: "baseline", gap: "4vw", flexWrap: "wrap", margin: "30px 0 0" }}>
           <span style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(2rem, 1.2rem + 2.6vw, 3.4rem)", color: "var(--graphite-300)", textDecoration: "line-through", textDecorationColor: "var(--stone-400)", textDecorationThickness: 1 }}>
             R$ 3.500
           </span>
           <span aria-hidden="true" style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "clamp(1.8rem, 1rem + 2.4vw, 3rem)", color: "var(--gold-500)" }}>
             →
           </span>
-          <span style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "clamp(3.6rem, 2rem + 5.6vw, 7rem)", lineHeight: 1, letterSpacing: "-0.015em", color: "var(--gold-700)" }}>
+          <span className="wc-historia-hero-num" style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "clamp(3.6rem, 2rem + 5.6vw, 7rem)", lineHeight: 1, letterSpacing: "-0.015em", color: "var(--gold-700)" }}>
             R$ 30.000
           </span>
           <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)" }}>

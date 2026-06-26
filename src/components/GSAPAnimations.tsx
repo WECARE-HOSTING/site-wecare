@@ -4,6 +4,29 @@ import { useEffect } from "react";
 
 export default function GSAPAnimations() {
   useEffect(() => {
+    // Synchronous early-exit — runs before any async GSAP import so no
+    // gsap.set() call can leave elements invisible on reduced-motion screens
+    // (also covers screenshot tools that emulate prefers-reduced-motion).
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const selectors = [
+        "[data-reveal]",
+        "[data-stagger] > *",
+        "[data-parallax]",
+        ".wc-card-hover",
+        ".wc-mosaic-item",
+        "details",
+      ];
+      selectors.forEach(sel =>
+        document.querySelectorAll(sel).forEach(el => {
+          const h = el as HTMLElement;
+          h.style.opacity = "1";
+          h.style.transform = "none";
+          h.style.visibility = "visible";
+        })
+      );
+      return;
+    }
+
     let gsap: typeof import("gsap").gsap;
     let ScrollTrigger: typeof import("gsap/ScrollTrigger").ScrollTrigger;
 
@@ -13,16 +36,6 @@ export default function GSAPAnimations() {
       gsap = gsapModule.gsap;
       ScrollTrigger = stModule.ScrollTrigger;
       gsap.registerPlugin(ScrollTrigger);
-
-      // Respect reduced-motion preference
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reducedMotion) {
-        document.querySelectorAll("[data-reveal]").forEach(el => {
-          (el as HTMLElement).style.opacity = "1";
-          (el as HTMLElement).style.transform = "none";
-        });
-        return;
-      }
 
       // ── Scroll reveal for [data-reveal] elements ──
       // Set initial state
