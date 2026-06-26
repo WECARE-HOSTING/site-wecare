@@ -1,26 +1,318 @@
+@import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* ============================================================
+   WeCare Design System Tokens
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base brand palette */
+  --navy:        #0C2330;
+  --gold:        #B79152;
+  --ivory:       #F2EAD9;
+  --stone:       #C9BBA4;
+  --graphite:    #161513;
+
+  /* Navy tones */
+  --navy-900:    #081720;
+  --navy-800:    #0C2330;
+  --navy-700:    #143240;
+  --navy-600:    #1F4252;
+  --navy-500:    #2E5567;
+  --navy-200:    #8FA6B0;
+  --navy-100:    #C5D2D8;
+
+  /* Gold tones */
+  --gold-700:    #8F6E37;
+  --gold-600:    #A07E45;
+  --gold-500:    #B79152;
+  --gold-300:    #D2B785;
+  --gold-100:    #E8D9B8;
+
+  /* Ivory tones */
+  --ivory-50:    #FBF7EF;
+  --ivory-100:   #F7F1E5;
+  --ivory-200:   #F2EAD9;
+  --ivory-300:   #EAE0CC;
+
+  /* Stone tones */
+  --stone-300:   #DCD2C0;
+  --stone-400:   #C9BBA4;
+  --stone-600:   #9D8E76;
+  --stone-700:   #6F6450;
+
+  /* Graphite tones */
+  --graphite-900: #0F0E0C;
+  --graphite-800: #161513;
+  --graphite-600: #3A3833;
+  --graphite-400: #6B675E;
+  --graphite-300: #928D81;
+
+  /* Semantic surfaces */
+  --surface-page:      #F2EAD9;
+  --surface-page-alt:  #FBF7EF;
+  --surface-card:      #FFFFFF;
+  --surface-inverse:   #0C2330;
+  --surface-sunken:    #EAE0CC;
+
+  /* Text */
+  --text-strong:   #161513;
+  --text-body:     #2B2A27;
+  --text-muted:    #6B675E;
+  --text-on-dark:  #F7F1E5;
+
+  /* Lines */
+  --line-soft:      rgba(22,21,19,0.10);
+  --line-soft-dark: rgba(242,234,217,0.16);
+  --border-card:    rgba(22,21,19,0.08);
+
+  /* Typography */
+  --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* Motion */
+  --dur:  220ms;
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 4px rgba(12,35,48,0.06), 0 0 1px rgba(12,35,48,0.04);
+  --shadow-sm: 0 2px 12px rgba(12,35,48,0.10), 0 0 1px rgba(12,35,48,0.06);
+  --shadow:    0 8px 32px rgba(12,35,48,0.14), 0 1px 4px rgba(12,35,48,0.08);
+
+  /* Radius */
+  --radius:    8px;
+  --radius-md: 12px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ============================================================
+   Base reset & body
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.625;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+section {
+  scroll-margin-top: 84px;
+}
+
+/* ============================================================
+   Utility classes
+   ============================================================ */
+.wc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.wc-label {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.wc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.wc-eyebrow::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 1px;
+  background: var(--gold-500);
+  flex-shrink: 0;
+}
+
+/* Reveal animations — JS adds .is-in */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  will-change: transform, opacity;
+}
+
+[data-reveal].is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Cards hover */
+.wc-card-hover {
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.wc-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* Nav links */
+.wc-nav-link {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--navy-800);
+  text-decoration: none;
+  transition: color var(--dur) var(--ease);
+}
+.wc-nav-link:hover {
+  color: var(--gold-700);
+}
+
+/* Inline gold underline link */
+.wc-link-gold {
+  font-weight: 600;
+  color: var(--navy-800);
+  text-decoration: none;
+  border-bottom: 1px solid var(--gold-500);
+  padding-bottom: 3px;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.wc-link-gold:hover {
+  color: var(--gold-700);
+  border-bottom-color: var(--gold-700);
+}
+
+/* FAQ */
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+.faq-chevron {
+  transition: transform var(--dur) var(--ease);
+  flex-shrink: 0;
+}
+
+/* OTA platform cells hover */
+.wc-ota-cell {
+  padding: 16px 14px;
+  border-right: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--navy-800);
+  transition: background var(--dur) var(--ease);
+}
+.wc-ota-cell:hover {
+  background: rgba(183,145,82,0.08);
+}
+
+/* Pricing card hover */
+.wc-plan-card {
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.wc-plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+/* Mosaic image items */
+.wc-mosaic-item {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s var(--ease);
+}
+.wc-mosaic-item:hover {
+  transform: scale(1.02);
+}
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+  .wc-container {
+    padding: 0 24px !important;
+  }
+  .wc-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-grid-4 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .wc-hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-hero-image {
+    display: none !important;
+  }
+  .wc-nav-links {
+    display: none !important;
+  }
+  .wc-proof-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .wc-vis-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-vis-card {
+    margin-right: 0 !important;
+  }
+  .wc-vis-image {
+    display: none !important;
+  }
+  .wc-step-2 {
+    margin-top: 0 !important;
+  }
+  .wc-step-3 {
+    margin-top: 0 !important;
+  }
+  .wc-pillar-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-portfolio-mosaic {
+    grid-template-columns: 1fr 1fr !important;
+    grid-auto-rows: 160px !important;
+  }
+  .wc-portfolio-mosaic > * {
+    grid-column: auto !important;
+  }
+  .wc-portfolio-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .wc-historia-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wc-plans-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
