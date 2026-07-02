@@ -10,7 +10,9 @@
       "logo": {
         "@type": "ImageObject",
         "@id": "https://www.wecarehosting.com.br/#logo",
-        "url": "https://www.wecarehosting.com.br/brand/wecare-simbolo-solido.svg",
+        "url": "https://www.wecarehosting.com.br/brand/wecare-simbolo-solido.png",
+        "width": 512,
+        "height": 512,
         "caption": "WeCare Hosting"
       },
       "foundingDate": "2019",
