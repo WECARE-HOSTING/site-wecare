@@ -13,10 +13,15 @@ import FAQ from "@/components/FAQ";
 import CTAFinal from "@/components/CTAFinal";
 import Footer from "@/components/Footer";
 import GSAPAnimations from "@/components/GSAPAnimations";
+import homepageSchema from "./homepage-schema.json";
 
 export default function Home() {
   return (
     <main style={{ background: "var(--surface-page)", overflowX: "hidden" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageSchema) }}
+      />
       <Nav />
       <Hero />
       <ProofBar />
