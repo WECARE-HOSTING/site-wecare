@@ -1,0 +1,123 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.wecarehosting.com.br/#organization",
+      "name": "WeCare Hosting",
+      "alternateName": "WeCare",
+      "url": "https://www.wecarehosting.com.br/",
+      "logo": {
+        "@type": "ImageObject",
+        "@id": "https://www.wecarehosting.com.br/#logo",
+        "url": "https://www.wecarehosting.com.br/brand/wecare-simbolo-solido.svg",
+        "caption": "WeCare Hosting"
+      },
+      "foundingDate": "2018",
+      "description": "Gestão de imóveis por temporada de alto padrão em São Paulo, com 10 anos de experiência prática no Airbnb (desde 2016). Cuidado de dono, operação de gestora: anúncio e marketing, precificação dinâmica, atendimento 24/7, curadoria de hóspedes, limpeza e manutenção. Sem fidelidade e sem multa.",
+      "slogan": "Patrimônio em boas mãos.",
+      "areaServed": {
+        "@type": "City",
+        "name": "São Paulo",
+        "sameAs": "https://www.wikidata.org/wiki/Q174"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "São Paulo",
+        "addressRegion": "SP",
+        "addressCountry": "BR"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "sales",
+        "telephone": "+55-11-96976-0183",
+        "availableLanguage": "Portuguese",
+        "url": "https://wa.me/5511969760183"
+      },
+      "sameAs": [
+        "https://instagram.com/wecarehosting"
+      ],
+      "knowsAbout": [
+        "Gestão de imóveis por temporada",
+        "Administração de Airbnb",
+        "Locação por temporada de alto padrão",
+        "Co-hosting",
+        "Precificação dinâmica de aluguel por temporada"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.wecarehosting.com.br/#website",
+      "url": "https://www.wecarehosting.com.br/",
+      "name": "WeCare — Gestão de Imóveis por Temporada",
+      "inLanguage": "pt-BR",
+      "publisher": { "@id": "https://www.wecarehosting.com.br/#organization" }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.wecarehosting.com.br/#webpage",
+      "url": "https://www.wecarehosting.com.br/",
+      "name": "WeCare — Gestão de Imóveis por Temporada",
+      "description": "Cuidado de alto padrão para imóveis em locação por temporada. Renda passiva de verdade — sem abrir mão do ativo.",
+      "inLanguage": "pt-BR",
+      "isPartOf": { "@id": "https://www.wecarehosting.com.br/#website" },
+      "about": { "@id": "https://www.wecarehosting.com.br/#organization" }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.wecarehosting.com.br/#faq",
+      "isPartOf": { "@id": "https://www.wecarehosting.com.br/#webpage" },
+      "inLanguage": "pt-BR",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como e quando eu recebo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "O Dia do Repasse: repasse pontual todo mês, com demonstrativo em tempo real no Relatório WeCare. Números reais, sem custos ocultos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O que está incluído na gestão?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Anúncio e marketing, precificação dinâmica, atendimento 24/7 ao hóspede, curadoria e gestão de reservas. Na Gestão 360, somam-se limpeza, manutenção e enxoval. Você escolhe quanto delega."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tenho fidelidade ou multa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Não. Sem fidelidade e sem multa — você entra e sai quando quiser. Acreditamos que a relação se sustenta por resultado, não por contrato amarrado."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Posso usar meu imóvel quando quiser?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sempre. Você bloqueia as datas que quiser, sem taxa. O imóvel é seu — a operação se encaixa na sua vida, e não o contrário."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como vocês escolhem os hóspedes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Curadoria antes da reserva: verificação de cada hóspede, análise de risco e seguro obrigatório. Protegemos o seu patrimônio ativamente — quem entra, cuida."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Meu imóvel se qualifica?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Avaliamos sem compromisso. Só entra o que acreditamos que vai render melhor em temporada do que em qualquer outra modalidade. Se houver fit dos dois lados, seguimos para o contrato."
+          }
+        }
+      ]
+    }
+  ]
+}
