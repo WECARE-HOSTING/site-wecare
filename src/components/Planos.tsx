@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const CheckIcon = ({ color = "var(--gold-700)" }: { color?: string }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
     <polyline points="20 6 9 17 4 12" />
@@ -8,7 +10,12 @@ const CheckIcon = ({ color = "var(--gold-700)" }: { color?: string }) => (
 
 const WA_LINK = "https://wa.me/5511969760183?text=Quero%20avaliar%20o%20meu%20im%C3%B3vel%20para%20a%20WECARE%20fazer%20a%20gest%C3%A3o";
 
-const notes = [
+const notes: {
+  label: string;
+  title: string;
+  body: string;
+  link?: { href: string; label: string };
+}[] = [
   {
     label: "Obrigatório",
     title: "EasyCover · R$ 120/mês",
@@ -18,6 +25,7 @@ const notes = [
     label: "Sem fidelidade",
     title: "Entra e sai quando quiser",
     body: "Sem multa e sem burocracia. A relação se sustenta por resultado.",
+    link: { href: "/blog/gestao-airbnb-sem-fidelidade", label: "Como funciona →" },
   },
   {
     label: "Taxa de adesão",
@@ -184,6 +192,11 @@ export default function Planos() {
               <span style={{ display: "block", fontFamily: "var(--font-sans)", fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--gold-700)", marginBottom: 8 }}>{n.label}</span>
               <span style={{ display: "block", fontFamily: "var(--font-serif)", fontSize: "1.05rem", color: "var(--text-strong)", marginBottom: 6 }}>{n.title}</span>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.86rem", lineHeight: 1.55, color: "var(--text-muted)" }}>{n.body}</span>
+              {n.link && (
+                <Link href={n.link.href} className="wc-link-gold" style={{ display: "inline-block", fontSize: "0.8rem", marginTop: 8 }}>
+                  {n.link.label}
+                </Link>
+              )}
             </div>
           ))}
         </div>

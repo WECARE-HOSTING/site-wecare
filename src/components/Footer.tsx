@@ -1,6 +1,10 @@
 "use client";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const anchor = (hash: string) => (isHome ? hash : `/${hash}`);
   return (
     <footer style={{ background: "var(--navy-900)", color: "var(--ivory-100)", padding: "72px 0 40px", borderTop: "1px solid var(--line-soft-dark)" }}>
       <div className="wc-container">
@@ -26,9 +30,10 @@ export default function Footer() {
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 11 }}>
                 {[
                   { href: "https://wa.me/5511969760183?text=Quero%20avaliar%20o%20meu%20im%C3%B3vel%20para%20a%20WECARE%20fazer%20a%20gest%C3%A3o", label: "Avalie seu imóvel", external: true },
-                  { href: "#como-funciona", label: "Como funciona" },
-                  { href: "#planos", label: "Planos e investimento" },
-                  { href: "#historia", label: "Nossa história" },
+                  { href: anchor("#como-funciona"), label: "Como funciona" },
+                  { href: anchor("#planos"), label: "Planos e investimento" },
+                  { href: anchor("#historia"), label: "Nossa história" },
+                  { href: "/blog", label: "Blog" },
                 ].map(link => (
                   <li key={link.label}>
                     <a
@@ -49,8 +54,8 @@ export default function Footer() {
               <div className="wc-label" style={{ color: "var(--gold-300)", marginBottom: 16 }}>WeCare</div>
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 11 }}>
                 {[
-                  { href: "#porque", label: "O Padrão WeCare" },
-                  { href: "#servicos", label: "Serviços" },
+                  { href: anchor("#porque"), label: "O Padrão WeCare" },
+                  { href: anchor("#servicos"), label: "Serviços" },
                   { href: "https://instagram.com/wecarehosting", label: "@wecarehosting", external: true },
                   { href: "https://wecarehosting.com.br", label: "wecarehosting.com.br", external: true },
                 ].map(link => (
