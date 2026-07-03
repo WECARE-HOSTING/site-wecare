@@ -11,10 +11,7 @@ export default function Footer() {
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 48, paddingBottom: 48, borderBottom: "1px solid var(--line-soft-dark)" }}>
           {/* Brand */}
           <div style={{ maxWidth: 340 }}>
-            <svg width="130" height="30" viewBox="0 0 130 30" aria-label="WeCare">
-              <text x="0" y="24" fontFamily="var(--font-serif)" fontWeight="500" fontSize="24" fill="var(--ivory-100)">wecare</text>
-              <text x="93" y="24" fontFamily="var(--font-serif)" fontWeight="500" fontSize="24" fill="var(--gold-500)">.</text>
-            </svg>
+            <img src="/brand/wecare-logo-reverso.svg" alt="WeCare" width={115} height={32} style={{ display: "block" }} />
             <p style={{ marginTop: 20, color: "var(--navy-200)", fontSize: "0.95rem", lineHeight: 1.65 }}>
               Gestão de imóveis para temporada, no alto padrão de quem cuida do próprio.
             </p>

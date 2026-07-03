@@ -82,10 +82,7 @@ export default function Nav() {
       >
         {/* Logo */}
         <a href={anchor("#topo")} style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 }}>
-          <svg width="120" height="28" viewBox="0 0 120 28" fill="none" aria-label="WeCare">
-            <text x="0" y="22" fontFamily="var(--font-serif)" fontWeight="500" fontSize="22" fill="var(--navy-800)">wecare</text>
-            <text x="86" y="22" fontFamily="var(--font-serif)" fontWeight="500" fontSize="22" fill="var(--gold-500)">.</text>
-          </svg>
+          <img src="/brand/wecare-logo-horizontal.svg" alt="WeCare" width={108} height={30} style={{ display: "block" }} />
         </a>
 
         {/* Desktop nav links */}
