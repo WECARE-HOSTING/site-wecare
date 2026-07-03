@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Nav() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const anchor = (hash: string) => (isHome ? hash : `/${hash}`);
   const headerRef = useRef<HTMLElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hiddenRef = useRef(false);
@@ -76,20 +81,18 @@ export default function Nav() {
         style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 76 }}
       >
         {/* Logo */}
-        <a href="#topo" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 }}>
-          <svg width="120" height="28" viewBox="0 0 120 28" fill="none" aria-label="WeCare">
-            <text x="0" y="22" fontFamily="var(--font-serif)" fontWeight="500" fontSize="22" fill="var(--navy-800)">wecare</text>
-            <text x="86" y="22" fontFamily="var(--font-serif)" fontWeight="500" fontSize="22" fill="var(--gold-500)">.</text>
-          </svg>
+        <a href={anchor("#topo")} style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 }}>
+          <img src="/brand/wecare-logo-horizontal.svg" alt="WeCare" width={108} height={30} style={{ display: "block" }} />
         </a>
 
         {/* Desktop nav links */}
         <nav className="wc-nav-links" style={{ display: "flex", alignItems: "center", gap: 26 }}>
-          <a className="wc-nav-link" href="#servicos">Serviços</a>
-          <a className="wc-nav-link" href="#portfolio">Portfólio</a>
-          <a className="wc-nav-link" href="#como-funciona">Como funciona</a>
-          <a className="wc-nav-link" href="#porque">Por que</a>
-          <a className="wc-nav-link" href="#planos">Planos</a>
+          <a className="wc-nav-link" href={anchor("#servicos")}>Serviços</a>
+          <a className="wc-nav-link" href={anchor("#portfolio")}>Portfólio</a>
+          <a className="wc-nav-link" href={anchor("#como-funciona")}>Como funciona</a>
+          <a className="wc-nav-link" href={anchor("#porque")}>Por que</a>
+          <a className="wc-nav-link" href={anchor("#planos")}>Planos</a>
+          <Link className="wc-nav-link" href="/blog">Blog</Link>
           <a
             href="https://wa.me/5511969760183?text=Quero%20avaliar%20o%20meu%20im%C3%B3vel%20para%20a%20WECARE%20fazer%20a%20gest%C3%A3o"
             target="_blank"
@@ -182,11 +185,12 @@ export default function Nav() {
         }}>
           <div className="wc-container">
             {[
-              { href: "#servicos", label: "Serviços" },
-              { href: "#portfolio", label: "Portfólio" },
-              { href: "#como-funciona", label: "Como funciona" },
-              { href: "#porque", label: "Por que WeCare" },
-              { href: "#planos", label: "Planos" },
+              { href: anchor("#servicos"), label: "Serviços" },
+              { href: anchor("#portfolio"), label: "Portfólio" },
+              { href: anchor("#como-funciona"), label: "Como funciona" },
+              { href: anchor("#porque"), label: "Por que WeCare" },
+              { href: anchor("#planos"), label: "Planos" },
+              { href: "/blog", label: "Blog" },
             ].map(link => (
               <a
                 key={link.href}

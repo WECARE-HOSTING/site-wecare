@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Historia() {
   return (
     <section id="historia" style={{ background: "var(--surface-page-alt)", padding: "clamp(80px, 9vw, 120px) 0" }}>
@@ -42,6 +44,12 @@ export default function Historia() {
             <p style={{ margin: "18px 0 0" }}>
               A WeCare nasceu daí: transformar imóveis e fazê-los render, sem o proprietário abrir mão do ativo.{" "}
               <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic" }}>Prova, não promessa.</span>
+            </p>
+            <p style={{ margin: "18px 0 0", fontSize: "0.92rem" }}>
+              Quanto pode render um imóvel como o seu? Veja o que muda o resultado de uma{" "}
+              <Link href="/blog/quanto-rende-casa-airbnb-sao-paulo" className="wc-link-gold">casa</Link> ou de um{" "}
+              <Link href="/blog/quanto-rende-apartamento-airbnb-sao-paulo" className="wc-link-gold">apartamento</Link>{" "}
+              em São Paulo.
             </p>
           </div>
         </div>

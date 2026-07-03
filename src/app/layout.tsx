@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.wecarehosting.com.br"),
   title: "WeCare — Gestão de Imóveis por Temporada",
   description: "Cuidado de alto padrão para imóveis em locação por temporada. Renda passiva de verdade — sem abrir mão do ativo.",
   icons: {

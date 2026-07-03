@@ -1,6 +1,10 @@
 "use client";
 
-const faqs = [
+import Link from "next/link";
+
+type Faq = { q: string; a: string; link?: { href: string; label: string } };
+
+const faqs: Faq[] = [
   {
     q: "Como e quando eu recebo?",
     a: "O Dia do Repasse: repasse pontual todo mês, com demonstrativo em tempo real no Relatório WeCare. Números reais, sem custos ocultos.",
@@ -11,7 +15,8 @@ const faqs = [
   },
   {
     q: "Tenho fidelidade ou multa?",
-    a: "Não. Sem fidelidade e sem multa — você entra e sai quando quiser. Acreditamos que a relação se sustenta por resultado, não por contrato amarrado.",
+    a: "Não. Sem fidelidade e sem multa — você entra e sai quando quiser. Não há cláusula de rescisão nem prazo mínimo: a relação se sustenta pelo resultado entregue mês a mês. O que continua valendo é só o seguro obrigatório (EasyCover) e a taxa de adesão única. O churn da WeCare fica abaixo de 1% ao mês.",
+    link: { href: "/blog/gestao-airbnb-sem-fidelidade", label: "Ver como funciona a saída, na prática" },
   },
   {
     q: "Posso usar meu imóvel quando quiser?",
@@ -70,6 +75,14 @@ export default function FAQ() {
               </summary>
               <p style={{ margin: 0, padding: "0 0 26px", fontSize: "1rem", lineHeight: 1.7, color: "var(--text-body)", maxWidth: "64ch" }}>
                 {faq.a}
+                {faq.link && (
+                  <>
+                    {" "}
+                    <Link href={faq.link.href} className="wc-link-gold">
+                      {faq.link.label}
+                    </Link>
+                  </>
+                )}
               </p>
             </details>
           ))}
