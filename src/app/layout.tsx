@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import GtagLeadTracker from "@/components/GtagLeadTracker";
 import "./globals.css";
 
 const GA_MEASUREMENT_ID = "G-SSEV44PYET";
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="pt-BR" className="h-full">
       <body className="min-h-full">
         {children}
+        <GtagLeadTracker />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
