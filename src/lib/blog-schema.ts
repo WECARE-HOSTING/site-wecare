@@ -95,3 +95,37 @@ export function buildBlogPostGraph(meta: BlogPostMeta) {
     ],
   };
 }
+
+export function buildBlogIndexGraph(posts: BlogPostMeta[]) {
+  const url = `${SITE_URL}/blog`;
+
+  const breadcrumb = {
+    "@type": "BreadcrumbList",
+    "@id": `${url}#breadcrumb`,
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+      { "@type": "ListItem", position: 2, name: "Blog", item: url },
+    ],
+  };
+
+  const blog = {
+    "@type": "Blog",
+    "@id": `${url}#blog`,
+    url,
+    name: "Blog WeCare Hosting",
+    description:
+      "Guias sobre gestão de Airbnb, aluguel por temporada e rentabilidade de imóveis em São Paulo — direto da WeCare Hosting.",
+    inLanguage: "pt-BR",
+    isPartOf: { "@id": WEBSITE_ID },
+    publisher: { "@id": ORG_ID },
+    // Referencing each post's Article node by @id (not inlining) keeps this
+    // in sync automatically: every post already ships its own #article node
+    // via buildBlogPostGraph, so adding a post here is just listing its slug.
+    blogPost: posts.map((p) => ({ "@id": `${SITE_URL}/blog/${p.slug}#article` })),
+  };
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [orgNode(), websiteNode(), breadcrumb, blog],
+  };
+}

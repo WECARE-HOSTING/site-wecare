@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { posts } from "@/content/blog/registry";
+import { buildBlogIndexGraph } from "@/lib/blog-schema";
 
 export const metadata: Metadata = {
   title: "Blog | WeCare Hosting",
@@ -10,7 +11,11 @@ export const metadata: Metadata = {
 };
 
 export default function BlogIndexPage() {
+  const graph = buildBlogIndexGraph(posts.map((p) => p.meta));
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
     <section style={{ padding: "clamp(128px, 13vw, 168px) 0 clamp(80px, 9vw, 120px)" }}>
       <div className="wc-container" style={{ maxWidth: 900 }}>
         <div className="wc-eyebrow">
@@ -73,5 +78,6 @@ export default function BlogIndexPage() {
         </div>
       </div>
     </section>
+    </>
   );
 }
