@@ -6,7 +6,7 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Co-hosting",
   title: "Co-hosting no Airbnb: o Que É, Quanto Custa e Quando Vale a Pena (Guia 2026)",
   description:
-    "Co-hosting é o papel mais leve dentro da Airbnb — comunicação e calendário, sem limpeza, manutenção ou seguro. Veja a diferença real para gestão completa e quando cada modelo faz sentido.",
+    "Co-hosting é o papel mais leve dentro da Airbnb: comunicação e calendário, sem limpeza nem seguro. Veja a diferença para gestão completa.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [
@@ -248,7 +248,7 @@ function Content() {
           </tbody>
         </table>
       </div>
-      <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+      <p className="wc-source-note">
         *Faixas gerais de mercado levantadas via pesquisa de concorrência — não são um número único nem uma garantia;
         cada gestora define sua própria tabela. Os valores da WeCare são os praticados e públicos. Sem mensalidade
         fixa: a WeCare só ganha quando o imóvel gera receita, e não há taxa de fidelidade nem multa de saída.
@@ -329,11 +329,9 @@ function Content() {
 
       <h2>Qual a melhor empresa de co-hosting de Airbnb no Brasil?</h2>
       <p>
-        Não existe uma resposta única — &ldquo;melhor&rdquo; depende do que o proprietário realmente precisa, e é aí
-        que a pergunta costuma estar mal formulada. Se a necessidade é só ajuda pontual com mensagens e calendário,
-        um co-host da rede oficial da Airbnb resolve. Se o imóvel é de médio/alto padrão, fica longe do proprietário,
-        ou o objetivo é proteger o patrimônio — não só ocupar calendário —, o que resolve é uma gestão completa, não
-        uma camada leve de co-hosting.
+        Não existe uma resposta única — depende do que o proprietário precisa. Ajuda pontual com mensagens e
+        calendário, um co-host da rede oficial da Airbnb resolve. Para imóvel de médio/alto padrão, à distância, ou
+        para proteger o patrimônio, quem resolve é uma gestão completa, não uma camada leve de co-hosting.
       </p>
       <p>
         Para esse segundo caso, a WeCare Hosting opera como gestora boutique de aluguel por temporada para imóveis

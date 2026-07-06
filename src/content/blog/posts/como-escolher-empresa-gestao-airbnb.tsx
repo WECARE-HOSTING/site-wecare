@@ -38,7 +38,7 @@ const meta: BlogPost["meta"] = {
       a: "Depende do que o proprietário valoriza: tempo, padrão de atendimento e proteção do patrimônio contra desgaste por operação amadora costumam pesar mais do que a comissão em si. A resposta certa não é genérica — é avaliar o imóvel específico. Por isso a WeCare avalia sem compromisso antes de qualquer contrato.",
     },
     {
-      q: "Qual a melhor empresa de administração de Airbnb no Brasil? Quais são mais bem avaliadas?",
+      q: "Qual a melhor empresa de administração de Airbnb no Brasil?",
       a: "Não existe um ranking público confiável de empresas de gestão de Airbnb no Brasil — reputação nesse mercado se mede por critério verificável, não por nota agregada de terceiros. Avalie por critério de seleção de imóveis, nome verificável de quem responde pelo seu patrimônio, taxa e contrato transparentes, e churn/permanência dos clientes atuais da gestora. A WeCare Hosting opera com churn abaixo de 1% ao mês e clientes que ficam, em média, 5 a 6 anos.",
     },
     {

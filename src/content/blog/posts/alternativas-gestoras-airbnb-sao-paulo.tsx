@@ -5,7 +5,7 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Comparativo de mercado",
   title: "Alternativas a Gestoras de Airbnb em São Paulo: Panorama Comparativo (2026)",
   description:
-    "HostnJoy, B.Homy, Charlie, Housi, Anfitrião SP, Airent, Fonte e outras opções — taxa, cobertura e reputação verificável, comparadas lado a lado, para quem tem um imóvel de alto padrão em São Paulo.",
+    "HostnJoy, B.Homy, Charlie, Housi e outras alternativas de gestão de Airbnb em São Paulo — taxa, cobertura e reputação comparadas lado a lado.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [
@@ -46,6 +46,12 @@ function Content() {
       </p>
 
       <h2>Quais são as principais gestoras de Airbnb em São Paulo, além da WeCare?</h2>
+      <p>
+        As gestoras que atuam em São Paulo variam por modelo, cobertura e taxa — veja a tabela completa abaixo. Em
+        reputação verificável no Reclame Aqui, a WeCare está com zero reclamações registradas, Housi (7,8/10) e
+        Charlie (7,6/10) têm avaliação boa, HostnJoy ainda não tem reputação definida e B.Homy está classificada como
+        Não Recomendada (dado de 2026-07-06).
+      </p>
       <div style={{ overflowX: "auto" }}>
         <table>
           <thead>
@@ -119,7 +125,7 @@ function Content() {
           </tbody>
         </table>
       </div>
-      <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+      <p className="wc-source-note">
         Dados verificados nos respectivos sites e no Reclame Aqui em 2026-07-06.
       </p>
 

@@ -260,9 +260,10 @@ function Content() {
         física que, no ano-calendário anterior, faturou mais de R$ 240 mil com locação de imóveis <strong>e</strong>{" "}
         teve mais de 3 imóveis distintos alugados. Quem fica abaixo de qualquer um dos dois limites continua só no
         IR, como hoje. Para quem se enquadra, há um redutor de R$ 600 por imóvel na base de cálculo mensal e uma
-        redução de 40% na alíquota combinada de IBS/CBS (o que deixa o percentual efetivo na faixa de 16%–17%,
-        segundo a reportagem consultada). A CBS entra em vigor plena a partir de 2027; o IBS tem transição de 2026 a
-        2033 — a regra não é imediata.
+        redução de 40% na alíquota combinada de IBS/CBS — considerando a alíquota padrão de referência estimada pelo
+        governo, isso resulta num percentual efetivo estimado em 16%–17%, sujeito a ajuste quando a regulamentação
+        final for publicada. A CBS entra em vigor plena a partir de 2027; o IBS tem transição de 2026 a 2033 — a
+        regra não é imediata.
       </p>
       <div style={{ overflowX: "auto" }}>
         <table>
@@ -288,10 +289,18 @@ function Content() {
         </table>
       </div>
       <p>
-        O próprio Airbnb, em posicionamento público citado na reportagem consultada, afirmou que &ldquo;a maioria
-        das pessoas físicas que alugam imóveis por temporada continuará sujeita apenas ao Imposto de Renda&rdquo; e
-        classificou a ideia de um &ldquo;novo imposto generalizado&rdquo; sobre anfitriões pessoa física como
-        divulgação incorreta.
+        O próprio Airbnb já se posicionou publicamente sobre o tema: um estudo da LCA Consultoria Econômica
+        encomendado pela empresa (concluído em 2025,{" "}
+        <a
+          href="https://news.airbnb.com/br/estudo-da-lca-mostra-que-anfitrioes-no-airbnb-ja-enfrentam-carga-tributaria-igual-ou-superior-a-da-hotelaria-no-brasil/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Airbnb Newsroom
+        </a>
+        ) mostra que anfitriões pessoa física já pagam carga tributária igual ou superior à da hotelaria, podendo
+        chegar a 39,5% após a reforma para quem ultrapassa os limites de enquadramento — mais um motivo para
+        acompanhar o próprio enquadramento, não presumir isenção.
       </p>
 
       <h2>Locação por temporada de casa rende mais que apartamento?</h2>
@@ -374,9 +383,10 @@ function Content() {
         ))}
       </div>
 
-      <p style={{ marginTop: 32, fontSize: "0.85rem", color: "var(--text-muted)" }}>
-        Este conteúdo é informativo e não substitui orientação jurídica ou contábil individual — antes de qualquer
-        decisão, consulte um advogado ou contador para o caso específico do seu imóvel.
+      <p style={{ marginTop: 32 }}>
+        <strong>Aviso:</strong> este conteúdo é informativo e não substitui orientação jurídica ou contábil
+        individual — antes de qualquer decisão, consulte um advogado ou contador para o caso específico do seu
+        imóvel.
       </p>
     </>
   );

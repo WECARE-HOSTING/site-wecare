@@ -6,7 +6,7 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Anfitrião ou empresa",
   title: "Anfitrião Profissional de Airbnb: o Que Faz e Quando Vale a Pena Contratar um (Guia 2026)",
   description:
-    "A pergunta certa não é 'qual anfitrião contratar' — é 'devo ser meu próprio anfitrião ou contratar uma empresa'. Responsabilidades, preços de mercado e quando cada opção faz sentido.",
+    "A pergunta certa não é qual anfitrião contratar, mas se você deve administrar sozinho ou contratar uma empresa. Preços e quando cada opção compensa.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [
@@ -307,10 +307,10 @@ function Content() {
         longo. Vale perguntar diretamente se isso existe — nunca assumir que sim.
       </p>
       <p>
-        Casas de alto padrão no litoral e campo já faturaram R$ 400 mil num único réveillon sob gestão curatorial —
-        número plural e anonimizado, prova de que esse segmento existe e de que a operação certa faz diferença real
-        no resultado. Recusar imóveis sem vocação e recusar hóspedes que não combinam com a casa não é seletividade
-        por pose: é o motivo pelo qual um padrão se mantém imóvel a imóvel, em vez de diluir em volume.
+        A WeCare já operou uma casa de alto padrão no litoral que faturou R$ 400 mil em um único réveillon — caso
+        documentado, não uma média do segmento, mas prova de que a operação certa faz diferença real no resultado.
+        Recusar imóveis sem vocação e recusar hóspedes que não combinam com a casa não é seletividade por pose: é o
+        motivo pelo qual um padrão se mantém imóvel a imóvel, em vez de diluir em volume.
       </p>
 
       <h2>Quais empresas oferecem serviço de anfitrião profissional em São Paulo?</h2>

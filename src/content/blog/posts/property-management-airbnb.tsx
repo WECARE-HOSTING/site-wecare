@@ -6,7 +6,7 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Property management",
   title: "Property Management para Imóveis de Temporada: o Que É e Como Funciona no Brasil (Guia 2026)",
   description:
-    "O que property management significa aplicado a Airbnb, quanto custa, qual a diferença da administração tradicional e o que verificar antes de contratar — sem ranking de empresas, com critérios reais.",
+    "O que property management significa aplicado a Airbnb, quanto custa e a diferença para administração tradicional — critérios reais para contratar.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [

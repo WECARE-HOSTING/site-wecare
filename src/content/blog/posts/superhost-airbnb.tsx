@@ -6,7 +6,7 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Superhost",
   title: "Superhost no Airbnb: o Que É e Como Funciona (2026)",
   description:
-    "Superhost é o selo trimestral do Airbnb baseado em 4 critérios oficiais de desempenho. Veja os requisitos exatos, o que muda quando uma gestora profissional administra o imóvel, e se vale a pena virar superhost sozinho ou contratar gestão especializada.",
+    "Superhost é o selo trimestral do Airbnb com 4 critérios de desempenho. Veja os requisitos e se vale mais virar superhost sozinho ou contratar uma gestora.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [

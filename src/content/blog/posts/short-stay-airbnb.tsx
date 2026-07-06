@@ -6,7 +6,7 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Short stay",
   title: "Short Stay: o Que É, Como Funciona e Vale a Pena em 2026",
   description:
-    "Definição, diferença para aluguel tradicional, dado real de mercado (Airbtics) e a decisão do STJ de 2026 que muda a regra em condomínios. Guia completo, sem promessa de rentabilidade inflada.",
+    "Definição, diferença para aluguel tradicional, dado real de mercado (Airbtics) e a decisão do STJ de 2026 que muda a regra em condomínios.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [
@@ -59,7 +59,9 @@ function Content() {
         cobrada antecipadamente, imóvel entregue mobiliado e pronto para uso, e reserva feita por plataforma digital.
         No Brasil, o modelo cresceu junto com o Airbnb a partir de 2018 e se consolidou depois da pandemia, quando
         viagem corporativa, tratamento médico e trabalho remoto passaram a demandar estadias intermediárias — nem
-        hotel, nem aluguel de 30 meses.
+        hotel, nem aluguel de 30 meses. Isso não é o mesmo que &ldquo;estar no Airbnb&rdquo;: Airbnb é a plataforma de
+        reserva, e short stay é o modelo de locação — um imóvel pode operar em regime de short stay e ser anunciado
+        no Airbnb, na Booking ou nos dois ao mesmo tempo.
       </p>
       <p>
         Juridicamente, short stay não é uma categoria própria: é locação por temporada, prevista nos artigos 48 a 50
@@ -252,7 +254,7 @@ function Content() {
           </tbody>
         </table>
       </div>
-      <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+      <p className="wc-source-note">
         Fonte: Airbtics, dados de referência fev/2025–jan/2026, atualizados em 12/03/2026.
       </p>
       <p>
@@ -375,6 +377,13 @@ function Content() {
         econômica reiterada&rdquo; em caso de disputa; (3) o precedente é recente e ainda vai amadurecer — não existe
         hoje um critério objetivo único aplicável a todo condomínio. Uma gestora que conhece esse risco orienta o
         proprietário antes de operar, não depois de um conflito na assembleia.
+      </p>
+
+      <h2>Vale mais a pena administrar o short stay sozinho ou contratar uma gestora?</h2>
+      <p>
+        Depende do que pesa mais para o proprietário: tempo, padrão de atendimento ao hóspede e proteção do imóvel
+        contra o desgaste de uma operação amadora costumam superar o valor da comissão cobrada por uma gestora. Não
+        existe resposta genérica — por isso a WeCare avalia cada imóvel, sem compromisso, antes de qualquer contrato.
       </p>
 
       <div className="wc-faq-block">
