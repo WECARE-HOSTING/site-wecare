@@ -1,18 +1,18 @@
 "use client";
 
 const cards = [
-  { region: "São Paulo · Capital", title: "Coberturas nos Jardins e Itaim", img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=80", objectPosition: "center 55%" },
-  { region: "Litoral", title: "Casas de praia premium", img: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=900&q=80", objectPosition: "center" },
-  { region: "Serra & Campo", title: "Refúgios fora da cidade", img: "https://images.unsplash.com/photo-1586348943529-beaae6c28db9?auto=format&fit=crop&w=900&q=80", objectPosition: "center 50%" },
+  { region: "São Paulo · Capital", title: "Coberturas nos Jardins e Itaim", img: "/uploads/apto-vista-sp-capital.jpg", objectPosition: "center" },
+  { region: "Litoral", title: "Casas de praia premium", img: "/uploads/litoral-piscina-lagoa.jpg", objectPosition: "center" },
+  { region: "Serra & Campo", title: "Refúgios fora da cidade", img: "/uploads/casa-jardim-piscina.jpg", objectPosition: "center" },
   { region: "Amazônia", title: "Eco-retiros na floresta", img: "/uploads/eco-retiros.jpg", objectPosition: "center" },
 ];
 
 const mosaic = [
-  { span: 2, img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" },
-  { span: 2, img: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80" },
-  { span: 2, img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" },
-  { span: 3, img: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80" },
-  { span: 3, img: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80" },
+  { span: 2, img: "/uploads/apto-itaim-sala-poltronas.jpg" },
+  { span: 2, img: "/uploads/quarto-vista-noturna-sp.jpg" },
+  { span: 2, img: "/uploads/banheiro-spa-detalhe.jpg" },
+  { span: 3, img: "/uploads/duplex-escada-banheira.jpg" },
+  { span: 3, img: "/uploads/loft-sala-jantar-poltrona-bolha.jpg" },
 ];
 
 const imgStyle: React.CSSProperties = {
