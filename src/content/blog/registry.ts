@@ -2,10 +2,29 @@ import { post as comoEscolher } from "./posts/como-escolher-empresa-gestao-airbn
 import { post as semFidelidade } from "./posts/gestao-airbnb-sem-fidelidade";
 import { post as casa } from "./posts/quanto-rende-casa-airbnb-sao-paulo";
 import { post as apartamento } from "./posts/quanto-rende-apartamento-airbnb-sao-paulo";
+import { post as shortStay } from "./posts/short-stay-airbnb";
+import { post as coHosting } from "./posts/co-hosting-airbnb";
+import { post as alternativasGestoras } from "./posts/alternativas-gestoras-airbnb-sao-paulo";
+import { post as anfitriaoProfissional } from "./posts/anfitriao-profissional-airbnb";
+import { post as superhost } from "./posts/superhost-airbnb";
+import { post as propertyManagement } from "./posts/property-management-airbnb";
+import { post as locacaoPorTemporada } from "./posts/locacao-por-temporada";
 import type { BlogPost, BlogPostMeta } from "./types";
 
 // Order = display order on /blog.
-export const posts: BlogPost[] = [comoEscolher, semFidelidade, casa, apartamento];
+export const posts: BlogPost[] = [
+  comoEscolher,
+  semFidelidade,
+  casa,
+  apartamento,
+  shortStay,
+  coHosting,
+  alternativasGestoras,
+  anfitriaoProfissional,
+  superhost,
+  propertyManagement,
+  locacaoPorTemporada,
+];
 
 export function getPost(slug: string): BlogPost | undefined {
   return posts.find((p) => p.meta.slug === slug);
