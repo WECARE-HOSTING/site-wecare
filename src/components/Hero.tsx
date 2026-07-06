@@ -128,7 +128,7 @@ export default function Hero() {
               style={{
                 position: "relative",
                 height: 540,
-                background: "url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1100&q=80') center/cover no-repeat, linear-gradient(135deg, var(--stone-300), var(--navy-600))",
+                background: "url('/uploads/apartamento-itaim-sala-estar.jpg') center/cover no-repeat, linear-gradient(135deg, var(--stone-300), var(--navy-600))",
               }}
             />
             {/* Curation seal */}
