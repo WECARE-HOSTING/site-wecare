@@ -48,9 +48,11 @@ export default function Servicos() {
   return (
     <section id="servicos" style={{ background: "var(--surface-page-alt)", padding: "clamp(72px, 8vw, 112px) 0" }}>
       <div className="wc-container">
-        <div data-reveal="" style={{ maxWidth: 640, marginBottom: 56 }}>
-          <div className="wc-eyebrow">
+        <div data-reveal="" style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 56px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+            <span style={{ width: 36, height: 1, background: "var(--gold-500)", display: "block" }} />
             <span className="wc-label" style={{ color: "var(--gold-700)" }}>O que fazemos</span>
+            <span style={{ width: 36, height: 1, background: "var(--gold-500)", display: "block" }} />
           </div>
           <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2rem, 1.5rem + 1.8vw, 2.8rem)", lineHeight: 1.16, letterSpacing: "-0.01em", color: "var(--text-strong)", margin: 0 }}>
             Operação ponta a ponta.{" "}
