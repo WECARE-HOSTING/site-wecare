@@ -78,7 +78,7 @@ export default function Visibilidade() {
             }}
           >
             <img
-              src="/uploads/airbnb-anuncio.png"
+              src="/uploads/airbnb-anuncio2.png"
               alt="Anúncio WeCare no Airbnb — Superhost e Preferido dos Hóspedes"
               style={{
                 width: "100%",
