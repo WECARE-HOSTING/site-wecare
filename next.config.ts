@@ -72,14 +72,6 @@ const legacyRedirects = [...exactLegacyRedirects, ...prefixLegacyRedirects].map(
 }));
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-    ],
-  },
   async redirects() {
     return legacyRedirects;
   },
