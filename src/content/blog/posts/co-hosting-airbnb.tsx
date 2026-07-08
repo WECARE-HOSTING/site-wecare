@@ -54,7 +54,9 @@ function Content() {
         nem responder sozinha pela hospedagem — o Airbnb formaliza esse papel diretamente na plataforma, com um
         perfil de co-anfitrião vinculado à conta do proprietário. O escopo típico cobre comunicação com hóspede,
         gestão de calendário e ajustes de preço. Não cobre, por padrão, limpeza, manutenção nem presença física no
-        imóvel.
+        imóvel. Como funciona esse recurso oficial por dentro — permissões, divisão de ganhos e a Rede de
+        Coanfitriões no Brasil — está no guia dedicado:{" "}
+        <Link href="/blog/co-anfitriao-airbnb">o que faz um coanfitrião no Airbnb</Link>.
       </p>
       <p>
         Isso torna o co-hosting adequado para quem já mora perto do imóvel, tem tempo para resolver a parte
