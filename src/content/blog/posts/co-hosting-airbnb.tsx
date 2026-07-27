@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "co-hosting-airbnb",
   eyebrow: "Co-hosting",
-  title: "Co-hosting no Airbnb: o Que É, Quanto Custa e Quando Vale a Pena (Guia 2026)",
+  title: "Co-host no Airbnb: o Que É e o Que Ele Não Faz",
   description:
-    "Co-hosting é o papel mais leve dentro da Airbnb: comunicação e calendário, sem limpeza nem seguro. Veja a diferença para gestão completa.",
+    "O co-host cuida de anúncio, calendário e hóspede. Não cuida de limpeza, manutenção nem seguro. Veja a diferença para gestão completa e quanto custa.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-06",
+  dateModified: "2026-07-27",
   keywords: [
     "co-hosting Airbnb",
     "co-host Airbnb Brasil",

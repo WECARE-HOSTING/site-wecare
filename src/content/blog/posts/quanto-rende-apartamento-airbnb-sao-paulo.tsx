@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "quanto-rende-apartamento-airbnb-sao-paulo",
   eyebrow: "Rentabilidade · Apartamento",
-  title: "Quanto Rende um Apartamento no Airbnb em São Paulo? (Dados 2026)",
+  title: "Quanto Rende um Apartamento no Airbnb em SP? 61% e R$ 245",
   description:
-    "Ocupação mediana de 61% e diária média de R$ 245 na cidade — veja o que os dados de mercado mostram e o que realmente muda o resultado do seu apartamento.",
+    "Ocupação mediana de 61% e diária média de R$ 245 em São Paulo. Veja o que os dados mostram e o que separa um apartamento na média de um acima dela.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-03",
+  dateModified: "2026-07-27",
   keywords: [
     "quanto rende um apartamento no Airbnb em São Paulo",
     "rentabilidade Airbnb apartamento São Paulo",
@@ -33,7 +33,7 @@ const meta: BlogPost["meta"] = {
       a: "Não necessariamente — rendem de formas diferentes. Apartamento tende a atender estadias mais curtas e perfil corporativo, com ocupação mais estável ao longo do ano; casa tende a se destacar com grupos maiores e datas de evento. O que muda o resultado, nos dois casos, é gestão.",
     },
   ],
-  related: ["quanto-rende-casa-airbnb-sao-paulo", "como-escolher-empresa-gestao-airbnb"],
+  related: ["quanto-rende-casa-airbnb-sao-paulo", "como-escolher-empresa-gestao-airbnb", "locacao-por-temporada"],
 };
 
 function Content() {

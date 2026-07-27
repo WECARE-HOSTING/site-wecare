@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "como-escolher-empresa-gestao-airbnb",
   eyebrow: "Como escolher",
-  title: "Como Escolher uma Empresa de Administração de Airbnb (Guia 2026)",
+  title: "Como Escolher uma Gestora de Airbnb: 7 Critérios",
   description:
-    "7 critérios para avaliar qualquer gestora antes de assinar — incluindo a pergunta que ninguém faz: a empresa tem critério de seleção, ou aceita qualquer imóvel?",
+    "Taxa total, fidelidade, churn, critério de seleção e quem responde pelo seu patrimônio. Os 7 pontos para checar antes de assinar com qualquer gestora.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-06",
+  dateModified: "2026-07-27",
   keywords: [
     "empresa para administrar Airbnb",
     "empresa de gestão de aluguel por temporada",
@@ -88,6 +88,15 @@ function Content() {
         imóvel individualmente e limitam quantos aceitam. A WeCare opera no segundo modelo — gestão de aluguel por
         temporada para imóveis de médio/alto padrão em São Paulo, com curadoria na entrada do proprietário e na
         entrada de cada hóspede.
+      </p>
+
+      <p>
+        Você vai ver o mesmo serviço anunciado como{" "}
+        <Link href="/blog/property-management-airbnb">property management</Link>. É a mesma operação, com nome
+        importado. Antes de comparar propostas, vale saber que a{" "}
+        <Link href="/blog/locacao-por-temporada">locação por temporada tem regras próprias</Link> na Lei do
+        Inquilinato: prazo de até 90 dias e, desde maio de 2026, possibilidade de o condomínio exigir aprovação de
+        dois terços dos condôminos.
       </p>
 
       <h2>Os 7 critérios que realmente separam uma boa gestora</h2>

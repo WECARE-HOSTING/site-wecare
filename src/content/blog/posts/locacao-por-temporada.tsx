@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "locacao-por-temporada",
   eyebrow: "Lei e tributação",
-  title: "Locação por Temporada: Lei, Tributação e Documentos (Guia 2026)",
+  title: "Lei da Locação por Temporada: 90 Dias, STJ e Imposto",
   description:
-    "O que diz a Lei do Inquilinato (arts. 48-50), como funciona a tributação após a reforma tributária e o que mudou com a decisão do STJ de maio/2026 sobre aprovação em condomínio.",
+    "O art. 48 da Lei 8.245/91 limita o contrato a 90 dias. Em maio de 2026 o STJ admitiu exigência de 2/3 do condomínio. Veja o que muda no imposto.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-06",
+  dateModified: "2026-07-27",
   keywords: [
     "locação por temporada",
     "locação para temporada Lei do Inquilinato",
