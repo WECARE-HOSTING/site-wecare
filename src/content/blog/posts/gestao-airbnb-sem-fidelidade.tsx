@@ -33,7 +33,7 @@ const meta: BlogPost["meta"] = {
       a: "Sim. Tanto a Gestão Online (15% das locações) quanto a Gestão 360 (20%, com operação física completa) seguem o mesmo princípio: sem mensalidade fixa, sem fidelidade. A WeCare só ganha quando o imóvel rende.",
     },
   ],
-  related: ["como-escolher-empresa-gestao-airbnb"],
+  related: ["como-escolher-empresa-gestao-airbnb", "property-management-airbnb", "locacao-por-temporada"],
 };
 
 function Content() {

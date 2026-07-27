@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "superhost-airbnb",
   eyebrow: "Superhost",
-  title: "Superhost no Airbnb: o Que É e Como Funciona (2026)",
+  title: "Superhost no Airbnb: os 4 Critérios e Como Manter",
   description:
-    "Superhost é o selo trimestral do Airbnb com 4 critérios de desempenho. Veja os requisitos e se vale mais virar superhost sozinho ou contratar uma gestora.",
+    "O selo é reavaliado a cada 3 meses em 4 critérios: nota 4,8, resposta de 90% em 24h, cancelamento abaixo de 1% e 10 estadias no ano.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-06",
+  dateModified: "2026-07-27",
   keywords: [
     "superhost",
     "selo superhost airbnb",

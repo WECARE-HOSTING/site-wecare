@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "quanto-rende-casa-airbnb-sao-paulo",
   eyebrow: "Rentabilidade · Casa",
-  title: "Quanto Rende uma Casa no Airbnb em São Paulo? Um Caso Real",
+  title: "Quanto Rende uma Casa no Airbnb em SP? O Caso R$ 30 mil",
   description:
-    "Sem tabela de média genérica: veja o caso documentado de uma casa que saiu de R$ 3.500 para R$ 30 mil/mês em São Paulo, e o que realmente determina o resultado da sua.",
+    "O caso documentado de uma casa no interior de São Paulo que saiu de R$ 3.500 para R$ 30 mil por mês, e o que determina o resultado da sua.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-03",
+  dateModified: "2026-07-27",
   keywords: [
     "quanto rende uma casa no Airbnb em São Paulo",
     "rentabilidade Airbnb casa São Paulo",
@@ -37,7 +37,7 @@ const meta: BlogPost["meta"] = {
       a: "Depende do uso. Casa tende a se destacar com grupos grandes, famílias e datas de evento — uma casa de alto padrão pode faturar R$ 400 mil num único réveillon; apartamento tende a atender estadias mais curtas e perfil corporativo, com ocupação mais estável ao longo do ano. O que decide, nos dois casos, é gestão.",
     },
   ],
-  related: ["quanto-rende-apartamento-airbnb-sao-paulo", "como-escolher-empresa-gestao-airbnb"],
+  related: ["quanto-rende-apartamento-airbnb-sao-paulo", "como-escolher-empresa-gestao-airbnb", "property-management-airbnb"],
 };
 
 function Content() {

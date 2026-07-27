@@ -4,11 +4,11 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "property-management-airbnb",
   eyebrow: "Property management",
-  title: "Property Management para Imóveis de Temporada: o Que É e Como Funciona no Brasil (Guia 2026)",
+  title: "Property Management de Airbnb: o Que É e Quanto Custa",
   description:
-    "O que property management significa aplicado a Airbnb, quanto custa e a diferença para administração tradicional — critérios reais para contratar.",
+    "Property management é a operação completa do imóvel de temporada: anúncio, preço, hóspede, limpeza e financeiro. Veja quanto custa e como contratar.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-06",
+  dateModified: "2026-07-27",
   keywords: [
     "property management",
     "property management Airbnb",
