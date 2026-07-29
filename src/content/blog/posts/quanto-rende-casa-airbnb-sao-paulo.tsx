@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O caso documentado de uma casa no interior de São Paulo que saiu de R$ 3.500 para R$ 30 mil por mês, e o que determina o resultado da sua.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "quanto rende uma casa no Airbnb em São Paulo",
     "rentabilidade Airbnb casa São Paulo",

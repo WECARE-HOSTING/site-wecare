@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "Property management é a operação completa do imóvel de temporada: anúncio, preço, hóspede, limpeza e financeiro. Veja quanto custa e como contratar.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "property management",
     "property management Airbnb",

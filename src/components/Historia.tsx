@@ -39,7 +39,7 @@ export default function Historia() {
           </h2>
           <div style={{ fontSize: "1.05rem", lineHeight: 1.75, color: "var(--text-body)", maxWidth: "58ch" }}>
             <p style={{ margin: 0 }}>
-              Em 2019, a casa da família em Granja Viana rendia R$ 3.500 por mês — tão pouco que já se falava em vender. Reformada e operada com método, passou a faturar R$ 30 mil mensais.
+              No interior de São Paulo, a casa da família rendia R$ 3.500 por mês — tão pouco que já se falava em vender. Reformada e operada com método, passou a faturar R$ 30 mil mensais.
             </p>
             <p style={{ margin: "18px 0 0" }}>
               A WeCare nasceu daí: transformar imóveis e fazê-los render, sem o proprietário abrir mão do ativo.{" "}
@@ -58,7 +58,7 @@ export default function Historia() {
         <div data-reveal="" style={{ marginTop: 48, height: 480, borderRadius: "var(--radius-md)", overflow: "hidden", position: "relative", boxShadow: "var(--shadow-sm)" }}>
           <img
             src="/uploads/casa-passargada-005.jpg"
-            alt="A casa de Granja Viana"
+            alt="A casa que deu origem à WeCare"
             style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
             onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1)"; }}
@@ -66,7 +66,7 @@ export default function Historia() {
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(12,35,48,0.18), transparent 60%)" }} />
           <div style={{ position: "absolute", bottom: 28, left: 36 }}>
             <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--gold-300)", background: "rgba(12,35,48,0.55)", padding: "4px 10px", borderRadius: 2 }}>
-              Granja Viana · A casa que deu origem
+              Interior de São Paulo · A casa que deu origem
             </span>
           </div>
         </div>

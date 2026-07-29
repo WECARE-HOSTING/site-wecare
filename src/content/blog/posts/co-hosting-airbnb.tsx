@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O co-host cuida de anúncio, calendário e hóspede. Não cuida de limpeza, manutenção nem seguro. Veja a diferença para gestão completa e quanto custa.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "co-hosting Airbnb",
     "co-host Airbnb Brasil",

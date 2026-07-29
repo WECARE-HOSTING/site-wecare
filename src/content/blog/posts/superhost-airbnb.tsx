@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O selo é reavaliado a cada 3 meses em 4 critérios: nota 4,8, resposta de 90% em 24h, cancelamento abaixo de 1% e 10 estadias no ano.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "superhost",
     "selo superhost airbnb",

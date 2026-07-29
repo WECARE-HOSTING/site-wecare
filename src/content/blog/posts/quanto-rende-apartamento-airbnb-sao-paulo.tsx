@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "Ocupação mediana de 61% e diária média de R$ 245 em São Paulo. Veja o que os dados mostram e o que separa um apartamento na média de um acima dela.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "quanto rende um apartamento no Airbnb em São Paulo",
     "rentabilidade Airbnb apartamento São Paulo",

@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "Taxa total, fidelidade, churn, critério de seleção e quem responde pelo seu patrimônio. Os 7 pontos para checar antes de assinar com qualquer gestora.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "empresa para administrar Airbnb",
     "empresa de gestão de aluguel por temporada",
