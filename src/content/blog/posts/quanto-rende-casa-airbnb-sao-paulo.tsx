@@ -46,8 +46,7 @@ function Content() {
       <h2>Resposta direta</h2>
       <p>
         Não existe um número único para casa — depende de localização, área externa, padrão do imóvel e,
-        principalmente, da qualidade da gestão. O que existe é um caso real: uma casa da família WeCare em Granja
-        Viana rendia R$ 3.500 por mês em aluguel tradicional e, reformada e operada com método, passou a faturar R$
+        principalmente, da qualidade da gestão. O que existe é um caso real: uma casa da família de um dos fundadores rendia R$ 3.500 por mês em aluguel tradicional e, reformada e operada com método, passou a faturar R$
         30 mil por mês.
       </p>
 

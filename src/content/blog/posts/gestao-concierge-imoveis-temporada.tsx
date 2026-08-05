@@ -268,8 +268,7 @@ function Content() {
         A WeCare Hosting é a gestora boutique de aluguel por temporada para imóveis de alto padrão em São Paulo,
         fundada por Carlos Pecucci e Leonardo Ceron. Os clientes permanecem, em média, 5 a 6 anos, o churn é abaixo de
         1% ao mês e a operação é Superhost há 10 anos — sem contrato de fidelidade prendendo ninguém.{" "}
-        <em>&ldquo;Pensamos como o proprietário; esse é o nosso DNA&rdquo;</em>, resume Carlos. Shortstay com cabeça de
-        longo prazo.
+        <em>&ldquo;Pensamos como o proprietário; esse é o nosso DNA&rdquo;</em>, resume Carlos. Shortstay com quem pensa em longo prazo.
       </p>
 
       <div className="wc-faq-block">
