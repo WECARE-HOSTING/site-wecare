@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O co-host cuida de anúncio, calendário e hóspede. Não cuida de limpeza, manutenção nem seguro. Veja a diferença para gestão completa e quanto custa.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "co-hosting Airbnb",
     "co-host Airbnb Brasil",
@@ -188,7 +188,7 @@ function Content() {
         Para um proprietário com um único imóvel, morando perto e com tempo disponível, um co-host pode ser
         suficiente. Para quem tem um imóvel de médio/alto padrão, mora longe, ou simplesmente não quer lidar com a
         operação física — limpeza, manutenção, chave, portaria —, contratar só um co-host deixa a parte mais
-        trabalhosa (e a que mais protege o patrimônio) sem solução. Shortstay com cabeça de longo prazo significa
+        trabalhosa (e a que mais protege o patrimônio) sem solução. Shortstay com quem pensa em longo prazo significa
         olhar para o imóvel inteiro, não só para a caixa de mensagens.
       </p>
 

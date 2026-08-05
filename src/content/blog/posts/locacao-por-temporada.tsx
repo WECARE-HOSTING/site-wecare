@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O art. 48 da Lei 8.245/91 limita o contrato a 90 dias. Em maio de 2026 o STJ admitiu exigência de 2/3 do condomínio. Veja o que muda no imposto.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "locação por temporada",
     "locação para temporada Lei do Inquilinato",

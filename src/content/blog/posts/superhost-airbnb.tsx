@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O selo é reavaliado a cada 3 meses em 4 critérios: nota 4,8, resposta de 90% em 24h, cancelamento abaixo de 1% e 10 estadias no ano.",
   datePublished: "2026-07-06",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "superhost",
     "selo superhost airbnb",
@@ -205,7 +205,7 @@ function Content() {
       <h2>Superhost não substitui critério — é consequência dele</h2>
       <p>
         Ter o selo é sinal de operação consistente, não de que qualquer imóvel deveria estar no Airbnb ou de que
-        qualquer gestora merece confiança. Shortstay com cabeça de longo prazo significa tratar o selo como
+        qualquer gestora merece confiança. Shortstay com quem pensa em longo prazo significa tratar o selo como
         resultado de um processo bem feito — resposta rápida, limpeza padronizada, curadoria de hóspede — e não como
         o único critério para escolher quem vai cuidar do seu patrimônio.
       </p>

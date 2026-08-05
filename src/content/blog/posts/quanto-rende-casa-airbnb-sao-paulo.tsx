@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O caso documentado de uma casa no interior de São Paulo que saiu de R$ 3.500 para R$ 30 mil por mês, e o que determina o resultado da sua.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "quanto rende uma casa no Airbnb em São Paulo",
     "rentabilidade Airbnb casa São Paulo",
@@ -53,8 +53,8 @@ function Content() {
 
       <h2>O caso real: de R$ 3.500 para R$ 30 mil na mesma casa</h2>
       <p>
-        Em 2019, a casa da família de Leonardo Ceron — hoje cofundador da WeCare, na época executivo de banco na
-        Europa — estava alugada por R$ 3.500 por mês em Granja Viana. Rendia tão pouco que a família já cogitava
+        A casa da família de Leonardo Ceron — hoje cofundador da WeCare, na época executivo de banco na
+        Europa — estava alugada por R$ 3.500 por mês, no interior de São Paulo. Rendia tão pouco que a família já cogitava
         vender. Leonardo chamou Carlos Pecucci, que vem da construção e incorporação da própria família, para
         avaliar o imóvel. Juntos, reformaram a casa e a colocaram no Airbnb com gestão profissional: os R$ 3.500
         viraram R$ 30 mil por mês.
@@ -98,7 +98,7 @@ function Content() {
             </tr>
             <tr>
               <td>Padrão do imóvel e reforma</td>
-              <td>Um imóvel subutilizado, reformado com critério, muda de categoria de hóspede e de diária — foi o que aconteceu em Granja Viana</td>
+              <td>Um imóvel subutilizado, reformado com critério, muda de categoria de hóspede e de diária — foi o que aconteceu nessa casa</td>
             </tr>
             <tr>
               <td>Sazonalidade de eventos</td>
@@ -119,7 +119,7 @@ function Content() {
       <h2>O que a WeCare não faz: prometer um número fechado</h2>
       <p>
         Não publicamos tabela de rentabilidade média nem projeção de retorno genérica — dados reais e conservadores,
-        nunca inflamos projeção para vender. O caso de Granja Viana é um resultado documentado de uma casa
+        nunca inflamos projeção para vender. Esse caso é um resultado documentado de uma casa
         específica, não uma expectativa padrão. Por isso a avaliação de qualquer casa nova é individual: olhamos o
         imóvel, a região, a área externa e o padrão antes de falar em número. &ldquo;Renda passiva de verdade&rdquo;
         significa isso — sem depreciar o ativo para forçar um resultado de curto prazo.

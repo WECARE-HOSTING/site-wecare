@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "Taxa total, fidelidade, churn, critério de seleção e quem responde pelo seu patrimônio. Os 7 pontos para checar antes de assinar com qualquer gestora.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-27",
+  dateModified: "2026-07-28",
   keywords: [
     "empresa para administrar Airbnb",
     "empresa de gestão de aluguel por temporada",
@@ -234,7 +234,7 @@ function Content() {
         completamente diferentes: uma trata o imóvel como mais uma unidade no portfólio; a outra trata como o
         patrimônio que é. A pergunta que decide não é &ldquo;quanto custa&rdquo;, é &ldquo;o que essa empresa faria
         se o meu imóvel não estivesse indo bem — vai me carregar no volume, ou vai olhar para ele
-        individualmente?&rdquo;. Shortstay com cabeça de longo prazo significa isso: gerir para o imóvel valorizar,
+        individualmente?&rdquo;. Shortstay com quem pensa em longo prazo significa isso: gerir para o imóvel valorizar,
         não só para ocupar calendário.
       </p>
 
