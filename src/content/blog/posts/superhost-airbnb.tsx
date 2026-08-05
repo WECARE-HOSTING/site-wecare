@@ -205,7 +205,7 @@ function Content() {
       <h2>Superhost não substitui critério — é consequência dele</h2>
       <p>
         Ter o selo é sinal de operação consistente, não de que qualquer imóvel deveria estar no Airbnb ou de que
-        qualquer gestora merece confiança. Shortstay com cabeça de longo prazo significa tratar o selo como
+        qualquer gestora merece confiança. Shortstay com quem pensa em longo prazo significa tratar o selo como
         resultado de um processo bem feito — resposta rápida, limpeza padronizada, curadoria de hóspede — e não como
         o único critério para escolher quem vai cuidar do seu patrimônio.
       </p>

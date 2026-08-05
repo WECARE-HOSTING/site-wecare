@@ -230,7 +230,7 @@ function Content() {
         não remunerado administrando reservas.
       </p>
       <p>
-        A origem da WeCare é essa cena: em 2019, a casa da família de Leonardo Ceron em Granja Viana, alugada por
+        A origem da WeCare é essa cena: a casa da família de Leonardo Ceron, no interior de São Paulo, alugada por
         R$ 3.500/mês, rendia tão pouco que a família falava em vender. Reformada e operada profissionalmente, passou a
         faturar R$ 30 mil/mês — um caso real e documentado, não uma promessa. A empresa nasceu para repetir esse
         cuidado em imóveis de outros donos.
