@@ -11,6 +11,8 @@ import { post as propertyManagement } from "./posts/property-management-airbnb";
 import { post as locacaoPorTemporada } from "./posts/locacao-por-temporada";
 import { post as gestaoConcierge } from "./posts/gestao-concierge-imoveis-temporada";
 import { post as coAnfitriao } from "./posts/co-anfitriao-airbnb";
+import { post as comissao } from "./posts/comissao-airbnb";
+import { post as ocupacao } from "./posts/ocupacao-airbnb";
 import type { BlogPost, BlogPostMeta } from "./types";
 
 // Order = display order on /blog.
@@ -28,6 +30,8 @@ export const posts: BlogPost[] = [
   locacaoPorTemporada,
   gestaoConcierge,
   coAnfitriao,
+  comissao,
+  ocupacao,
 ];
 
 export function getPost(slug: string): BlogPost | undefined {
