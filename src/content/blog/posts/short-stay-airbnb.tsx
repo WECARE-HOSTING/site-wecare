@@ -4,9 +4,9 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "short-stay-airbnb",
   eyebrow: "Short stay",
-  title: "Short Stay: o Que É, Como Funciona e Vale a Pena em 2026",
+  title: "Short stay em SP: vale a pena no seu imóvel?",
   description:
-    "Definição, diferença para aluguel tradicional, dado real de mercado (Airbtics) e a decisão do STJ de 2026 que muda a regra em condomínios.",
+    "Até 90 dias, STJ 2026 e dado real de mercado. O que muda se você opera sozinho ou entrega a uma gestora — sem fidelidade, com avaliação sem compromisso.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-06",
   keywords: [

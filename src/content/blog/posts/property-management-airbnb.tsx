@@ -4,9 +4,9 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "property-management-airbnb",
   eyebrow: "Property management",
-  title: "Property Management de Airbnb: o Que É e Quanto Custa",
+  title: "Property management de Airbnb: quanto custa em SP",
   description:
-    "Property management é a operação completa do imóvel de temporada: anúncio, preço, hóspede, limpeza e financeiro. Veja quanto custa e como contratar.",
+    "Operação ponta a ponta: anúncio, preço, hóspede, limpeza e repasse. Gestão Online 15% ou 360 a 20%, sem fidelidade. O que entra e o que fica com você.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-28",
   keywords: [

@@ -4,9 +4,9 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "locacao-por-temporada",
   eyebrow: "Lei e tributação",
-  title: "Lei da Locação por Temporada: 90 Dias, STJ e Imposto",
+  title: "Locação por temporada: STJ 2026 e o que fazer agora",
   description:
-    "O art. 48 da Lei 8.245/91 limita o contrato a 90 dias. Em maio de 2026 o STJ admitiu exigência de 2/3 do condomínio. Veja o que muda no imposto.",
+    "O STJ admitiu 2/3 do condomínio. Antes de anunciar ou assinar com gestora: prazo de 90 dias, imposto e o risco no seu prédio — com o que muda na prática.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-28",
   keywords: [

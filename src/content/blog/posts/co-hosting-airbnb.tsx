@@ -4,9 +4,9 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "co-hosting-airbnb",
   eyebrow: "Co-hosting",
-  title: "Co-host no Airbnb: o Que É e o Que Ele Não Faz",
+  title: "Co-host ou gestora de Airbnb: o que cada um cobre",
   description:
-    "O co-host cuida de anúncio, calendário e hóspede. Não cuida de limpeza, manutenção nem seguro. Veja a diferença para gestão completa e quanto custa.",
+    "Co-host cuida de anúncio, calendário e hóspede. Não cobre limpeza, manutenção nem seguro. Compare com gestão 15%/20% e veja o que o seu imóvel precisa.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-28",
   keywords: [

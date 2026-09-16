@@ -4,9 +4,9 @@ import type { BlogPost } from "../types";
 const meta: BlogPost["meta"] = {
   slug: "superhost-airbnb",
   eyebrow: "Superhost",
-  title: "Superhost no Airbnb: os 4 Critérios e Como Manter",
+  title: "Superhost no Airbnb: quem mantém o selo por você",
   description:
-    "O selo é reavaliado a cada 3 meses em 4 critérios: nota 4,8, resposta de 90% em 24h, cancelamento abaixo de 1% e 10 estadias no ano.",
+    "Nota 4,8, resposta em 24h e cancelamento abaixo de 1%. O que a gestora precisa operar para não perder o selo — e como a WeCare faz isso há 10 anos.",
   datePublished: "2026-07-06",
   dateModified: "2026-07-28",
   keywords: [
