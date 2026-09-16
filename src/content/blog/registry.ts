@@ -13,10 +13,12 @@ import { post as gestaoConcierge } from "./posts/gestao-concierge-imoveis-tempor
 import { post as coAnfitriao } from "./posts/co-anfitriao-airbnb";
 import { post as comissao } from "./posts/comissao-airbnb";
 import { post as ocupacao } from "./posts/ocupacao-airbnb";
+import { post as airbnbReveillon } from "./posts/airbnb-reveillon";
 import type { BlogPost, BlogPostMeta } from "./types";
 
 // Order = display order on /blog.
 export const posts: BlogPost[] = [
+  airbnbReveillon,
   comoEscolher,
   semFidelidade,
   casa,
