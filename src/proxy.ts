@@ -11,7 +11,7 @@ const GONE_SITEMAPS = new Set([
   "/wp-sitemap-pages-1.xml",
 ]);
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (GONE_SITEMAPS.has(path)) {
     return new NextResponse("Gone", {
