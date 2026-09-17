@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { posts } from "@/content/blog/registry";
 import { buildBlogIndexGraph } from "@/lib/blog-schema";
+import BlogCTAProprietario from "@/components/blog/BlogCTAProprietario";
 
 export const metadata: Metadata = {
   title: "Blog | WeCare Hosting",
@@ -76,6 +77,8 @@ export default function BlogIndexPage() {
             </Link>
           ))}
         </div>
+
+        <BlogCTAProprietario variant="index" />
       </div>
     </section>
     </>
