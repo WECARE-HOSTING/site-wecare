@@ -14,10 +14,12 @@ import { post as coAnfitriao } from "./posts/co-anfitriao-airbnb";
 import { post as comissao } from "./posts/comissao-airbnb";
 import { post as ocupacao } from "./posts/ocupacao-airbnb";
 import { post as airbnbReveillon } from "./posts/airbnb-reveillon";
+import { post as rendaPassiva } from "./posts/renda-passiva";
 import type { BlogPost, BlogPostMeta } from "./types";
 
 // Order = display order on /blog.
 export const posts: BlogPost[] = [
+  rendaPassiva,
   airbnbReveillon,
   comoEscolher,
   semFidelidade,
