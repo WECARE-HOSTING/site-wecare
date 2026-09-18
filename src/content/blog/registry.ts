@@ -2,6 +2,7 @@ import { post as comoEscolher } from "./posts/como-escolher-empresa-gestao-airbn
 import { post as semFidelidade } from "./posts/gestao-airbnb-sem-fidelidade";
 import { post as casa } from "./posts/quanto-rende-casa-airbnb-sao-paulo";
 import { post as apartamento } from "./posts/quanto-rende-apartamento-airbnb-sao-paulo";
+import { post as apartamentoGrande } from "./posts/apartamento-grande-rende-mais";
 import { post as shortStay } from "./posts/short-stay-airbnb";
 import { post as coHosting } from "./posts/co-hosting-airbnb";
 import { post as alternativasGestoras } from "./posts/alternativas-gestoras-airbnb-sao-paulo";
@@ -18,6 +19,7 @@ import type { BlogPost, BlogPostMeta } from "./types";
 
 // Order = display order on /blog.
 export const posts: BlogPost[] = [
+  apartamentoGrande,
   airbnbReveillon,
   comoEscolher,
   semFidelidade,
