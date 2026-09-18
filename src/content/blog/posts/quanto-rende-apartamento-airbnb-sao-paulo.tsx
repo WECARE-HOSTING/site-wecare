@@ -33,7 +33,7 @@ const meta: BlogPost["meta"] = {
       a: "Não necessariamente — rendem de formas diferentes. Apartamento tende a atender estadias mais curtas e perfil corporativo, com ocupação mais estável ao longo do ano; casa tende a se destacar com grupos maiores e datas de evento. O que muda o resultado, nos dois casos, é gestão.",
     },
   ],
-  related: ["quanto-rende-casa-airbnb-sao-paulo", "como-escolher-empresa-gestao-airbnb", "locacao-por-temporada"],
+  related: ["apartamento-grande-rende-mais", "quanto-rende-casa-airbnb-sao-paulo", "como-escolher-empresa-gestao-airbnb"],
 };
 
 function Content() {
@@ -141,6 +141,8 @@ function Content() {
         <Link href="/blog/quanto-rende-casa-airbnb-sao-paulo">
           Quanto rende uma casa no Airbnb em São Paulo
         </Link>
+        . Apartamento grande (3 dormitórios ou mais) compete em outra faixa — veja{" "}
+        <Link href="/blog/apartamento-grande-rende-mais">o que muda quando a metragem sobe</Link>
         . E se já está decidido a contratar uma gestão profissional, veja{" "}
         <Link href="/blog/como-escolher-empresa-gestao-airbnb">como escolher a empresa certa</Link>.
       </p>
