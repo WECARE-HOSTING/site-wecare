@@ -8,7 +8,7 @@ const meta: BlogPost["meta"] = {
   description:
     "O Airbnb cobra 16% do anfitrião no Brasil pelo acesso à plataforma. A comissão de uma gestora paga outra coisa: a operação do imóvel.",
   datePublished: "2026-08-05",
-  dateModified: "2026-08-05",
+  dateModified: "2026-09-22",
   keywords: [
     "comissão Airbnb",
     "taxa de serviço Airbnb",
@@ -37,6 +37,22 @@ const meta: BlogPost["meta"] = {
     {
       q: "Como saber se a comissão de uma gestora é justa?",
       a: "Peça para a gestora detalhar o que a comissão cobre — precificação, atendimento, curadoria, manutenção — e compare com o resultado que ela sustenta, não só o número. Avalie seu imóvel sem compromisso para ver o que o percentual aplicável ao seu caso cobre.",
+    },
+    {
+      q: "Qual é a cota justa para um co-anfitrião que faz check-in, check-out e prepara a habitação?",
+      a: "Não existe percentual único de mercado para co-anfitrião autônomo — varia com escopo, cidade e experiência. Na WeCare não é uma cobrança avulsa: os 15% da Gestão Online ou os 20% da Gestão 360 já cobrem a operação inteira, incluindo quem faz check-in e check-out. É um número só, não uma soma de percentuais.",
+    },
+    {
+      q: "A taxa de limpeza e o deslocamento do co-anfitrião estão inclusos na remuneração? Como ele presta contas?",
+      a: "Depende de como você contrata. Na Gestão 360 da WeCare, limpeza, manutenção e a equipe que vai até o imóvel já estão dentro dos 20% — sem cobrança separada por deslocamento. Prestação de contas é parte do serviço, não item à parte que você negocia depois.",
+    },
+    {
+      q: "Preciso de um co-anfitrião só para atendimento online e visita, ou também para a limpeza?",
+      a: "É a fronteira exata entre os dois planos da WeCare. A Gestão Online (15%) cobre atendimento e operação à distância, sem braço físico no imóvel. A Gestão 360 (20%) soma quem vai até lá — limpeza, manutenção, enxoval. A resposta certa depende de quanto da parte física você já tem resolvido sozinho.",
+    },
+    {
+      q: "Qual a média de percentual que um co-anfitrião recebe?",
+      a: "Como comissão avulsa de co-anfitrião informal, varia muito e não tem padrão de mercado confiável. Na WeCare o número é fixo e transparente: 15% na Gestão Online, 20% na Gestão 360 — já é a remuneração de toda a operação, não um adicional sobre outro percentual.",
     },
   ],
   related: [
@@ -89,6 +105,12 @@ function Content() {
         A WeCare opera com um modelo de comissão transparente, sem taxa oculta: o percentual é definido na avaliação do
         imóvel e cobre a operação completa, ponta a ponta — sem custo &ldquo;surpresa&rdquo; depois que o contrato já
         está em vigor.
+      </p>
+      <p>
+        A WeCare cobra <strong>15% das locações na Gestão Online e 20% na Gestão 360</strong> — a diferença entre os
+        dois planos é o que está incluído. A Gestão Online cobre precificação, atendimento e operação à distância. A
+        Gestão 360 soma o que exige gente no imóvel: limpeza, manutenção e enxoval de equipe própria. Você não contrata
+        co-anfitrião avulso por fora: o percentual já é a remuneração da operação inteira.
       </p>
 
       <h2>O que compõe o custo total de ter um imóvel no Airbnb com gestão profissional</h2>
