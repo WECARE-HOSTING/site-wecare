@@ -4,15 +4,42 @@ const SITE_URL = "https://www.wecarehosting.com.br";
 const ORG_ID = `${SITE_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 
-// Minimal, self-contained stubs of the homepage's Organization/WebSite nodes
-// (same @id as src/app/homepage-schema.json) so each blog page's @graph
-// validates on its own while still merging with the site-wide graph via @id.
+// Self-contained Organization/WebSite nodes (same @id as
+// src/app/homepage-schema.json) so each blog page's @graph validates on its
+// own. NAP matches the homepage Organization: legal name, street address, and
+// the official landline. WhatsApp stays a labeled sales ContactPoint.
 function orgNode() {
   return {
     "@type": "Organization",
     "@id": ORG_ID,
     name: "WeCare Hosting",
+    legalName: "We Care Hosting Serviços Ltda",
     url: `${SITE_URL}/`,
+    telephone: "+55-11-5039-2569",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Rua Eduardo Souza Aranha, 67",
+      addressLocality: "São Paulo",
+      addressRegion: "SP",
+      addressCountry: "BR",
+    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        name: "Telefone",
+        telephone: "+55-11-5039-2569",
+        availableLanguage: "Portuguese",
+      },
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        name: "WhatsApp",
+        telephone: "+55-11-96976-0183",
+        availableLanguage: "Portuguese",
+        url: "https://wa.me/5511969760183",
+      },
+    ],
     logo: {
       "@type": "ImageObject",
       "@id": `${SITE_URL}/#logo`,

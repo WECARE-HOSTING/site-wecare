@@ -5,7 +5,8 @@
       "@type": "Organization",
       "@id": "https://www.wecarehosting.com.br/#organization",
       "name": "WeCare Hosting",
-      "alternateName": "WeCare",
+      "legalName": "We Care Hosting Serviços Ltda",
+      "alternateName": ["WeCare", "WECARE Hosting"],
       "url": "https://www.wecarehosting.com.br/",
       "logo": {
         "@type": "ImageObject",
@@ -25,17 +26,29 @@
       },
       "address": {
         "@type": "PostalAddress",
+        "streetAddress": "Rua Eduardo Souza Aranha, 67",
         "addressLocality": "São Paulo",
         "addressRegion": "SP",
         "addressCountry": "BR"
       },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "sales",
-        "telephone": "+55-11-96976-0183",
-        "availableLanguage": "Portuguese",
-        "url": "https://wa.me/5511969760183"
-      },
+      "telephone": "+55-11-5039-2569",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "name": "Telefone",
+          "telephone": "+55-11-5039-2569",
+          "availableLanguage": "Portuguese"
+        },
+        {
+          "@type": "ContactPoint",
+          "contactType": "sales",
+          "name": "WhatsApp",
+          "telephone": "+55-11-96976-0183",
+          "availableLanguage": "Portuguese",
+          "url": "https://wa.me/5511969760183"
+        }
+      ],
       "sameAs": [
         "https://instagram.com/wecarehosting",
         "https://www.linkedin.com/company/wecare-hosting/",
@@ -48,6 +61,28 @@
         "Co-hosting",
         "Precificação dinâmica de aluguel por temporada"
       ]
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://www.wecarehosting.com.br/#localbusiness",
+      "name": "WeCare Hosting",
+      "legalName": "We Care Hosting Serviços Ltda",
+      "url": "https://www.wecarehosting.com.br/",
+      "image": "https://www.wecarehosting.com.br/brand/wecare-simbolo-solido.png",
+      "telephone": "+55-11-5039-2569",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Rua Eduardo Souza Aranha, 67",
+        "addressLocality": "São Paulo",
+        "addressRegion": "SP",
+        "addressCountry": "BR"
+      },
+      "parentOrganization": { "@id": "https://www.wecarehosting.com.br/#organization" },
+      "areaServed": {
+        "@type": "City",
+        "name": "São Paulo",
+        "sameAs": "https://www.wikidata.org/wiki/Q174"
+      }
     },
     {
       "@type": "WebSite",
