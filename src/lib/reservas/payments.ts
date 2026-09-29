@@ -1,47 +1,59 @@
 import "server-only";
-import { HOLD_STATUS, cancelHold, confirmPaid, getReservation, listOpenHolds } from "./hostaway";
-import { checkPayment, infinitePayConfigured, orderNsuFor, reservationIdFrom, toCents } from "./infinitepay";
+import { HOLD_STATUS, confirmHold, findConfirmed, getReservation, listOpenHolds, releaseHold } from "./hostaway";
+import { checkPayment, infinitePayConfigured, orderNsuFor, parseOrderNsu, toCents } from "./infinitepay";
 
 export type SettleResult =
   | { state: "confirmed"; reservationId: number }
-  | { state: "pending"; reservationId: number | null }
-  | { state: "needs_attention"; reservationId: number | null; reason: string };
+  | { state: "processing" } // paid, confirmation not written yet
+  | { state: "pending" } // not paid (yet)
+  | { state: "needs_attention"; reason: string };
+
+type PaymentRef = { orderNsu: string | null; transactionNsu?: string | null; slug?: string | null };
 
 /**
- * Moves a hold to a confirmed reservation once InfinitePay says it is paid.
- * Called by both the webhook and the guest's return page — whichever arrives
- * first does the work; the other sees it already confirmed. Safe to repeat.
+ * Read-only status for the guest's return page. Only the webhook and the expiry
+ * job write, so two requests can never both create the confirmed reservation.
  */
-export async function settlePayment(params: { orderNsu: string | null; transactionNsu?: string | null; slug?: string | null }): Promise<SettleResult> {
-  const reservationId = reservationIdFrom(params.orderNsu);
-  if (!reservationId || !params.orderNsu) return { state: "needs_attention", reservationId: null, reason: "Pedido não reconhecido." };
+export async function orderStatus(ref: PaymentRef): Promise<SettleResult> {
+  const order = parseOrderNsu(ref.orderNsu);
+  if (!order || !ref.orderNsu) return { state: "needs_attention", reason: "Pedido não reconhecido." };
+  const confirmed = await findConfirmed(order.listingId, order.checkin, ref.orderNsu);
+  if (confirmed) return { state: "confirmed", reservationId: confirmed.id };
+  const payment = await checkPayment({ orderNsu: ref.orderNsu, transactionNsu: ref.transactionNsu, slug: ref.slug });
+  return payment.paid ? { state: "processing" } : { state: "pending" };
+}
 
-  const reservation = await getReservation(reservationId);
-  if (!reservation) return { state: "needs_attention", reservationId, reason: "Reserva não encontrada na Hostaway." };
-  if (reservation.status !== HOLD_STATUS && reservation.status !== "cancelled" && reservation.isPaid) {
-    return { state: "confirmed", reservationId };
+/**
+ * Turns a paid hold into a confirmed reservation. Called by the InfinitePay
+ * webhook and by the expiry job (for holds whose webhook never arrived).
+ * Safe to repeat: an order that already has its confirmed reservation is a no-op.
+ */
+export async function settlePayment(ref: PaymentRef): Promise<SettleResult> {
+  const order = parseOrderNsu(ref.orderNsu);
+  if (!order || !ref.orderNsu) return { state: "needs_attention", reason: "Pedido não reconhecido." };
+
+  const already = await findConfirmed(order.listingId, order.checkin, ref.orderNsu);
+  if (already) return { state: "confirmed", reservationId: already.id };
+
+  const payment = await checkPayment({ orderNsu: ref.orderNsu, transactionNsu: ref.transactionNsu, slug: ref.slug });
+  if (!payment.paid) return { state: "pending" };
+
+  const hold = await getReservation(order.holdId);
+  if (!hold || hold.status !== HOLD_STATUS) {
+    // Paid after the hold expired and was released: the dates may be gone.
+    console.error(`[reservas] ALERTA: pedido ${ref.orderNsu} pago, mas a reserva provisória ${order.holdId} não existe mais — confirmar manualmente ou estornar.`);
+    return { state: "needs_attention", reason: "Pagamento recebido depois do prazo de 30 minutos." };
   }
-
-  const payment = await checkPayment({ orderNsu: params.orderNsu, transactionNsu: params.transactionNsu, slug: params.slug });
-  if (!payment.paid) return { state: "pending", reservationId };
-
   // paid_amount can exceed amount when the guest pays card-installment interest;
   // what must match is the charged amount against the reservation total.
-  if (payment.amountCents < toCents(reservation.total)) {
-    console.error(`[reservas] ALERTA: pagamento de ${payment.amountCents} centavos menor que o total da reserva ${reservationId} (${reservation.total}).`);
-    return { state: "needs_attention", reservationId, reason: "Valor pago diferente do total da reserva." };
+  if (payment.amountCents < toCents(hold.total)) {
+    console.error(`[reservas] ALERTA: pedido ${ref.orderNsu} pago com ${payment.amountCents} centavos, abaixo do total ${hold.total}.`);
+    return { state: "needs_attention", reason: "Valor pago diferente do total da reserva." };
   }
 
-  const note = `Reserva do site WeCare — paga via InfinitePay (${payment.method ?? "?"}${payment.installments && payment.installments > 1 ? `, ${payment.installments}x` : ""}) · pedido ${params.orderNsu}${params.transactionNsu ? ` · transação ${params.transactionNsu}` : ""}`;
-  try {
-    // Also covers a hold the sweeper already released: Hostaway's overbooking
-    // protection re-accepts it only if nobody else took the dates meanwhile.
-    await confirmPaid(reservationId, note);
-    return { state: "confirmed", reservationId };
-  } catch (err) {
-    console.error(`[reservas] ALERTA: reserva ${reservationId} foi paga mas não pôde ser confirmada — verificar e, se preciso, estornar.`, err);
-    return { state: "needs_attention", reservationId, reason: "Pagamento recebido, mas as datas não puderam ser confirmadas automaticamente." };
-  }
+  const paymentNote = `paga via InfinitePay (${payment.method ?? "?"}${payment.installments && payment.installments > 1 ? `, ${payment.installments}x` : ""})${ref.transactionNsu ? ` · transação ${ref.transactionNsu}` : ""}`;
+  const confirmed = await confirmHold(hold, ref.orderNsu, paymentNote);
+  return { state: "confirmed", reservationId: confirmed.id };
 }
 
 /** Releases holds past their deadline — after one last check that they were not paid. */
@@ -53,7 +65,7 @@ export async function expireHolds(now = Date.now()): Promise<{ checked: number; 
     if (!hold.holdExpiresAt || Date.parse(hold.holdExpiresAt) > now) continue;
     if (infinitePayConfigured()) {
       try {
-        const result = await settlePayment({ orderNsu: orderNsuFor(hold.id) });
+        const result = await settlePayment({ orderNsu: orderNsuFor({ listingId: hold.listingId, checkin: hold.checkin, holdId: hold.id }) });
         if (result.state === "confirmed") {
           confirmed.push(hold.id);
           continue;
@@ -62,7 +74,7 @@ export async function expireHolds(now = Date.now()): Promise<{ checked: number; 
         console.error(`[reservas] payment check failed for hold ${hold.id}; releasing anyway`, err);
       }
     }
-    await cancelHold(hold.id);
+    await releaseHold(hold.id);
     released.push(hold.id);
   }
   return { checked: holds.length, released, confirmed };

@@ -18,22 +18,28 @@ function handle(): string {
 
 export const toCents = (value: number) => Math.round(value * 100);
 
-/** Our order id for InfinitePay is the Hostaway reservation id, so no database is needed. */
-export const orderNsuFor = (reservationId: number) => `WC-${reservationId}`;
+export type OrderRef = { listingId: number; checkin: string; holdId: number };
 
-export function reservationIdFrom(orderNsu: string | null | undefined): number | null {
-  const m = /^WC-(\d+)$/.exec(orderNsu ?? "");
-  return m ? Number(m[1]) : null;
+/**
+ * Our order id carries everything needed to find the order again in Hostaway
+ * without a database: listing, arrival date and the hold's reservation id.
+ * (The hold itself is deleted once paid, so its id alone is not enough.)
+ */
+export const orderNsuFor = (r: OrderRef) => `WC-${r.listingId}-${r.checkin.replaceAll("-", "")}-${r.holdId}`;
+
+export function parseOrderNsu(orderNsu: string | null | undefined): OrderRef | null {
+  const m = /^WC-(\d+)-(\d{4})(\d{2})(\d{2})-(\d+)$/.exec(orderNsu ?? "");
+  return m ? { listingId: Number(m[1]), checkin: `${m[2]}-${m[3]}-${m[4]}`, holdId: Number(m[5]) } : null;
 }
 
 export async function createCheckoutLink(params: {
-  reservationId: number;
+  order: OrderRef;
   listing: Listing;
   quote: Quote;
   guest: GuestDetails;
   siteUrl: string;
 }): Promise<string> {
-  const { reservationId, listing, quote, guest, siteUrl } = params;
+  const { order, listing, quote, guest, siteUrl } = params;
   const stay = `${formatDateBR(quote.checkin)} a ${formatDateBR(quote.checkout)}`;
   const res = await fetch(`${API}/links`, {
     method: "POST",
@@ -41,7 +47,7 @@ export async function createCheckoutLink(params: {
     cache: "no-store",
     body: JSON.stringify({
       handle: handle(),
-      order_nsu: orderNsuFor(reservationId),
+      order_nsu: orderNsuFor(order),
       redirect_url: `${siteUrl}/reservas/confirmacao`,
       webhook_url: `${siteUrl}/api/infinitepay/webhook`,
       // One line with the total Hostaway calculated; the breakdown already

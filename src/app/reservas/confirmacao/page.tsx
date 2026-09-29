@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import { settlePayment, type SettleResult } from "@/lib/reservas/payments";
+import { orderStatus, type SettleResult } from "@/lib/reservas/payments";
 import { WHATSAPP_RESERVAS } from "@/lib/reservas/contact";
 
 export const metadata: Metadata = {
@@ -11,15 +11,15 @@ export const metadata: Metadata = {
 
 type Search = Promise<{ order_nsu?: string; transaction_nsu?: string; slug?: string; receipt_url?: string }>;
 
-/** InfinitePay sends the guest here after paying; we settle right away instead of waiting for the webhook. */
+/** InfinitePay sends the guest here after paying. Read-only: the webhook is what confirms the reservation. */
 export default async function ConfirmacaoPage({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams;
   let result: SettleResult;
   try {
-    result = await settlePayment({ orderNsu: sp.order_nsu ?? null, transactionNsu: sp.transaction_nsu, slug: sp.slug });
+    result = await orderStatus({ orderNsu: sp.order_nsu ?? null, transactionNsu: sp.transaction_nsu, slug: sp.slug });
   } catch (err) {
     console.error("[reservas] confirmation settle failed", err);
-    result = { state: "pending", reservationId: null };
+    result = { state: "pending" };
   }
   const retry = `/reservas/confirmacao?${new URLSearchParams(Object.entries(sp).filter((e): e is [string, string] => typeof e[1] === "string"))}`;
   const receipt = sp.receipt_url?.startsWith("https://") ? sp.receipt_url : null;
@@ -32,6 +32,14 @@ export default async function ConfirmacaoPage({ searchParams }: { searchParams: 
           <h1 className="rs-h1">Reserva confirmada!</h1>
           <p>Pagamento recebido e datas garantidas. Você vai receber a confirmação e as instruções de chegada por e-mail e WhatsApp.</p>
           <p className="rs-muted">Código da reserva: <strong>{result.reservationId}</strong></p>
+        </>
+      )}
+      {result.state === "processing" && (
+        <>
+          <meta httpEquiv="refresh" content="5" />
+          <Clock size={48} className="rs-wait-ico" />
+          <h1 className="rs-h1">Pagamento recebido!</h1>
+          <p>Estamos finalizando sua reserva — isso leva só alguns segundos. Esta página atualiza sozinha.</p>
         </>
       )}
       {result.state === "pending" && (

@@ -1,5 +1,5 @@
 import { parseStay, quoteStay, StayError } from "@/lib/reservas/booking";
-import { cancelHold, createHold } from "@/lib/reservas/hostaway";
+import { HoldConflictError, createHold, releaseHold } from "@/lib/reservas/hostaway";
 import { createCheckoutLink, infinitePayConfigured } from "@/lib/reservas/infinitepay";
 import { siteUrl } from "@/lib/reservas/site-url";
 import type { GuestDetails } from "@/lib/reservas/types";
@@ -22,8 +22,8 @@ function parseGuest(input: Record<string, unknown>): GuestDetails {
 
 /**
  * Re-validates dates and price on the server, blocks the dates in Hostaway
- * (unpaid hold), and returns the InfinitePay URL. If the payment link can't be
- * created the hold is released immediately.
+ * (unpaid hold, checked for conflicts), and returns the InfinitePay URL. If the
+ * payment link can't be created the hold is released immediately.
  */
 export async function POST(request: Request) {
   if (!infinitePayConfigured()) {
@@ -47,17 +47,16 @@ export async function POST(request: Request) {
     }
 
     const hold = await createHold(quote, guest).catch((err) => {
-      // Overbooking protection rejects the hold if someone just took the dates.
-      console.error("[reservas] hold failed", err);
-      throw new StayError("Essas datas acabaram de ser reservadas. Escolha outras datas.");
+      if (err instanceof HoldConflictError) throw new StayError("Essas datas acabaram de ser reservadas. Escolha outras datas.");
+      throw err;
     });
 
     try {
-      const url = await createCheckoutLink({ reservationId: hold.id, listing, quote, guest, siteUrl: siteUrl() });
+      const url = await createCheckoutLink({ order: { listingId: listing.id, checkin: quote.checkin, holdId: hold.id }, listing, quote, guest, siteUrl: siteUrl() });
       return Response.json({ url, reservationId: hold.id });
     } catch (err) {
       console.error(`[reservas] payment link failed, releasing hold ${hold.id}`, err);
-      await cancelHold(hold.id).catch((e) => console.error(`[reservas] ALERTA: não foi possível liberar a reserva ${hold.id}`, e));
+      await releaseHold(hold.id).catch((e) => console.error(`[reservas] ALERTA: não foi possível liberar a reserva ${hold.id}`, e));
       return Response.json({ error: "Não foi possível abrir o pagamento agora. Tente novamente em instantes." }, { status: 502 });
     }
   } catch (err) {
