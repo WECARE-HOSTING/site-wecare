@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${SITE_URL}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/reservas`, changeFrequency: "daily", priority: 0.8 },
     ...posts.map((post) => ({
       url: `${SITE_URL}/blog/${post.meta.slug}`,
       lastModified: post.meta.dateModified,

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { LISTING_IMAGE_PATTERNS } from "./src/lib/reservas/image-hosts";
 
 // Legacy WordPress site (live until 2025-09, replaced by this Next.js one-pager
 // without a redirect plan) — these URLs still carry real Search Console
@@ -72,6 +73,10 @@ const legacyRedirects = [...exactLegacyRedirects, ...prefixLegacyRedirects].map(
 }));
 
 const nextConfig: NextConfig = {
+  images: {
+    // Listing photos for /reservas (Hostaway bucket + Airbnb CDN).
+    remotePatterns: LISTING_IMAGE_PATTERNS.map((p) => new URL(p)),
+  },
   async redirects() {
     return legacyRedirects;
   },
