@@ -1,5 +1,5 @@
 import "server-only";
-import type { CalendarDay, HeldReservation, Listing, Quote, StayRequest } from "./types";
+import type { CalendarDay, GuestDetails, HeldReservation, Listing, Quote, StayRequest } from "./types";
 import { addDays, nightsBetween, stayNights } from "./dates";
 
 // Sample data used only when Hostaway credentials are absent outside production
@@ -118,7 +118,8 @@ function isBooked(listingId: number, date: string): boolean {
   return (day >= start && day < start + 4) || (day >= (start + 11) % 28 && day < ((start + 11) % 28) + 2);
 }
 
-const holds = new Map<number, HeldReservation & { checkin: string; checkout: string }>();
+// Mirrors Hostaway: holds and confirmed reservations are separate records.
+const reservations = new Map<number, HeldReservation>();
 
 export function calendar(listingId: number, startDate: string, endDate: string): CalendarDay[] {
   const listing = listings.find((l) => l.id === listingId);
@@ -126,7 +127,7 @@ export function calendar(listingId: number, startDate: string, endDate: string):
   const days: CalendarDay[] = [];
   for (let d = startDate; d <= endDate; d = addDays(d, 1)) {
     const weekday = new Date(`${d}T00:00:00Z`).getUTCDay();
-    const held = [...holds.values()].some((h) => h.listingId === listingId && h.status !== "cancelled" && d >= h.checkin && d < h.checkout);
+    const held = [...reservations.values()].some((h) => h.listingId === listingId && d >= h.checkin && d < h.checkout);
     days.push({
       date: d,
       available: !isBooked(listingId, d) && !held,
@@ -159,23 +160,44 @@ export function quote(stay: StayRequest, currency: string): Quote {
 
 let nextId = 700001;
 
-export function createHold(q: Quote): HeldReservation {
-  const hold = { id: nextId++, listingId: q.listingId, status: "awaitingPayment", total: q.total, isPaid: false, holdExpiresAt: new Date(Date.now() + 30 * 60_000).toISOString(), source: "site-wecare", checkin: q.checkin, checkout: q.checkout };
-  holds.set(hold.id, hold);
+export function createHold(q: Quote, guest: GuestDetails): HeldReservation {
+  const hold: HeldReservation = {
+    id: nextId++,
+    listingId: q.listingId,
+    status: "awaitingPayment",
+    total: q.total,
+    currency: q.currency,
+    checkin: q.checkin,
+    checkout: q.checkout,
+    guests: q.guests,
+    guest,
+    hostNote: "",
+    holdExpiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+  };
+  reservations.set(hold.id, hold);
   return hold;
 }
 
 export function getReservation(id: number): HeldReservation | null {
-  return holds.get(id) ?? null;
+  return reservations.get(id) ?? null;
 }
 
-export function setStatus(id: number, status: string): void {
-  const h = holds.get(id);
-  if (!h) return;
-  h.status = status;
-  if (status === "new") h.isPaid = true;
+export function findConfirmed(orderNsu: string): HeldReservation | null {
+  return [...reservations.values()].find((r) => r.status === "new" && r.hostNote.includes(`pedido ${orderNsu}`)) ?? null;
+}
+
+export function confirmHold(holdId: number, orderNsu: string): HeldReservation {
+  const hold = reservations.get(holdId)!;
+  const confirmed = { ...hold, id: nextId++, status: "new", hostNote: `pedido ${orderNsu}`, holdExpiresAt: null };
+  reservations.set(confirmed.id, confirmed);
+  reservations.delete(holdId);
+  return confirmed;
+}
+
+export function releaseHold(id: number): void {
+  reservations.delete(id);
 }
 
 export function openHolds(): HeldReservation[] {
-  return [...holds.values()].filter((h) => h.status === "awaitingPayment");
+  return [...reservations.values()].filter((h) => h.status === "awaitingPayment");
 }

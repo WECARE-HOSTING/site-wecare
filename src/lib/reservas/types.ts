@@ -66,8 +66,12 @@ export type HeldReservation = {
   listingId: number;
   status: string;
   total: number;
-  isPaid: boolean;
-  /** ISO timestamp after which an unpaid hold is released. */
+  currency: string;
+  checkin: string;
+  checkout: string;
+  guests: number;
+  guest: GuestDetails;
+  hostNote: string;
+  /** ISO timestamp after which an unpaid hold is released; null when not one of our holds. */
   holdExpiresAt: string | null;
-  source: string | null;
 };

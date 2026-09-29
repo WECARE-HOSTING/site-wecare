@@ -8,14 +8,13 @@ import { isAllowedImage } from "./image-hosts";
 
 const API = "https://api.hostaway.com/v1";
 
-/** Marks every reservation this site creates, so the expiry job only ever touches ours. */
+// Sent as `source`, though Hostaway stores "apiv1" instead; ours are recognised by host-note markers.
 export const RESERVATION_SOURCE = "site-wecare";
 
 // Hostaway: 2000 = direct booking channel.
 const DIRECT_CHANNEL_ID = 2000;
 
-// Status a reservation sits in while the guest is paying. Hostaway's overbooking
-// protection treats it as occupying the dates, which is what makes the hold work.
+// Status a reservation sits in while the guest is paying; it blocks the calendar.
 export const HOLD_STATUS = process.env.HOSTAWAY_HOLD_STATUS || "awaitingPayment";
 
 export class HostawayError extends Error {
@@ -85,9 +84,9 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
     const retryAt = Number(res.headers.get("X-RateLimit-Retry-After")) * 1000;
     await sleep(Math.min(Math.max(retryAt - Date.now(), 1000), 10_000));
   }
-  const body = (await res.json().catch(() => null)) as { status?: string; result?: unknown } | null;
+  const body = (await res.json().catch(() => null)) as { status?: string; result?: unknown; message?: string } | null;
   if (!res.ok || body?.status !== "success") {
-    const detail = typeof body?.result === "string" ? body.result : res.statusText;
+    const detail = body?.message ?? (typeof body?.result === "string" ? body.result : res.statusText);
     throw new HostawayError(`Hostaway ${init.method ?? "GET"} ${path.split("?")[0]} failed (${res.status}): ${detail}`, res.status);
   }
   return body.result as T;
@@ -325,12 +324,27 @@ export async function getHostawayQuote(stay: StayRequest, currency: string): Pro
 
 // ---------------------------------------------------------------------------
 // Writes
+//
+// Verified against the live API (test listing 560237, 2026-09-29):
+// - POST /reservations with status awaitingPayment blocks the calendar.
+// - Hostaway refuses a reservation over a confirmed one (403 "Requested dates
+//   are not available") but accepts it over holds and manual blocks, so we
+//   check for conflicts ourselves right after creating a hold.
+// - An awaitingPayment reservation can't be cancelled (403) and PUT ignores
+//   status/isPaid, so it can never be promoted. On payment we create a new
+//   confirmed reservation and DELETE the hold; unpaid holds are DELETEd too.
+// - `source` is overwritten with "apiv1", so our reservations are recognised
+//   by the markers we write into hostNote instead.
 // ---------------------------------------------------------------------------
 
-// Hostaway timestamps carry no timezone, so the hold deadline is written by us,
-// as ISO-8601, into the reservation's host note and read back from there.
 export const HOLD_MINUTES = 30;
+// Hostaway timestamps carry no timezone, so the hold deadline is written by us,
+// as ISO-8601, into the host note and read back from there.
 const HOLD_NOTE = /Reserva do site WeCare — aguardando pagamento até (\S+)/;
+const ORDER_NOTE = (orderNsu: string) => `pedido ${orderNsu}`;
+
+// Statuses that don't occupy the calendar.
+const INACTIVE = new Set(["cancelled", "declined", "expired", "inquiry", "inquiryPreapproved", "inquiryDenied", "inquiryTimedout", "inquiryNotPossible"]);
 
 function mapReservation(raw: Raw): HeldReservation {
   const expires = HOLD_NOTE.exec(str(raw.hostNote))?.[1] ?? null;
@@ -339,37 +353,85 @@ function mapReservation(raw: Raw): HeldReservation {
     listingId: num(raw.listingMapId),
     status: str(raw.status),
     total: num(raw.totalPrice),
-    isPaid: num(raw.isPaid) === 1,
+    currency: str(raw.currency) || "BRL",
+    checkin: str(raw.arrivalDate),
+    checkout: str(raw.departureDate),
+    guests: num(raw.numberOfGuests, 1),
+    guest: { firstName: str(raw.guestFirstName), lastName: str(raw.guestLastName), email: str(raw.guestEmail), phone: str(raw.phone) },
+    hostNote: str(raw.hostNote),
     holdExpiresAt: expires && !Number.isNaN(Date.parse(expires)) ? expires : null,
-    source: str(raw.source) || null,
   };
 }
 
-export async function createHold(quote: Quote, guest: GuestDetails): Promise<HeldReservation> {
-  if (mockMode()) return mock.createHold(quote);
-  const raw = await call<Raw>("/reservations", {
-    method: "POST",
-    body: JSON.stringify({
-      channelId: DIRECT_CHANNEL_ID,
-      listingMapId: quote.listingId,
-      source: RESERVATION_SOURCE,
-      arrivalDate: quote.checkin,
-      departureDate: quote.checkout,
-      guestFirstName: guest.firstName,
-      guestLastName: guest.lastName,
-      guestName: `${guest.firstName} ${guest.lastName}`,
-      guestEmail: guest.email,
-      phone: guest.phone,
-      numberOfGuests: quote.guests,
-      adults: quote.guests,
-      totalPrice: quote.total,
-      currency: quote.currency,
-      isPaid: 0,
-      status: HOLD_STATUS,
-      hostNote: `Reserva do site WeCare — aguardando pagamento até ${new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString()}`,
-    }),
+function reservationBody(r: { listingId: number; checkin: string; checkout: string; guests: number; total: number; currency: string; guest: GuestDetails }, status: string, hostNote: string) {
+  return JSON.stringify({
+    channelId: DIRECT_CHANNEL_ID,
+    listingMapId: r.listingId,
+    source: RESERVATION_SOURCE,
+    arrivalDate: r.checkin,
+    departureDate: r.checkout,
+    guestFirstName: r.guest.firstName,
+    guestLastName: r.guest.lastName,
+    guestName: `${r.guest.firstName} ${r.guest.lastName}`,
+    guestEmail: r.guest.email,
+    phone: r.guest.phone,
+    numberOfGuests: r.guests,
+    adults: r.guests,
+    totalPrice: r.total,
+    currency: r.currency,
+    isPaid: status === "new" ? 1 : 0,
+    status,
+    hostNote,
   });
-  return mapReservation(raw);
+}
+
+/**
+ * Whatever else occupies a night of the stay: active reservations other than
+ * `exceptId`, and manual blocks (reported as id 0, status "blocked").
+ */
+async function conflictingReservations(listingId: number, checkin: string, checkout: string, exceptId: number): Promise<{ id: number; status: string }[]> {
+  const lastNight = addDays(checkout, -1);
+  const days = await call<Raw[]>(`/listings/${listingId}/calendar?startDate=${checkin}&endDate=${lastNight}&includeResources=1`);
+  const found = new Map<number, string>();
+  for (const d of days) {
+    if (str(d.status) === "blocked") found.set(0, "blocked");
+    for (const r of (Array.isArray(d.reservations) ? d.reservations : []) as Raw[]) {
+      if (num(r.id) !== exceptId && !INACTIVE.has(str(r.status))) found.set(num(r.id), str(r.status));
+    }
+  }
+  return [...found].map(([id, status]) => ({ id, status }));
+}
+
+export class HoldConflictError extends Error {}
+
+/**
+ * Blocks the dates while the guest pays. Because Hostaway accepts overlapping
+ * reservations, we look right after creating: if anything else now sits on
+ * these nights the hold is removed again. Two simultaneous holds see each
+ * other; only the older one (lower id) survives.
+ */
+export async function createHold(quote: Quote, guest: GuestDetails): Promise<HeldReservation> {
+  if (mockMode()) return mock.createHold(quote, guest);
+  const note = `Reserva do site WeCare — aguardando pagamento até ${new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString()}`;
+  const hold = mapReservation(
+    await call<Raw>("/reservations", { method: "POST", body: reservationBody({ ...quote, guest }, HOLD_STATUS, note) }).catch((err) => {
+      if (err instanceof HostawayError && err.status === 403 && /not available/i.test(err.message)) throw new HoldConflictError(err.message);
+      throw err;
+    }),
+  );
+
+  const conflicts = await conflictingReservations(quote.listingId, quote.checkin, quote.checkout, hold.id).catch(async (err) => {
+    await releaseHold(hold.id).catch(() => {});
+    throw err;
+  });
+  // A newer hold on the same nights yields to us (it runs this same check);
+  // anything else — an older hold or a real booking — wins over ours.
+  const blocking = conflicts.filter((c) => !(c.status === HOLD_STATUS && c.id > hold.id));
+  if (blocking.length) {
+    await releaseHold(hold.id);
+    throw new HoldConflictError(`Dates taken by reservation(s) ${blocking.map((c) => c.id).join(", ")}`);
+  }
+  return hold;
 }
 
 export async function getReservation(id: number): Promise<HeldReservation | null> {
@@ -377,34 +439,37 @@ export async function getReservation(id: number): Promise<HeldReservation | null
   try {
     return mapReservation(await call<Raw>(`/reservations/${id}`));
   } catch (err) {
-    if (err instanceof HostawayError && err.status === 404) return null;
+    if (err instanceof HostawayError && (err.status === 404 || err.status === 403)) return null;
     throw err;
   }
 }
 
-export async function confirmPaid(id: number, paymentNote: string): Promise<void> {
-  if (mockMode()) return mock.setStatus(id, "new");
-  await call(`/reservations/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({ status: "new", isPaid: 1, hostNote: paymentNote }),
-  });
+/** The confirmed reservation created for an order, if there is one. */
+export async function findConfirmed(listingId: number, checkin: string, orderNsu: string): Promise<HeldReservation | null> {
+  if (mockMode()) return mock.findConfirmed(orderNsu);
+  const rows = await call<Raw[]>(`/reservations?listingId=${listingId}&arrivalStartDate=${checkin}&arrivalEndDate=${checkin}&limit=50`);
+  return rows.map(mapReservation).find((r) => r.status !== HOLD_STATUS && !INACTIVE.has(r.status) && r.hostNote.includes(ORDER_NOTE(orderNsu))) ?? null;
 }
 
-export async function cancelHold(id: number): Promise<void> {
-  if (mockMode()) return mock.setStatus(id, "cancelled");
-  await call(`/reservations/${id}/statuses/cancelled`, {
-    method: "PUT",
-    body: JSON.stringify({ cancelledBy: "host" }),
-  });
+/** Turns a paid hold into a confirmed reservation: create the real one first, then drop the hold, so the dates are never free in between. */
+export async function confirmHold(hold: HeldReservation, orderNsu: string, paymentNote: string): Promise<HeldReservation> {
+  if (mockMode()) return mock.confirmHold(hold.id, orderNsu);
+  const confirmed = mapReservation(
+    await call<Raw>("/reservations", { method: "POST", body: reservationBody(hold, "new", `Reserva do site WeCare — ${paymentNote} · ${ORDER_NOTE(orderNsu)}`) }),
+  );
+  await releaseHold(hold.id).catch((err) => console.error(`[reservas] confirmed ${confirmed.id} but could not delete hold ${hold.id}; delete it by hand`, err));
+  return confirmed;
 }
 
-/**
- * Our own unpaid holds. They are always among the most recently touched
- * reservations, so the latest 100 by activity is enough; filtering on `source`
- * guarantees we never look at a reservation another channel created.
- */
+/** Unpaid holds are deleted, not cancelled: Hostaway refuses to cancel them, and they never were real bookings. */
+export async function releaseHold(id: number): Promise<void> {
+  if (mockMode()) return mock.releaseHold(id);
+  await call(`/reservations/${id}`, { method: "DELETE" });
+}
+
+/** Our unpaid holds: Hostaway filters by status; the host-note marker proves the hold is ours. */
 export async function listOpenHolds(): Promise<HeldReservation[]> {
   if (mockMode()) return mock.openHolds();
-  const rows = await call<Raw[]>(`/reservations?limit=100&sortOrder=latestActivityDesc&channelId=${DIRECT_CHANNEL_ID}`);
-  return rows.map(mapReservation).filter((r) => r.source === RESERVATION_SOURCE && r.status === HOLD_STATUS);
+  const rows = await call<Raw[]>(`/reservations?status=${HOLD_STATUS}&limit=200`);
+  return rows.map(mapReservation).filter((r) => r.status === HOLD_STATUS && r.holdExpiresAt !== null);
 }
