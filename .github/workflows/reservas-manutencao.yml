@@ -1,0 +1,22 @@
+# Releases unpaid booking holds after 30 min and keeps the /reservas caches warm.
+# GitHub Actions instead of Vercel Cron: the Hobby plan only allows daily crons.
+# Needs repo secret CRON_SECRET (same value as the Vercel env var).
+name: Reservas — manutenção
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Expirar reservas não pagas e aquecer caches
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then echo "CRON_SECRET not set, skipping"; exit 0; fi
+          curl -fsS --max-time 320 -H "Authorization: Bearer $CRON_SECRET" \
+            https://www.wecarehosting.com.br/api/reservas/manutencao
