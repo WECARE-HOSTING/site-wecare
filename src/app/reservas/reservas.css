@@ -301,3 +301,10 @@
   .rs-hero { padding-top: 36px; }
   .rs-card-arrow { opacity: 1; }
 }
+
+/* Loading skeleton */
+.rs-skel { background: linear-gradient(90deg, var(--ivory-200) 25%, var(--ivory-100) 50%, var(--ivory-200) 75%); background-size: 200% 100%; animation: rs-shimmer 1.3s linear infinite; border-radius: 8px; }
+.rs-skel-media { aspect-ratio: 1 / 0.95; border-radius: 16px; }
+.rs-skel-line { height: 14px; }
+@keyframes rs-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .rs-skel { animation: none; } }

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 const cards = [
   { region: "São Paulo · Capital", title: "Coberturas nos Jardins e Itaim", img: "/uploads/apto-vista-sp-capital.jpg", objectPosition: "center" },
   { region: "Litoral", title: "Casas de praia premium", img: "/uploads/litoral-piscina-lagoa.jpg", objectPosition: "center" },
@@ -67,9 +69,11 @@ export default function Portfolio() {
                 if (img) img.style.transform = "scale(1)";
               }}
             >
-              <img
+              <Image
                 src={card.img}
                 alt={card.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 style={{ ...imgStyle, objectPosition: card.objectPosition }}
               />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(8,23,32,0.84), rgba(8,23,32,0.04) 56%)" }} />
@@ -104,10 +108,12 @@ export default function Portfolio() {
                 if (img) img.style.transform = "scale(1)";
               }}
             >
-              <img
+              <Image
                 src={m.img}
                 alt=""
                 aria-hidden="true"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ ...imgStyle, objectPosition: "center" }}
               />
             </div>

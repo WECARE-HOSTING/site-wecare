@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Search } from "lucide-react";
 import DateRangeCalendar from "./DateRangeCalendar";
@@ -23,6 +23,7 @@ export default function SearchBar({ destinations, initial }: Props) {
   const [checkout, setCheckout] = useState(initial.checkout);
   const [hospedes, setHospedes] = useState(initial.hospedes);
   const [panel, setPanel] = useState<Panel>(null);
+  const [searching, startSearch] = useTransition();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function SearchBar({ destinations, initial }: Props) {
     }
     if (hospedes > 1) q.set("hospedes", String(hospedes));
     setPanel(null);
-    router.push(`/reservas${q.size ? `?${q}` : ""}`);
+    startSearch(() => router.push(`/reservas${q.size ? `?${q}` : ""}`));
   };
 
   const matches = destinations.filter((d) => d.label.toLowerCase().includes(destino.trim().toLowerCase())).slice(0, 8);
@@ -71,9 +72,9 @@ export default function SearchBar({ destinations, initial }: Props) {
           <span className="rs-search-k">{t.who}</span>
           <span className={`rs-search-v${hospedes > 1 ? "" : " is-empty"}`}>{hospedes > 1 ? t.n(hospedes, t.guest) : t.guestsQ}</span>
         </div>
-        <button type="button" className="rs-search-go" onClick={submit} aria-label={t.search}>
+        <button type="button" className="rs-search-go" onClick={submit} aria-label={t.search} disabled={searching} aria-busy={searching}>
           <Search size={18} strokeWidth={2.4} />
-          <span>{t.search}</span>
+          <span>{searching ? t.searching : t.search}</span>
         </button>
       </div>
 

@@ -112,7 +112,7 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
 
         {results.length ? (
           <div className="rs-grid">
-            {results.map((r) => <ListingCard key={r.id} listing={r} query={qs} />)}
+            {results.map((r, n) => <ListingCard key={r.id} listing={r} query={qs} priority={n < 4} />)}
           </div>
         ) : (
           <div className="rs-empty">

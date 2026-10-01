@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Historia() {
@@ -56,10 +57,12 @@ export default function Historia() {
 
         {/* Hero image */}
         <div data-reveal="" style={{ marginTop: 48, height: 480, borderRadius: "var(--radius-md)", overflow: "hidden", position: "relative", boxShadow: "var(--shadow-sm)" }}>
-          <img
+          <Image
             src="/uploads/casa-passargada-005.jpg"
             alt="A casa que deu origem à WeCare"
-            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+            fill
+            sizes="(max-width: 1200px) 100vw, 1200px"
+            style={{ objectFit: "cover", objectPosition: "center 55%", transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
             onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = "scale(1)"; }}
           />

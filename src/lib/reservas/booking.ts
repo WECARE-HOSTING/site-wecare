@@ -41,12 +41,15 @@ function stayProblem(t: T, listing: Listing, stay: StayRequest, day: (date: stri
 export async function quoteStay(stay: StayRequest, t: T): Promise<{ listing: Listing; quote: Quote }> {
   const listing = await getListing(stay.listingId);
   if (!listing) throw new StayError(t.errListingNotFound);
+  // The live calendar and Hostaway's price don't depend on each other, so they run together
+  // (one round trip instead of two). If the dates turn out to be unavailable the price is discarded.
+  const quoting = getHostawayQuote(stay, listing.currency, t);
+  quoting.catch(() => {}); // surfaced below, only when the calendar check passes
   const days = await getCalendar(listing.id, stay.checkin, stay.checkout);
   const byDate = new Map(days.map((d) => [d.date, d]));
   const problem = stayProblem(t, listing, stay, (d) => byDate.get(d));
   if (problem) throw new StayError(problem);
-  const quote = await getHostawayQuote(stay, listing.currency, t);
-  return { listing, quote };
+  return { listing, quote: await quoting };
 }
 
 /** Search-time check against the cached index. Null when the dates fall outside it. */

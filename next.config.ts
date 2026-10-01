@@ -72,13 +72,33 @@ const legacyRedirects = [...exactLegacyRedirects, ...prefixLegacyRedirects].map(
   permanent: true,
 }));
 
+// The old Hostaway-hosted Booking Website lived at reserva.wecarehosting.com.br
+// (listing pages at /listings/<id>?start=…&end=…&numberOfGuests=…). Once that
+// hostname points at this project, everything on it lands on our own /reservas,
+// carrying the dates over where it can. Listing ids are the same Hostaway ids.
+const BOOKING_HOST = [{ type: "host" as const, value: "reserva.wecarehosting.com.br" }];
+const bookingSiteRedirects = [
+  {
+    source: "/listings/:id(\\d+)",
+    has: [
+      ...BOOKING_HOST,
+      { type: "query" as const, key: "start", value: "(?<start>\\d{4}-\\d{2}-\\d{2})" },
+      { type: "query" as const, key: "end", value: "(?<end>\\d{4}-\\d{2}-\\d{2})" },
+      { type: "query" as const, key: "numberOfGuests", value: "(?<guests>\\d+)" },
+    ],
+    destination: "https://www.wecarehosting.com.br/reservas/:id?checkin=:start&checkout=:end&hospedes=:guests",
+  },
+  { source: "/listings/:id(\\d+)", has: BOOKING_HOST, destination: "https://www.wecarehosting.com.br/reservas/:id" },
+  { source: "/:path*", has: BOOKING_HOST, destination: "https://www.wecarehosting.com.br/reservas" },
+].map((r) => ({ ...r, permanent: true }));
+
 const nextConfig: NextConfig = {
   images: {
     // Listing photos for /reservas (Hostaway bucket + Airbnb CDN).
     remotePatterns: LISTING_IMAGE_PATTERNS.map((p) => new URL(p)),
   },
   async redirects() {
-    return legacyRedirects;
+    return [...bookingSiteRedirects, ...legacyRedirects];
   },
 };
 

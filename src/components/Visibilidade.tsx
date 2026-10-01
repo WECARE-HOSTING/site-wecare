@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 const platforms = [
   { name: "Airbnb", accent: false },
   { name: "Booking.com", accent: false },
@@ -77,9 +79,12 @@ export default function Visibilidade() {
               marginLeft: 32,
             }}
           >
-            <img
+            <Image
               src="/uploads/airbnb-anuncio2.png"
               alt="Anúncio WeCare no Airbnb — Superhost e Preferido dos Hóspedes"
+              width={1200}
+              height={994}
+              sizes="(max-width: 768px) 100vw, 560px"
               style={{
                 width: "100%",
                 height: "auto",
