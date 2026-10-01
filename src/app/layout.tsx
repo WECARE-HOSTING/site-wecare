@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import GtagLeadTracker from "@/components/GtagLeadTracker";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 import "./globals.css";
 
 const GA_MEASUREMENT_ID = "G-SSEV44PYET";
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className="min-h-full">
         {children}
         <GtagLeadTracker />
+        <WhatsAppFloat />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
