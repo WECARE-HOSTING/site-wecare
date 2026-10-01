@@ -10,6 +10,7 @@ import { isIsoDate } from "@/lib/reservas/dates";
 import { amenityLabel } from "@/lib/reservas/amenities";
 import { getT } from "@/lib/reservas/lang";
 import { publicStars } from "@/lib/reservas/rating";
+import { translateCaptions, translateText } from "@/lib/reservas/translate";
 
 export const maxDuration = 300;
 
@@ -52,18 +53,31 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const checkout = isIsoDate(sp.checkout) && checkin && sp.checkout! > checkin ? sp.checkout! : null;
   const guests = Math.max(1, Number(sp.hospedes) || 1);
   const place = listing.state && listing.state !== listing.city ? `${listing.city}, ${listing.state}` : listing.city;
+  // Machine translations come from the cache (see translate.ts). Anything not ready yet falls back
+  // to the Portuguese original, with a note, and is there on the next visit.
+  const target = t.lang === "pt" ? null : t.lang;
+  const [esSections, rulesTranslated, captions] = target
+    ? await Promise.all([
+        target === "es" ? Promise.all(listing.sections.map((s) => translateText("description", "es", s.text))) : null,
+        listing.houseRules ? translateText("rules", target, listing.houseRules) : null,
+        translateCaptions(target, listing.images.map((i) => i.caption)),
+      ])
+    : [null, null, null];
+  const images = captions ? listing.images.map((img, i) => ({ ...img, caption: captions[i] ?? img.caption })) : listing.images;
+  const houseRules = rulesTranslated ?? listing.houseRules;
+  const rulesInOriginal = target !== null && Boolean(listing.houseRules) && rulesTranslated === null;
   // English: Hostaway's own full description. Portuguese/Spanish: the same description rebuilt
-  // from the section fields, each with a heading (the text itself is only available in Portuguese).
+  // from the section fields, each with a heading (Spanish translated by us when available).
   const split = (s: string) => s.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
   const blocks: { title?: string; paragraphs: string[] }[] =
     t.lang === "en" && listing.descriptionEn
       ? [{ paragraphs: split(listing.descriptionEn) }]
-      : listing.sections.map((s) => ({ title: t.sectionTitle[s.key], paragraphs: split(s.text) }));
+      : listing.sections.map((s, i) => ({ title: t.sectionTitle[s.key], paragraphs: split(esSections?.[i] ?? s.text) }));
   const shownBlocks = blocks.slice(0, 2);
   const moreBlocks = blocks.slice(2);
   // A single English block has no sections to fold, so fold by paragraphs instead.
   const foldByParagraph = blocks.length === 1;
-  const translated = t.lang === "pt" || (t.lang === "en" && Boolean(listing.descriptionEn));
+  const translated = t.lang === "pt" || (t.lang === "en" && Boolean(listing.descriptionEn)) || (t.lang === "es" && esSections !== null && esSections.every((s) => s !== null));
 
   return (
     <article className="rs-wrap rs-detail">
@@ -86,7 +100,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
         </div>
       </header>
 
-      <Gallery images={listing.images} name={text.name} />
+      <Gallery images={images} name={text.name} />
 
       <div className="rs-detail-cols">
         <div className="rs-detail-main">
@@ -166,12 +180,12 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
               {hour(listing.checkOutTime) && <span><Clock size={18} /> {t.checkOutUntil(hour(listing.checkOutTime)!)}</span>}
               <span><Clock size={18} /> {t.minStay(t.n(listing.minNights, t.night))}</span>
             </div>
-            {listing.houseRules && (
+            {houseRules && (
               <details className="rs-more">
                 <summary>{t.houseRules}</summary>
                 <div className="rs-prose">
-                  {t.rulesOriginalPt && <p className="rs-muted rs-small">{t.rulesOriginalPt}</p>}
-                  {listing.houseRules.split(/\n+/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
+                  {rulesInOriginal && t.rulesOriginalPt && <p className="rs-muted rs-small">{t.rulesOriginalPt}</p>}
+                  {houseRules.split(/\n+/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
                 </div>
               </details>
             )}
