@@ -23,21 +23,23 @@ export type ListingCardData = {
   currency: string;
 };
 
-export default function ListingCard({ listing, query }: { listing: ListingCardData; query: string }) {
+export default function ListingCard({ listing, query, priority = false }: { listing: ListingCardData; query: string; priority?: boolean }) {
   const t = useT();
   const [i, setI] = useState(0);
+  // The neighbouring photo is only mounted once the guest shows interest, so a page of 60 cards ships one image per card instead of two.
+  const [warm, setWarm] = useState(false);
   const photos = listing.images.slice(0, 6);
   const step = (e: React.MouseEvent, n: number) => {
     e.preventDefault();
+    setWarm(true);
     setI((v) => (v + n + photos.length) % photos.length);
   };
 
   return (
     <Link href={`/reservas/${listing.id}${query}`} className="rs-card">
-      <div className="rs-card-media">
-        {/* Only the visible photo and the next one are mounted, so a page of cards doesn't fetch 6× the images. */}
-        {photos.map((src, idx) => (idx !== i && idx !== (i + 1) % photos.length ? null : (
-          <Image key={src} src={src} alt="" fill sizes="(max-width: 560px) 100vw, (max-width: 880px) 50vw, (max-width: 1128px) 33vw, 300px" className={idx === i ? "is-on" : ""} />
+      <div className="rs-card-media" onPointerEnter={() => setWarm(true)}>
+        {photos.map((src, idx) => (idx !== i && !(warm && idx === (i + 1) % photos.length) ? null : (
+          <Image key={src} src={src} alt="" fill priority={priority && idx === 0} sizes="(max-width: 560px) 100vw, (max-width: 880px) 50vw, (max-width: 1128px) 33vw, 300px" className={idx === i ? "is-on" : ""} />
         )))}
         {photos.length > 1 && (
           <>
