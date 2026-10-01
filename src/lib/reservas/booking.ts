@@ -2,7 +2,7 @@ import "server-only";
 import type { CalendarDay, Listing, Quote, StayRequest } from "./types";
 import type { T } from "./i18n";
 import { isIsoDate, nightsBetween, stayNights, todayInBrazil } from "./dates";
-import { getCalendar, getHostawayQuote, getListing, type AvailabilityIndex } from "./hostaway";
+import { getCalendar, getHostawayQuote, getListingSummary, type AvailabilityIndex } from "./hostaway";
 
 export class StayError extends Error {}
 
@@ -39,7 +39,7 @@ function stayProblem(t: T, listing: Listing, stay: StayRequest, day: (date: stri
  * plus Hostaway's own price calculation. Never trust a total sent by the browser.
  */
 export async function quoteStay(stay: StayRequest, t: T): Promise<{ listing: Listing; quote: Quote }> {
-  const listing = await getListing(stay.listingId);
+  const listing = await getListingSummary(stay.listingId);
   if (!listing) throw new StayError(t.errListingNotFound);
   // The live calendar and Hostaway's price don't depend on each other, so they run together
   // (one round trip instead of two). If the dates turn out to be unavailable the price is discarded.

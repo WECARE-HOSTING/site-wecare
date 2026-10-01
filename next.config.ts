@@ -92,13 +92,30 @@ const bookingSiteRedirects = [
   { source: "/:path*", has: BOOKING_HOST, destination: "https://www.wecarehosting.com.br/reservas" },
 ].map((r) => ({ ...r, permanent: true }));
 
+// Safe, framework-agnostic hardening; no CSP yet because GA/gtag need inline scripts.
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+];
+
 const nextConfig: NextConfig = {
   images: {
+    // Listing photos never change under the same URL; keep optimized copies for 30 days instead of the 4 h default.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     // Listing photos for /reservas (Hostaway bucket + Airbnb CDN).
     remotePatterns: LISTING_IMAGE_PATTERNS.map((p) => new URL(p)),
   },
   async redirects() {
-    return [...bookingSiteRedirects, ...legacyRedirects];
+    return [...bookingSiteRedirects, { source: "/reserva", destination: "/reservas", permanent: true }, ...legacyRedirects];
+  },
+  async headers() {
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Static brand/portfolio files are served as-is with max-age=0 by default, so every visit revalidated them.
+      { source: "/(brand|uploads)/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
+    ];
   },
 };
 

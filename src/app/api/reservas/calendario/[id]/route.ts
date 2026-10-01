@@ -1,13 +1,13 @@
 import type { NextRequest } from "next/server";
 import { getT } from "@/lib/reservas/lang";
-import { getCalendar, getListing } from "@/lib/reservas/hostaway";
+import { getCalendar, getListingSummary } from "@/lib/reservas/hostaway";
 import { addDays, isIsoDate, todayInBrazil } from "@/lib/reservas/dates";
 
 // Live availability for the date picker on a listing page. Capped at ~4 months
 // per request so one visitor can't make us pull a year of calendar at a time.
 export async function GET(request: NextRequest, ctx: RouteContext<"/api/reservas/calendario/[id]">) {
   const { id } = await ctx.params;
-  const listing = await getListing(Number(id));
+  const listing = await getListingSummary(Number(id));
   if (!listing) return Response.json({ error: (await getT()).errListingNotFound }, { status: 404 });
 
   const today = todayInBrazil();
