@@ -1,4 +1,5 @@
 import "server-only";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { GuestDetails, Listing, Quote } from "./types";
 
 const API = "https://api.checkout.infinitepay.io";
@@ -13,6 +14,32 @@ function handle(): string {
   const h = process.env.INFINITEPAY_HANDLE?.replace(/^\$/, "");
   if (!h) throw new InfinitePayError("INFINITEPAY_HANDLE is not configured");
   return h;
+}
+
+/**
+ * InfinitePay does not sign its webhooks, so we sign the URL we hand it: the callback for an
+ * order carries an HMAC of that order's id. Anyone can still POST to the endpoint, but only
+ * InfinitePay (which got the URL from us) knows the signature for a real order, so forged
+ * calls are rejected before they cost a Hostaway or InfinitePay request.
+ * The key is derived from CRON_SECRET, which the project already requires.
+ */
+function webhookKey(): string | null {
+  const secret = process.env.INFINITEPAY_WEBHOOK_SECRET || process.env.CRON_SECRET;
+  return secret ? createHmac("sha256", secret).update("infinitepay-webhook").digest("hex") : null;
+}
+
+export function webhookSignature(orderNsu: string): string {
+  const key = webhookKey();
+  if (!key) throw new InfinitePayError("CRON_SECRET (or INFINITEPAY_WEBHOOK_SECRET) is not configured");
+  return createHmac("sha256", key).update(orderNsu).digest("hex").slice(0, 32);
+}
+
+/** False when the signature is missing, wrong, or no secret is configured. */
+export function verifyWebhookSignature(orderNsu: string, signature: string | null): boolean {
+  if (!signature || !webhookKey()) return false;
+  const expected = Buffer.from(webhookSignature(orderNsu));
+  const given = Buffer.from(signature);
+  return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
 export const toCents = (value: number) => Math.round(value * 100);
@@ -50,7 +77,7 @@ export async function createCheckoutLink(params: {
       handle: handle(),
       order_nsu: orderNsuFor(order),
       redirect_url: `${siteUrl}/reservas/confirmacao`,
-      webhook_url: `${siteUrl}/api/infinitepay/webhook`,
+      webhook_url: `${siteUrl}/api/infinitepay/webhook?sig=${webhookSignature(orderNsuFor(order))}`,
       // One line with the total Hostaway calculated; the breakdown already
       // appeared on our checkout page.
       items: [{ quantity: 1, price: toCents(quote.total), description: `${listing.name} · ${stay} · ${quote.guests} hósp.`.slice(0, 250) }],
