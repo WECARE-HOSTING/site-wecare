@@ -9,7 +9,8 @@ import { getAvailabilityIndex, getListings } from "@/lib/reservas/hostaway";
 import { matchesIndex } from "@/lib/reservas/booking";
 import { isIsoDate, nightsBetween, todayInBrazil } from "@/lib/reservas/dates";
 import { getT } from "@/lib/reservas/lang";
-import { publicStars } from "@/lib/reservas/rating";
+import { publicStars, rankingStars } from "@/lib/reservas/rating";
+import { SHOW_RATINGS } from "@/lib/reservas/features";
 import { FILTER_AMENITIES, amenityLabel } from "@/lib/reservas/amenities";
 import type { Listing } from "@/lib/reservas/types";
 
@@ -67,7 +68,7 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     personCapacity: l.personCapacity,
     bedrooms: l.bedrooms,
     stars: publicStars(l.rating),
-    unrated: l.rating === null,
+    unrated: SHOW_RATINGS && l.rating === null,
     nightly,
     nightlyIsEstimate: estimate,
     // Nightly rates only; cleaning and fees are added on the listing page quote.
@@ -96,7 +97,8 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     }
     results.push(card(l, nightly, estimate, checkin && checkout ? nightsBetween(checkin, checkout) : null));
   }
-  const starsById = new Map(listings.map((l) => [l.id, publicStars(l.rating)]));
+  // Best-reviewed first, even while the score itself is not shown.
+  const starsById = new Map(listings.map((l) => [l.id, rankingStars(l.rating)]));
   results.sort((a, b) => (starsById.get(b.id) ?? 0) - (starsById.get(a.id) ?? 0));
 
   // The query string that carries a search over to a listing page.

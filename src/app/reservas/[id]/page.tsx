@@ -12,6 +12,7 @@ import { isIsoDate } from "@/lib/reservas/dates";
 import { amenityLabel } from "@/lib/reservas/amenities";
 import { getT } from "@/lib/reservas/lang";
 import { publicStars } from "@/lib/reservas/rating";
+import { SHOW_RATINGS, SHOW_REVIEWS } from "@/lib/reservas/features";
 import { translateCaptions, translateText } from "@/lib/reservas/translate";
 import { MIN_POIS, nearbyPlacesWithin } from "@/lib/reservas/nearby";
 
@@ -51,7 +52,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   if (!listing) notFound();
   const text = textFor(listing, t.lang);
   const stars = publicStars(listing.rating);
-  const [reviews, pois] = await Promise.all([getReviewsWithin(listing.id, 2500), nearbyPlacesWithin(listing, 1500)]);
+  const [reviews, pois] = await Promise.all([SHOW_REVIEWS ? getReviewsWithin(listing.id, 2500) : { total: 0, items: [] }, nearbyPlacesWithin(listing, 1500)]);
   const sp = await searchParams;
   const checkin = isIsoDate(sp.checkin) ? sp.checkin : null;
   const checkout = isIsoDate(sp.checkout) && checkin && sp.checkout! > checkin ? sp.checkout! : null;
@@ -94,7 +95,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
               <span>·</span>
             </>
           )}
-          {stars === null && listing.rating === null && (
+          {SHOW_RATINGS && stars === null && listing.rating === null && (
             <>
               <span className="rs-card-new">{t.isNew}</span>
               <span>·</span>
