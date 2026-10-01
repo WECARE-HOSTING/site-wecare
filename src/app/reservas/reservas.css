@@ -309,3 +309,6 @@
 .rs-skel-line { height: 14px; }
 @keyframes rs-shimmer { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .rs-skel { animation: none; } }
+
+/* Language change in flight: client strings already switched, server-rendered ones about to */
+main.rs-switching { opacity: 0.6; transition: opacity 0.15s; pointer-events: none; }

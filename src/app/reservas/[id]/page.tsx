@@ -52,7 +52,18 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const checkout = isIsoDate(sp.checkout) && checkin && sp.checkout! > checkin ? sp.checkout! : null;
   const guests = Math.max(1, Number(sp.hospedes) || 1);
   const place = listing.state && listing.state !== listing.city ? `${listing.city}, ${listing.state}` : listing.city;
-  const paragraphs = text.description.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  // English: Hostaway's own full description. Portuguese/Spanish: the same description rebuilt
+  // from the section fields, each with a heading (the text itself is only available in Portuguese).
+  const split = (s: string) => s.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  const blocks: { title?: string; paragraphs: string[] }[] =
+    t.lang === "en" && listing.descriptionEn
+      ? [{ paragraphs: split(listing.descriptionEn) }]
+      : listing.sections.map((s) => ({ title: t.sectionTitle[s.key], paragraphs: split(s.text) }));
+  const shownBlocks = blocks.slice(0, 2);
+  const moreBlocks = blocks.slice(2);
+  // A single English block has no sections to fold, so fold by paragraphs instead.
+  const foldByParagraph = blocks.length === 1;
+  const translated = t.lang === "pt" || (t.lang === "en" && Boolean(listing.descriptionEn));
 
   return (
     <article className="rs-wrap rs-detail">
@@ -96,16 +107,41 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
             <div><DoorOpen size={22} /><div><strong>{t.hl3[0]}</strong><p>{t.hl3[1]}</p></div></div>
           </section>
 
-          {paragraphs.length > 0 && (
+          {blocks.length > 0 && (
             <section className="rs-section">
               <h2 className="rs-h2">{t.about}</h2>
-              <div className="rs-prose">{paragraphs.slice(0, 3).map((p, i) => <p key={i}>{p}</p>)}</div>
-              {paragraphs.length > 3 && (
-                <details className="rs-more">
-                  <summary>{t.showMore}</summary>
-                  <div className="rs-prose">{paragraphs.slice(3).map((p, i) => <p key={i}>{p}</p>)}</div>
-                </details>
+              {foldByParagraph ? (
+                <>
+                  <div className="rs-prose">{blocks[0].paragraphs.slice(0, 4).map((p, i) => <p key={i}>{p}</p>)}</div>
+                  {blocks[0].paragraphs.length > 4 && (
+                    <details className="rs-more">
+                      <summary>{t.showMore}</summary>
+                      <div className="rs-prose">{blocks[0].paragraphs.slice(4).map((p, i) => <p key={i}>{p}</p>)}</div>
+                    </details>
+                  )}
+                </>
+              ) : (
+                <>
+                  {shownBlocks.map((b) => (
+                    <div key={b.title} className="rs-prose">
+                      {b.title && b.title !== t.sectionTitle.summary && <h3 className="rs-h3">{b.title}</h3>}
+                      {b.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+                    </div>
+                  ))}
+                  {moreBlocks.length > 0 && (
+                    <details className="rs-more">
+                      <summary>{t.showMore}</summary>
+                      {moreBlocks.map((b) => (
+                        <div key={b.title} className="rs-prose">
+                          <h3 className="rs-h3">{b.title}</h3>
+                          {b.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+                        </div>
+                      ))}
+                    </details>
+                  )}
+                </>
               )}
+              {!translated && t.descriptionOriginalPt && <p className="rs-muted rs-small">{t.descriptionOriginalPt}</p>}
             </section>
           )}
 
@@ -133,7 +169,10 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
             {listing.houseRules && (
               <details className="rs-more">
                 <summary>{t.houseRules}</summary>
-                <div className="rs-prose">{listing.houseRules.split(/\n+/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}</div>
+                <div className="rs-prose">
+                  {t.rulesOriginalPt && <p className="rs-muted rs-small">{t.rulesOriginalPt}</p>}
+                  {listing.houseRules.split(/\n+/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
+                </div>
               </details>
             )}
           </section>

@@ -105,6 +105,9 @@ const pt = {
   checkOutUntil: (h: string) => `Check-out até as ${h}`,
   minStay: (n: string) => `Estadia mínima de ${n}`,
   houseRules: "Regras da casa",
+  sectionTitle: { summary: "Sobre este espaço", space: "O espaço", access: "Acesso dos hóspedes", interaction: "Atendimento", neighborhood: "O bairro", transit: "Como se locomover", notes: "Outras informações" } as Record<string, string>,
+  descriptionOriginalPt: "",
+  rulesOriginalPt: "",
 
   // booking panel
   add: "Adicionar",
@@ -286,6 +289,9 @@ const en: Messages = {
   checkOutUntil: (h) => `Check-out by ${h}`,
   minStay: (n) => `Minimum stay of ${n}`,
   houseRules: "House rules",
+  sectionTitle: { summary: "About this space", space: "The space", access: "Guest access", interaction: "Guest support", neighborhood: "The neighborhood", transit: "Getting around", notes: "Other things to note" },
+  descriptionOriginalPt: "",
+  rulesOriginalPt: "Shown in the original Portuguese.",
 
   add: "Add",
   maxGuests: (n) => `Sleeps ${n} at most.`,
@@ -459,6 +465,9 @@ const es: Messages = {
   checkOutUntil: (h) => `Salida hasta las ${h}`,
   minStay: (n) => `Estancia mínima de ${n}`,
   houseRules: "Normas de la casa",
+  sectionTitle: { summary: "Sobre este espacio", space: "El espacio", access: "Acceso de los huéspedes", interaction: "Atención", neighborhood: "El barrio", transit: "Cómo moverse", notes: "Otra información" },
+  descriptionOriginalPt: "Descripción en su idioma original (portugués).",
+  rulesOriginalPt: "Se muestran en el idioma original (portugués).",
 
   add: "Añadir",
   maxGuests: (n) => `Capacidad máxima: ${n}.`,

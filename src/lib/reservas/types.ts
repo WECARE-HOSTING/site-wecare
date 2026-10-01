@@ -1,3 +1,7 @@
+/** Parts of the Hostaway description, in the order a guest reads them. Titles come from the UI language. */
+export type SectionKey = "summary" | "space" | "access" | "interaction" | "neighborhood" | "transit" | "notes";
+export type DescriptionSection = { key: SectionKey; text: string };
+
 export type ListingImage = { url: string; caption: string };
 
 export type Listing = {
@@ -6,7 +10,9 @@ export type Listing = {
   city: string;
   state: string;
   neighborhood: string;
+  /** Full Portuguese description (all sections joined); used for meta tags. */
   description: string;
+  sections: DescriptionSection[];
   /** Hostaway keeps its own `name`/`description` in English; used when the guest browses in English. */
   nameEn: string;
   descriptionEn: string;
