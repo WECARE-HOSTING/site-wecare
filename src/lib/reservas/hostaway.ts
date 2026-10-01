@@ -201,6 +201,16 @@ async function fetchAllRawListings(): Promise<Raw[]> {
   return rows;
 }
 
+/**
+ * What the search page, the quote and the availability index need: no long texts, six photos.
+ * The full mapped list was ~2.3 MB — right at the 2 MB limit of the Next.js data cache (past
+ * it nothing is cached and every request would re-download Hostaway's 7 MB) and slow to read
+ * on every single page view. The slim list is ~150 KB; full detail is cached per listing.
+ */
+function toSummary(l: Listing): Listing {
+  return { ...l, description: "", descriptionEn: "", houseRules: "", amenities: [], images: l.images.slice(0, 6) };
+}
+
 const fetchListings = unstable_cache(
   async (): Promise<Listing[]> => {
     const rows = await fetchAllRawListings();
@@ -208,19 +218,35 @@ const fetchListings = unstable_cache(
     return rows
       .filter(isPublic)
       .map(mapListing)
-      .filter((l) => (allow ? allow.has(l.id) : true));
+      .filter((l) => (allow ? allow.has(l.id) : true))
+      .map(toSummary);
   },
-  ["hostaway-listings-v2"],
+  ["hostaway-listings-v3"],
   { revalidate: 3600, tags: ["hostaway-listings"] },
 );
 
+/** Summaries (no description, house rules or amenities; at most 6 photos). */
 export async function getListings(): Promise<Listing[]> {
   if (mockMode()) return mock.listings;
   return fetchListings();
 }
 
-export async function getListing(id: number): Promise<Listing | null> {
+export async function getListingSummary(id: number): Promise<Listing | null> {
   return (await getListings()).find((l) => l.id === id) ?? null;
+}
+
+/** Full listing for its own page. Only ids we already list are fetched, so a made-up id never reaches Hostaway. */
+export async function getListing(id: number): Promise<Listing | null> {
+  if (mockMode()) return mock.listings.find((l) => l.id === id) ?? null;
+  if (!(await getListingSummary(id))) return null;
+  return unstable_cache(
+    async (): Promise<Listing | null> => {
+      const raw = await call<Raw>(`/listings/${id}`);
+      return isPublic(raw) ? mapListing(raw) : null;
+    },
+    ["hostaway-listing-v1", String(id)],
+    { revalidate: 3600, tags: ["hostaway-listings", `hostaway-listing-${id}`] },
+  )();
 }
 
 /** Always fresh: availability is the one thing we can never serve stale. */

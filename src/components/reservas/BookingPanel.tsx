@@ -97,6 +97,8 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
       <div className="rs-book-head">
         {quote.status === "ok" ? (
           <><strong>{t.money(quote.quote.total, currency)}</strong> <span>{t.forNights(t.n(quote.quote.nights, t.night))}</span></>
+        ) : quote.status === "loading" ? (
+          <strong>{t.calculating}</strong>
         ) : (
           <><strong>{t.money(nightly, currency)}</strong> <span>{t.perNight}</span></>
         )}
@@ -172,6 +174,8 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
         <div>
           {quote.status === "ok" ? (
             <><strong>{t.money(quote.quote.total, currency)}</strong><span>{t.date(checkin!)} – {t.date(checkout!)}</span></>
+          ) : quote.status === "loading" ? (
+            <><strong>{t.calculating}</strong><span>{t.date(checkin!)} – {t.date(checkout!)}</span></>
           ) : (
             <><strong>{t.money(nightly, currency)} <small>{t.perNight}</small></strong><span>{t.chooseDates}</span></>
           )}

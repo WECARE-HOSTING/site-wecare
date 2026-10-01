@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { BedDouble, Bath, Clock, DoorOpen, ShieldCheck, Sparkles, Star, Users } from "lucide-react";
 import Gallery from "@/components/reservas/Gallery";
@@ -17,10 +18,10 @@ const SITE_URL = "https://www.wecarehosting.com.br";
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ checkin?: string; checkout?: string; hospedes?: string }>;
 
+// Memoized per request: generateMetadata and the page both ask for the same listing.
+const loadById = cache(async (id: string) => (/^\d+$/.test(id) ? getListing(Number(id)) : null));
 async function load(params: Params) {
-  const { id } = await params;
-  if (!/^\d+$/.test(id)) return null;
-  return getListing(Number(id));
+  return loadById((await params).id);
 }
 
 /** English visitors get Hostaway's English copy; Portuguese and Spanish get the Portuguese listing text. */
