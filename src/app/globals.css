@@ -545,3 +545,10 @@ details[open] .faq-chevron {
 .wc-prose details p {
   margin: 14px 0 0;
 }
+
+/* Floating WhatsApp button (every page) */
+.wc-wa-float { position: fixed; right: 20px; bottom: 20px; z-index: 60; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #25d366; color: #fff; box-shadow: 0 6px 20px rgba(8, 23, 32, 0.28); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.wc-wa-float:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 10px 26px rgba(8, 23, 32, 0.34); }
+.wc-wa-float:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 5px #128c7e; }
+/* On a listing page the booking bar sits at the bottom on phones: stay clear of it. */
+@media (max-width: 880px) { body:has(.rs-book-bar) .wc-wa-float { bottom: 96px; } }

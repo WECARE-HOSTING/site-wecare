@@ -47,7 +47,8 @@ const ROWS: { names: string[]; pt: string; en: string; es: string }[] = [
   { names: ["Garage"], pt: "Garagem", en: "Garage", es: "Garaje" },
   { names: ["Electric vehicle charger"], pt: "Carregador para carro elétrico", en: "EV charger", es: "Cargador de coche eléctrico" },
   { names: ["City view"], pt: "Vista da cidade", en: "City view", es: "Vista a la ciudad" },
-  { names: ["Beach view"], pt: "Vista para o mar", en: "Sea view", es: "Vista al mar" },
+  { names: ["Beach view", "Ocean view", "Water view"], pt: "Vista para o mar", en: "Sea view", es: "Vista al mar" },
+  { names: ["Pets allowed", "Pets allowed on request"], pt: "Aceita pets", en: "Pets allowed", es: "Admite mascotas" },
   { names: ["Beach front"], pt: "Pé na areia", en: "Beachfront", es: "Frente a la playa" },
   { names: ["Beach"], pt: "Perto da praia", en: "Near the beach", es: "Cerca de la playa" },
   { names: ["Beach essentials"], pt: "Itens de praia", en: "Beach essentials", es: "Artículos de playa" },
@@ -59,6 +60,24 @@ const ROWS: { names: string[]; pt: string; en: string; es: string }[] = [
   { names: ["Long term stays allowed"], pt: "Estadias longas", en: "Long stays allowed", es: "Estancias largas" },
   { names: ["Smoke detector"], pt: "Detector de fumaça", en: "Smoke detector", es: "Detector de humo" },
   { names: ["Fire Extinguisher"], pt: "Extintor de incêndio", en: "Fire extinguisher", es: "Extintor" },
+];
+
+/**
+ * Amenities guests can filter by on the search page. `slug` is what goes in the URL
+ * (?comodidades=piscina,churrasqueira); `id` is the amenity id stored on each listing.
+ */
+export const FILTER_AMENITIES: { slug: string; id: string }[] = [
+  { slug: "piscina", id: "Pool" },
+  { slug: "churrasqueira", id: "Barbecue grill" },
+  { slug: "vista-mar", id: "Sea view" },
+  { slug: "pe-na-areia", id: "Beachfront" },
+  { slug: "ar-condicionado", id: "Air conditioning" },
+  { slug: "jacuzzi", id: "Jacuzzi" },
+  { slug: "varanda", id: "Balcony" },
+  { slug: "estacionamento", id: "Free parking" },
+  { slug: "academia", id: "Gym" },
+  { slug: "elevador", id: "Elevator" },
+  { slug: "pets", id: "Pets allowed" },
 ];
 
 const BY_HOSTAWAY_NAME = new Map(ROWS.flatMap((r) => r.names.map((n) => [n, r.en] as const)));

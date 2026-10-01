@@ -12,7 +12,8 @@ type Panel = "destino" | "datas" | "hospedes" | null;
 
 type Props = {
   destinations: Destination[];
-  initial: { destino: string; checkin: string | null; checkout: string | null; hospedes: number };
+  /** `hospedes` is null until the guest (or the URL) has actually chosen a number, so "1 guest" is a real choice. */
+  initial: { destino: string; checkin: string | null; checkout: string | null; hospedes: number | null };
 };
 
 export default function SearchBar({ destinations, initial }: Props) {
@@ -21,7 +22,7 @@ export default function SearchBar({ destinations, initial }: Props) {
   const [destino, setDestino] = useState(initial.destino);
   const [checkin, setCheckin] = useState(initial.checkin);
   const [checkout, setCheckout] = useState(initial.checkout);
-  const [hospedes, setHospedes] = useState(initial.hospedes);
+  const [hospedes, setHospedes] = useState<number | null>(initial.hospedes);
   const [panel, setPanel] = useState<Panel>(null);
   const [searching, startSearch] = useTransition();
   const ref = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export default function SearchBar({ destinations, initial }: Props) {
       q.set("checkin", checkin);
       q.set("checkout", checkout);
     }
-    if (hospedes > 1) q.set("hospedes", String(hospedes));
+    if (hospedes !== null) q.set("hospedes", String(hospedes));
     setPanel(null);
     startSearch(() => router.push(`/reservas${q.size ? `?${q}` : ""}`));
   };
@@ -70,7 +71,7 @@ export default function SearchBar({ destinations, initial }: Props) {
         </button>
         <div className={`rs-search-seg rs-search-last${panel === "hospedes" ? " is-on" : ""}`} onClick={() => setPanel("hospedes")} role="button" tabIndex={0}>
           <span className="rs-search-k">{t.who}</span>
-          <span className={`rs-search-v${hospedes > 1 ? "" : " is-empty"}`}>{hospedes > 1 ? t.n(hospedes, t.guest) : t.guestsQ}</span>
+          <span className={`rs-search-v${hospedes !== null ? "" : " is-empty"}`}>{hospedes !== null ? t.n(hospedes, t.guest) : t.guestsQ}</span>
         </div>
         <button type="button" className="rs-search-go" onClick={submit} aria-label={t.search} disabled={searching} aria-busy={searching}>
           <Search size={18} strokeWidth={2.4} />
@@ -119,7 +120,11 @@ export default function SearchBar({ destinations, initial }: Props) {
       )}
       {panel === "hospedes" && (
         <div className="rs-pop rs-pop-guests">
-          <GuestStepper value={hospedes} onChange={setHospedes} />
+          <GuestStepper value={hospedes ?? 1} onChange={setHospedes} />
+          <div className="rs-pop-foot">
+            <span />
+            <button type="button" className="rs-btn-dark" onClick={() => { setHospedes((h) => h ?? 1); setPanel(null); }}>{t.done}</button>
+          </div>
         </div>
       )}
     </div>

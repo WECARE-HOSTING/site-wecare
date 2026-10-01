@@ -225,7 +225,8 @@ async function fetchAllRawListings(): Promise<Raw[]> {
  * on every single page view. The slim list is ~150 KB; full detail is cached per listing.
  */
 function toSummary(l: Listing): Listing {
-  return { ...l, description: "", sections: [], descriptionEn: "", houseRules: "", amenities: [], images: l.images.slice(0, 6) };
+  // Amenity ids are tiny, and the search filter needs them.
+  return { ...l, description: "", sections: [], descriptionEn: "", houseRules: "", images: l.images.slice(0, 6) };
 }
 
 const fetchListings = unstable_cache(
@@ -238,11 +239,11 @@ const fetchListings = unstable_cache(
       .filter((l) => (allow ? allow.has(l.id) : true))
       .map(toSummary);
   },
-  ["hostaway-listings-v3"],
+  ["hostaway-listings-v4"],
   { revalidate: 3600, tags: ["hostaway-listings"] },
 );
 
-/** Summaries (no description, house rules or amenities; at most 6 photos). */
+/** Summaries (no description or house rules; at most 6 photos; amenity ids kept for filtering). */
 export async function getListings(): Promise<Listing[]> {
   if (mockMode()) return mock.listings;
   return fetchListings();
