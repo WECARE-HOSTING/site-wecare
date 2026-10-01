@@ -20,10 +20,14 @@ type PaymentRef = { orderNsu: string | null; transactionNsu?: string | null; slu
 export async function orderStatus(ref: PaymentRef): Promise<SettleResult> {
   const order = parseOrderNsu(ref.orderNsu);
   if (!order || !ref.orderNsu) return { state: "needs_attention", reason: "unknown_order" };
+  // Ask InfinitePay first: an unpaid or made-up order then never costs a Hostaway call (the
+  // account's rate limit is shared with the rest of WeCare). If InfinitePay is down, fall back to
+  // Hostaway so a guest whose booking is already confirmed still sees it.
+  const paid = await checkPayment({ orderNsu: ref.orderNsu, transactionNsu: ref.transactionNsu, slug: ref.slug }).then((p) => p.paid, () => null);
+  if (paid === false) return { state: "pending" };
   const confirmed = await findConfirmed(order.listingId, order.checkin, ref.orderNsu);
   if (confirmed) return { state: "confirmed", reservationId: confirmed.id };
-  const payment = await checkPayment({ orderNsu: ref.orderNsu, transactionNsu: ref.transactionNsu, slug: ref.slug });
-  return payment.paid ? { state: "processing" } : { state: "pending" };
+  return paid ? { state: "processing" } : { state: "pending" };
 }
 
 /**
@@ -35,11 +39,12 @@ export async function settlePayment(ref: PaymentRef): Promise<SettleResult> {
   const order = parseOrderNsu(ref.orderNsu);
   if (!order || !ref.orderNsu) return { state: "needs_attention", reason: "unknown_order" };
 
-  const already = await findConfirmed(order.listingId, order.checkin, ref.orderNsu);
-  if (already) return { state: "confirmed", reservationId: already.id };
-
+  // Payment first, so unpaid orders (and expired holds that were never paid) don't touch Hostaway.
   const payment = await checkPayment({ orderNsu: ref.orderNsu, transactionNsu: ref.transactionNsu, slug: ref.slug });
   if (!payment.paid) return { state: "pending" };
+
+  const already = await findConfirmed(order.listingId, order.checkin, ref.orderNsu);
+  if (already) return { state: "confirmed", reservationId: already.id };
 
   const hold = await getReservation(order.holdId);
   if (!hold || hold.status !== HOLD_STATUS) {
@@ -59,6 +64,8 @@ export async function settlePayment(ref: PaymentRef): Promise<SettleResult> {
   return { state: "confirmed", reservationId: confirmed.id };
 }
 
+const HOLD_RETRY_GRACE_MS = 2 * 60 * 60_000;
+
 /** Releases holds past their deadline — after one last check that they were not paid. */
 export async function expireHolds(now = Date.now()): Promise<{ checked: number; released: number[]; confirmed: number[] }> {
   const holds = await listOpenHolds();
@@ -74,7 +81,13 @@ export async function expireHolds(now = Date.now()): Promise<{ checked: number; 
           continue;
         }
       } catch (err) {
-        console.error(`[reservas] payment check failed for hold ${hold.id}; releasing anyway`, err);
+        // Can't tell whether it was paid: keep the dates held and retry on the next run, rather
+        // than free dates a guest may have paid for. After a grace period release it anyway.
+        if (now - Date.parse(hold.holdExpiresAt) < HOLD_RETRY_GRACE_MS) {
+          console.error(`[reservas] payment check failed for hold ${hold.id}; keeping it, will retry`, err);
+          continue;
+        }
+        console.error(`[reservas] payment check still failing for hold ${hold.id} after the grace period; releasing`, err);
       }
     }
     await releaseHold(hold.id);
