@@ -1,27 +1,27 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import { unstable_cache } from "next/cache";
 import { after } from "next/server";
 import { generateText } from "ai";
 import type { Lang } from "./i18n";
+import type { Listing } from "./types";
+import { durable } from "./durable";
 
 /**
  * Machine translation of listing copy (Hostaway only holds it in Portuguese, plus English for the
  * description). Claude Haiku through the Vercel AI Gateway — no API key, the project's OIDC token
  * is enough — at roughly US$ 2 for the whole catalogue.
  *
+ * One stored file per listing and language (see durable.ts), keyed by a hash of the source text:
+ * reused across deploys, and redone only when someone edits the text in Hostaway.
  * Translating a 4 000-character section takes several seconds, so a guest never waits for it:
- * pages ask with a short deadline and show the original text meanwhile, while the translation
- * finishes in the background (`after`) and lands in the cache for the next visit. Every
- * translation is cached for 30 days under a hash of the source text, so it is redone only when
- * someone edits the text in Hostaway. The maintenance job (/api/reservas/traducoes) warms them.
+ * pages ask with a short deadline and show the Portuguese original meanwhile, while the work
+ * finishes in the background (`after`). The maintenance job (/api/reservas/traducoes) fills them.
  */
 
 export const TRANSLATION_MODEL = "anthropic/claude-haiku-4.5";
-const TTL_SECONDS = 60 * 60 * 24 * 30;
 
 export type Target = Exclude<Lang, "pt">;
-export type Kind = "description" | "rules" | "captions";
+type Kind = "description" | "rules" | "captions";
 
 const TARGET_NAME: Record<Target, string> = { en: "American English", es: "neutral Spanish (understandable across Spain and Latin America)" };
 
@@ -76,48 +76,6 @@ async function callModel(kind: Kind, target: Target, text: string): Promise<stri
   return result;
 }
 
-const hash = (...parts: string[]) => createHash("sha256").update(parts.join("\u0000")).digest("hex").slice(0, 24);
-const inFlight = new Map<string, Promise<string>>();
-
-/** Get-or-compute with the data cache; concurrent callers in one instance share a single model call. */
-function translation(kind: Kind, target: Target, text: string): Promise<string> {
-  const id = hash(kind, target, text);
-  let p = inFlight.get(id);
-  if (!p) {
-    p = unstable_cache(() => callModel(kind, target, text), ["reservas-translation", TRANSLATION_MODEL, id], { revalidate: TTL_SECONDS, tags: ["reservas-translation"] })().finally(() =>
-      inFlight.delete(id),
-    );
-    inFlight.set(id, p);
-  }
-  return p;
-}
-
-const sleep = (ms: number) => new Promise<null>((r) => setTimeout(() => r(null), ms));
-
-/**
- * The translation if it is ready within `waitMs`, otherwise null — and the work carries on after
- * the response so the next visitor gets it. `waitMs: Infinity` (maintenance job) waits for it.
- */
-async function ready<T>(work: Promise<T>, waitMs: number, label: string): Promise<T | null> {
-  const quiet = work.catch((err) => {
-    console.error(`[reservas] translation failed (${label})`, err);
-    return null;
-  });
-  if (waitMs === Infinity) return quiet;
-  const first = await Promise.race([quiet, sleep(waitMs)]);
-  if (first === null) {
-    try {
-      after(() => quiet);
-    } catch {
-      // not inside a request (e.g. a script): the promise just keeps running
-    }
-  }
-  return first;
-}
-
-export const translateText = (kind: Exclude<Kind, "captions">, target: Target, text: string, waitMs = 1200) =>
-  text.trim() ? ready(translation(kind, target, text), waitMs, `${kind}/${target}`) : Promise.resolve(text);
-
 /** Captions go in one call as numbered lines ("1. text") and must come back with every number. */
 async function translateCaptionBatch(target: Target, captions: string[]): Promise<string[]> {
   const flat = captions.map((c) => c.replace(/\s*\n+\s*/g, " "));
@@ -132,14 +90,45 @@ async function translateCaptionBatch(target: Target, captions: string[]): Promis
   return out as string[];
 }
 
-export async function translateCaptions(target: Target, captions: string[], waitMs = 1200): Promise<string[] | null> {
-  if (!captions.some(Boolean)) return captions;
-  // Only distinct, non-empty captions are sent (Hostaway repeats them across channels and photos).
+/** Everything translated for one listing in one language. `null` parts did not exist in the source. */
+export type ListingTranslation = { sections: string[] | null; rules: string | null; captions: string[] | null };
+
+async function translateListing(listing: Listing, target: Target): Promise<ListingTranslation> {
+  const captions = listing.images.map((i) => i.caption);
   const distinct = [...new Set(captions.filter(Boolean))];
-  const id = hash("captions", target, JSON.stringify(distinct));
-  const work = unstable_cache(() => translateCaptionBatch(target, distinct), ["reservas-captions", TRANSLATION_MODEL, id], { revalidate: TTL_SECONDS, tags: ["reservas-translation"] })();
-  const done = await ready(work, waitMs, `captions/${target}`);
-  if (!done) return null;
-  const byText = new Map(distinct.map((c, i) => [c, done[i]]));
-  return captions.map((c) => (c ? (byText.get(c) ?? c) : c));
+  const [sections, rules, translatedDistinct] = await Promise.all([
+    // English descriptions come straight from Hostaway; only Spanish needs the sections translated.
+    target === "es" ? Promise.all(listing.sections.map((s) => callModel("description", "es", s.text))) : Promise.resolve(null),
+    listing.houseRules.trim() ? callModel("rules", target, listing.houseRules) : Promise.resolve(null),
+    distinct.length ? translateCaptionBatch(target, distinct) : Promise.resolve(null),
+  ]);
+  const byText = new Map(distinct.map((c, i) => [c, translatedDistinct?.[i] ?? c]));
+  return { sections, rules, captions: distinct.length ? captions.map((c) => (c ? (byText.get(c) ?? c) : c)) : null };
+}
+
+function listingKey(listing: Listing, target: Target): string {
+  const source = JSON.stringify({ sections: target === "es" ? listing.sections.map((s) => s.text) : null, rules: listing.houseRules, captions: listing.images.map((i) => i.caption) });
+  return `${target}-${listing.id}-${createHash("sha256").update(`${TRANSLATION_MODEL}\u0000${source}`).digest("hex").slice(0, 20)}`;
+}
+
+/**
+ * The listing's translation if it is ready within `waitMs`; otherwise null, and the work carries on
+ * after the response so the next visitor gets it. `waitMs: Infinity` (maintenance job) waits for it.
+ */
+export async function listingTranslation(listing: Listing, target: Target, waitMs = 1200): Promise<ListingTranslation | null> {
+  const work = durable("translation", listingKey(listing, target), () => translateListing(listing, target));
+  const quiet = work.catch((err) => {
+    console.error(`[reservas] translation failed (${listing.id}/${target})`, err);
+    return null;
+  });
+  if (waitMs === Infinity) return quiet;
+  const first = await Promise.race([quiet, new Promise<null>((r) => setTimeout(() => r(null), waitMs))]);
+  if (first === null) {
+    try {
+      after(() => quiet);
+    } catch {
+      // not inside a request (e.g. a script): the promise just keeps running
+    }
+  }
+  return first;
 }

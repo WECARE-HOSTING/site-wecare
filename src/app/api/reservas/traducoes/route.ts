@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getListing, getListings } from "@/lib/reservas/hostaway";
-import { translateCaptions, translateText } from "@/lib/reservas/translate";
+import { listingTranslation } from "@/lib/reservas/translate";
 
 // Translating the whole catalogue the first time takes a few minutes; later runs only redo what changed.
 export const maxDuration = 300;
@@ -10,8 +10,7 @@ const START_BUDGET_MS = 210_000;
 
 /**
  * Called every 15 min by .github/workflows/reservas-manutencao.yml. Walks the listings and makes
- * sure each one's Spanish description, house rules (EN/ES) and photo captions (EN/ES) are in the
- * cache, so guests never wait for the model. Already-cached texts return instantly.
+ * sure each one's Spanish description, house rules (EN/ES) and photo captions (EN/ES) are stored, so guests never wait for the model. Already-cached texts return instantly.
  */
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -37,14 +36,9 @@ export async function GET(request: NextRequest) {
     const listing = await getListing(summary.id).catch(() => null);
     if (!listing) continue;
     visited++;
-    for (const section of listing.sections) track(translateText("description", "es", section.text, Infinity));
-    if (listing.houseRules) {
-      track(translateText("rules", "en", listing.houseRules, Infinity));
-      track(translateText("rules", "es", listing.houseRules, Infinity));
-    }
-    const captions = listing.images.map((i) => i.caption);
-    track(translateCaptions("en", captions, Infinity));
-    track(translateCaptions("es", captions, Infinity));
+    // One stored file per listing and language; already-stored ones return immediately.
+    track(listingTranslation(listing, "es", Infinity));
+    track(listingTranslation(listing, "en", Infinity));
     await sleep(700);
   }
   // Finished translations are already cached; whatever is still running at the deadline is picked up by the next run.

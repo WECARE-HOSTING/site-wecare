@@ -13,7 +13,7 @@ import { amenityLabel } from "@/lib/reservas/amenities";
 import { getT } from "@/lib/reservas/lang";
 import { publicStars } from "@/lib/reservas/rating";
 import { SHOW_RATINGS, SHOW_REVIEWS } from "@/lib/reservas/features";
-import { translateCaptions, translateText } from "@/lib/reservas/translate";
+import { listingTranslation } from "@/lib/reservas/translate";
 import { MIN_POIS, nearbyPlacesWithin } from "@/lib/reservas/nearby";
 
 export const maxDuration = 300;
@@ -61,13 +61,10 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   // Machine translations come from the cache (see translate.ts). Anything not ready yet falls back
   // to the Portuguese original, with a note, and is there on the next visit.
   const target = t.lang === "pt" ? null : t.lang;
-  const [esSections, rulesTranslated, captions] = target
-    ? await Promise.all([
-        target === "es" ? Promise.all(listing.sections.map((s) => translateText("description", "es", s.text))) : null,
-        listing.houseRules ? translateText("rules", target, listing.houseRules) : null,
-        translateCaptions(target, listing.images.map((i) => i.caption)),
-      ])
-    : [null, null, null];
+  const translation = target ? await listingTranslation(listing, target) : null;
+  const esSections = translation?.sections ?? null;
+  const rulesTranslated = translation?.rules ?? null;
+  const captions = translation?.captions ?? null;
   const images = captions ? listing.images.map((img, i) => ({ ...img, caption: captions[i] ?? img.caption })) : listing.images;
   const houseRules = rulesTranslated ?? listing.houseRules;
   const rulesInOriginal = target !== null && Boolean(listing.houseRules) && rulesTranslated === null;
@@ -82,7 +79,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const moreBlocks = blocks.slice(2);
   // A single English block has no sections to fold, so fold by paragraphs instead.
   const foldByParagraph = blocks.length === 1;
-  const translated = t.lang === "pt" || (t.lang === "en" && Boolean(listing.descriptionEn)) || (t.lang === "es" && esSections !== null && esSections.every((s) => s !== null));
+  const translated = t.lang === "pt" || (t.lang === "en" && Boolean(listing.descriptionEn)) || (t.lang === "es" && esSections !== null);
 
   return (
     <article className="rs-wrap rs-detail">
