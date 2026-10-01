@@ -5,11 +5,12 @@ import { generateText } from "ai";
 import type { Lang } from "./i18n";
 import type { Listing } from "./types";
 import { durable } from "./durable";
+import { CACHE_MODEL_TAG, aiModel } from "./model";
 
 /**
  * Machine translation of listing copy (Hostaway only holds it in Portuguese, plus English for the
- * description). Claude Haiku through the Vercel AI Gateway — no API key, the project's OIDC token
- * is enough — at roughly US$ 2 for the whole catalogue.
+ * description). Claude Haiku 4.5 through Anthropic's API (see model.ts), a few US$ for the whole
+ * catalogue the first time and cents afterwards.
  *
  * One stored file per listing and language (see durable.ts), keyed by a hash of the source text:
  * reused across deploys, and redone only when someone edits the text in Hostaway.
@@ -17,8 +18,6 @@ import { durable } from "./durable";
  * pages ask with a short deadline and show the Portuguese original meanwhile, while the work
  * finishes in the background (`after`). The maintenance job (/api/reservas/traducoes) fills them.
  */
-
-export const TRANSLATION_MODEL = "anthropic/claude-haiku-4.5";
 
 export type Target = Exclude<Lang, "pt">;
 type Kind = "description" | "rules" | "captions";
@@ -56,16 +55,16 @@ async function slot<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-// When the Gateway refuses us (no card on file, out of credit, rate limited) every attempt would
+// When the API refuses us (bad key, out of credit, rate limited) every attempt would
 // fail the same way and slow each page down, so we stop trying for a few minutes.
 const PAUSE_MS = 5 * 60_000;
 const REFUSALS = new Set([401, 402, 403, 429]);
 let pausedUntil = 0;
 
 async function callModel(kind: Kind, target: Target, text: string): Promise<string> {
-  if (Date.now() < pausedUntil) throw new Error("translation paused after the AI Gateway refused a request");
+  if (Date.now() < pausedUntil) throw new Error("translation paused after the AI provider refused a request");
   const { text: out } = await slot(() =>
-    generateText({ model: TRANSLATION_MODEL, instructions: instructions(kind, target), prompt: text, temperature: 0, abortSignal: AbortSignal.timeout(150_000) }),
+    generateText({ model: aiModel(), instructions: instructions(kind, target), prompt: text, temperature: 0, abortSignal: AbortSignal.timeout(150_000) }),
   ).catch((err) => {
     if (REFUSALS.has((err as { statusCode?: number }).statusCode ?? 0)) pausedUntil = Date.now() + PAUSE_MS;
     throw err;
@@ -108,7 +107,7 @@ async function translateListing(listing: Listing, target: Target): Promise<Listi
 
 function listingKey(listing: Listing, target: Target): string {
   const source = JSON.stringify({ sections: target === "es" ? listing.sections.map((s) => s.text) : null, rules: listing.houseRules, captions: listing.images.map((i) => i.caption) });
-  return `${target}-${listing.id}-${createHash("sha256").update(`${TRANSLATION_MODEL}\u0000${source}`).digest("hex").slice(0, 20)}`;
+  return `${target}-${listing.id}-${createHash("sha256").update(`${CACHE_MODEL_TAG}\u0000${source}`).digest("hex").slice(0, 20)}`;
 }
 
 /**
