@@ -28,7 +28,7 @@ const TARGET_NAME: Record<Target, string> = { en: "American English", es: "neutr
 const KIND_RULES: Record<Kind, string> = {
   description: "It is the description of a vacation rental: keep the warm, polished hospitality tone.",
   rules: "These are house rules and policies: translate faithfully and precisely; never soften, add or drop a rule, amount, time or deadline.",
-  captions: "These are short photo captions.",
+  captions: "These are short photo captions, one per line, each starting with its number and a period (\"1. \"). Return every line with the same number, in the same order, one per line, and nothing else.",
 };
 
 function instructions(kind: Kind, target: Target): string {
@@ -42,7 +42,7 @@ function instructions(kind: Kind, target: Target): string {
 }
 
 // At most this many model calls at once, however many pages and jobs ask.
-const MAX_CONCURRENT = 8;
+const MAX_CONCURRENT = 12;
 let running = 0;
 const waiting: (() => void)[] = [];
 async function slot<T>(fn: () => Promise<T>): Promise<T> {
@@ -118,12 +118,18 @@ async function ready<T>(work: Promise<T>, waitMs: number, label: string): Promis
 export const translateText = (kind: Exclude<Kind, "captions">, target: Target, text: string, waitMs = 1200) =>
   text.trim() ? ready(translation(kind, target, text), waitMs, `${kind}/${target}`) : Promise.resolve(text);
 
-/** Captions go in one call, as a JSON array, and must come back as an array of the same length. */
+/** Captions go in one call as numbered lines ("1. text") and must come back with every number. */
 async function translateCaptionBatch(target: Target, captions: string[]): Promise<string[]> {
-  const raw = await callModel("captions", target, JSON.stringify(captions));
-  const parsed: unknown = JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, ""));
-  if (!Array.isArray(parsed) || parsed.length !== captions.length || parsed.some((c) => typeof c !== "string")) throw new Error("caption batch came back malformed");
-  return parsed as string[];
+  const flat = captions.map((c) => c.replace(/\s*\n+\s*/g, " "));
+  const raw = await callModel("captions", target, flat.map((c, i) => `${i + 1}. ${c}`).join("\n"));
+  const byNumber = new Map<number, string>();
+  for (const line of raw.split("\n")) {
+    const m = /^\s*(\d+)\.\s*(.+?)\s*$/.exec(line);
+    if (m) byNumber.set(Number(m[1]), m[2]);
+  }
+  const out = flat.map((_, i) => byNumber.get(i + 1));
+  if (out.some((c) => !c)) throw new Error(`caption batch came back incomplete (${byNumber.size}/${captions.length})`);
+  return out as string[];
 }
 
 export async function translateCaptions(target: Target, captions: string[], waitMs = 1200): Promise<string[] | null> {
