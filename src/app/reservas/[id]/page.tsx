@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BedDouble, Bath, Clock, DoorOpen, ShieldCheck, Sparkles, Star, Users } from "lucide-react";
 import Gallery from "@/components/reservas/Gallery";
 import ReviewCard from "@/components/reservas/ReviewCard";
+import NearbySection from "@/components/reservas/NearbySection";
 import BookingPanel from "@/components/reservas/BookingPanel";
 import { getListing, getReviewsWithin } from "@/lib/reservas/hostaway";
 import type { Listing } from "@/lib/reservas/types";
@@ -12,6 +13,7 @@ import { amenityLabel } from "@/lib/reservas/amenities";
 import { getT } from "@/lib/reservas/lang";
 import { publicStars } from "@/lib/reservas/rating";
 import { translateCaptions, translateText } from "@/lib/reservas/translate";
+import { MIN_POIS, nearbyPlacesWithin } from "@/lib/reservas/nearby";
 
 export const maxDuration = 300;
 
@@ -49,7 +51,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   if (!listing) notFound();
   const text = textFor(listing, t.lang);
   const stars = publicStars(listing.rating);
-  const reviews = await getReviewsWithin(listing.id, 2500);
+  const [reviews, pois] = await Promise.all([getReviewsWithin(listing.id, 2500), nearbyPlacesWithin(listing, 1500)]);
   const sp = await searchParams;
   const checkin = isIsoDate(sp.checkin) ? sp.checkin : null;
   const checkout = isIsoDate(sp.checkout) && checkin && sp.checkout! > checkin ? sp.checkout! : null;
@@ -199,6 +201,8 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
               )}
             </section>
           )}
+
+          {pois && pois.length >= MIN_POIS && listing.lat !== null && listing.lng !== null && <NearbySection lat={listing.lat} lng={listing.lng} pois={pois} />}
 
           <section className="rs-section">
             <h2 className="rs-h2">{t.stayInfo}</h2>
