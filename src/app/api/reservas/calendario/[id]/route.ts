@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { getT } from "@/lib/reservas/lang";
 import { getCalendar, getListing } from "@/lib/reservas/hostaway";
 import { addDays, isIsoDate, todayInBrazil } from "@/lib/reservas/dates";
 
@@ -7,7 +8,7 @@ import { addDays, isIsoDate, todayInBrazil } from "@/lib/reservas/dates";
 export async function GET(request: NextRequest, ctx: RouteContext<"/api/reservas/calendario/[id]">) {
   const { id } = await ctx.params;
   const listing = await getListing(Number(id));
-  if (!listing) return Response.json({ error: "Imóvel não encontrado." }, { status: 404 });
+  if (!listing) return Response.json({ error: (await getT()).errListingNotFound }, { status: 404 });
 
   const today = todayInBrazil();
   const from = request.nextUrl.searchParams.get("from");

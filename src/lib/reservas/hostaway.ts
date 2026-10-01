@@ -3,7 +3,8 @@ import { unstable_cache } from "next/cache";
 import type { CalendarDay, GuestDetails, HeldReservation, Listing, Quote, QuoteLine, StayRequest } from "./types";
 import { addDays, nightsBetween, todayInBrazil } from "./dates";
 import * as mock from "./mock";
-import { translateAmenity } from "./amenities";
+import { amenityId } from "./amenities";
+import type { T } from "./i18n";
 import { isAllowedImage } from "./image-hosts";
 
 const API = "https://api.hostaway.com/v1";
@@ -102,7 +103,7 @@ const numOrNull = (v: unknown) => (v === null || v === undefined || v === "" || 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
 // Titles carry a channel suffix ("… | Wecare Hosting", "…|WeCare") that is noise on our own site.
-const BRAND_SUFFIX = /\s*\|\s*we\s*care(\s*hosting)?\s*$/i;
+const BRAND_SUFFIX = /\s*[|\-–—]\s*we\s*care(\s*hosting)?\s*$/i;
 const cleanTitle = (t: string) => t.replace(BRAND_SUFFIX, "").trim();
 
 // Hostaway listing tags that mean "do not sell this directly".
@@ -128,10 +129,11 @@ function mapListing(raw: Raw): Listing {
     .map((img) => ({ url: str(img.url), caption: str(img.bookingEngineCaption) || str(img.airbnbCaption) }))
     .filter((img) => isAllowedImage(img.url));
   const amenities = (Array.isArray(raw.listingAmenities) ? (raw.listingAmenities as Raw[]) : [])
-    .map((a) => translateAmenity(str(a.amenityName)))
+    .map((a) => amenityId(str(a.amenityName)))
     .filter((a): a is string => Boolean(a));
 
   // Portuguese copy lives in the channel-specific fields; `name`/`description` are English.
+  const summaryEn = str(raw.description);
   const summary = str(raw.homeawayPropertyDescription) || [str(raw.airbnbSummary), str(raw.airbnbSpace)].filter(Boolean).join("\n\n") || str(raw.description);
 
   return {
@@ -141,6 +143,8 @@ function mapListing(raw: Raw): Listing {
     state: str(raw.state),
     neighborhood: "",
     description: summary,
+    nameEn: cleanTitle(str(raw.name)),
+    descriptionEn: summaryEn,
     houseRules: str(raw.houseRules),
     personCapacity: num(raw.personCapacity, 1),
     bedrooms: num(raw.bedroomsNumber),
@@ -206,7 +210,7 @@ const fetchListings = unstable_cache(
       .map(mapListing)
       .filter((l) => (allow ? allow.has(l.id) : true));
   },
-  ["hostaway-listings"],
+  ["hostaway-listings-v2"],
   { revalidate: 3600, tags: ["hostaway-listings"] },
 );
 
@@ -285,21 +289,9 @@ export async function getAvailabilityIndex(): Promise<AvailabilityIndex> {
   return buildAvailabilityIndex(todayInBrazil());
 }
 
-const COMPONENT_LABELS: Record<string, string> = {
-  cleaningFee: "Taxa de limpeza",
-  additionalCleaningFee: "Taxa de limpeza",
-  guestChannelFee: "Taxa de serviço",
-  hostChannelFee: "Taxa de serviço",
-  petFee: "Taxa de pet",
-  securityDepositFee: "Caução",
-  extraPersonFee: "Hóspede adicional",
-  weeklyDiscount: "Desconto semanal",
-  monthlyDiscount: "Desconto mensal",
-};
-
-export async function getHostawayQuote(stay: StayRequest, currency: string): Promise<Quote> {
+export async function getHostawayQuote(stay: StayRequest, currency: string, t: T): Promise<Quote> {
   const nights = nightsBetween(stay.checkin, stay.checkout);
-  if (mockMode()) return mock.quote(stay, currency);
+  if (mockMode()) return mock.quote(stay, currency, t);
 
   const result = await call<{ totalPrice?: unknown; components?: Raw[] }>(`/listings/${stay.listingId}/calendar/priceDetails`, {
     method: "POST",
@@ -312,12 +304,12 @@ export async function getHostawayQuote(stay: StayRequest, currency: string): Pro
     const amount = num(c.total, num(c.value));
     if (!amount || type === "totals" || type === "commissions" || num(c.isIncludedInTotalPrice, 1) !== 1) continue;
     const name = str(c.name);
-    const label = type === "accommodation" ? `${nights} ${nights === 1 ? "noite" : "noites"}` : COMPONENT_LABELS[name] || str(c.title) || (type === "tax" ? "Impostos" : name);
+    const label = type === "accommodation" && name === "baseRate" ? t.n(nights, t.night) : t.fee[name] || str(c.title) || (type === "tax" ? t.taxes : name);
     lines.push({ label, amount });
   }
   const total = num(result.totalPrice);
   if (!total) throw new HostawayError("Hostaway returned no price for these dates");
-  if (!lines.length) lines.push({ label: `${nights} ${nights === 1 ? "noite" : "noites"}`, amount: total });
+  if (!lines.length) lines.push({ label: t.n(nights, t.night), amount: total });
 
   return { ...stay, nights, currency, lines, total };
 }

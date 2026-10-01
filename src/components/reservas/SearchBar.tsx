@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { MapPin, Search } from "lucide-react";
 import DateRangeCalendar from "./DateRangeCalendar";
 import GuestStepper from "./GuestStepper";
-import { formatDateBR, plural } from "@/lib/reservas/dates";
+import { useT } from "./I18n";
 
 export type Destination = { label: string; count: number };
 
@@ -16,6 +16,7 @@ type Props = {
 };
 
 export default function SearchBar({ destinations, initial }: Props) {
+  const t = useT();
   const router = useRouter();
   const [destino, setDestino] = useState(initial.destino);
   const [checkin, setCheckin] = useState(initial.checkin);
@@ -55,31 +56,31 @@ export default function SearchBar({ destinations, initial }: Props) {
     <div className="rs-search" ref={ref}>
       <div className={`rs-search-pill${panel ? " is-active" : ""}`}>
         <label className={`rs-search-seg rs-search-dest${panel === "destino" ? " is-on" : ""}`} onClick={() => setPanel("destino")}>
-          <span className="rs-search-k">Destino</span>
-          <input value={destino} onChange={(e) => setDestino(e.target.value)} onFocus={() => setPanel("destino")} placeholder="Buscar destinos" aria-label="Destino" onKeyDown={(e) => e.key === "Enter" && submit()} />
+          <span className="rs-search-k">{t.destination}</span>
+          <input value={destino} onChange={(e) => setDestino(e.target.value)} onFocus={() => setPanel("destino")} placeholder={t.searchDestinations} aria-label={t.destination} onKeyDown={(e) => e.key === "Enter" && submit()} />
         </label>
         <button type="button" className={`rs-search-seg${panel === "datas" ? " is-on" : ""}`} onClick={() => setPanel("datas")}>
-          <span className="rs-search-k">Check-in</span>
-          <span className={`rs-search-v${checkin ? "" : " is-empty"}`}>{checkin ? formatDateBR(checkin) : "Insira as datas"}</span>
+          <span className="rs-search-k">{t.checkIn}</span>
+          <span className={`rs-search-v${checkin ? "" : " is-empty"}`}>{checkin ? t.date(checkin) : t.insertDates}</span>
         </button>
         <button type="button" className={`rs-search-seg${panel === "datas" ? " is-on" : ""}`} onClick={() => setPanel("datas")}>
-          <span className="rs-search-k">Check-out</span>
-          <span className={`rs-search-v${checkout ? "" : " is-empty"}`}>{checkout ? formatDateBR(checkout) : "Insira as datas"}</span>
+          <span className="rs-search-k">{t.checkOut}</span>
+          <span className={`rs-search-v${checkout ? "" : " is-empty"}`}>{checkout ? t.date(checkout) : t.insertDates}</span>
         </button>
         <div className={`rs-search-seg rs-search-last${panel === "hospedes" ? " is-on" : ""}`} onClick={() => setPanel("hospedes")} role="button" tabIndex={0}>
-          <span className="rs-search-k">Quem</span>
-          <span className={`rs-search-v${hospedes > 1 ? "" : " is-empty"}`}>{hospedes > 1 ? plural(hospedes, "hóspede", "hóspedes") : "Hóspedes?"}</span>
+          <span className="rs-search-k">{t.who}</span>
+          <span className={`rs-search-v${hospedes > 1 ? "" : " is-empty"}`}>{hospedes > 1 ? t.n(hospedes, t.guest) : t.guestsQ}</span>
         </div>
-        <button type="button" className="rs-search-go" onClick={submit} aria-label="Buscar">
+        <button type="button" className="rs-search-go" onClick={submit} aria-label={t.search}>
           <Search size={18} strokeWidth={2.4} />
-          <span>Buscar</span>
+          <span>{t.search}</span>
         </button>
       </div>
 
       {panel === "destino" && (
         <div className="rs-pop rs-pop-dest">
-          <div className="rs-pop-title">Destinos WeCare</div>
-          {matches.length === 0 && <p className="rs-muted">Nenhum destino encontrado.</p>}
+          <div className="rs-pop-title">{t.wecareDestinations}</div>
+          {matches.length === 0 && <p className="rs-muted">{t.noDestination}</p>}
           {matches.map((d) => (
             <button
               key={d.label}
@@ -93,7 +94,7 @@ export default function SearchBar({ destinations, initial }: Props) {
               <span className="rs-dest-ico"><MapPin size={18} /></span>
               <span>
                 {d.label}
-                <small>{plural(d.count, "imóvel", "imóveis")}</small>
+                <small>{t.n(d.count, t.property)}</small>
               </span>
             </button>
           ))}
@@ -111,7 +112,7 @@ export default function SearchBar({ destinations, initial }: Props) {
             }}
           />
           <div className="rs-pop-foot">
-            <button type="button" className="rs-link" onClick={() => { setCheckin(null); setCheckout(null); }}>Limpar datas</button>
+            <button type="button" className="rs-link" onClick={() => { setCheckin(null); setCheckout(null); }}>{t.clearDates}</button>
           </div>
         </div>
       )}

@@ -4,7 +4,9 @@ import SearchBar, { type Destination } from "@/components/reservas/SearchBar";
 import ListingCard, { type ListingCardData } from "@/components/reservas/ListingCard";
 import { getAvailabilityIndex, getListings } from "@/lib/reservas/hostaway";
 import { matchesIndex } from "@/lib/reservas/booking";
-import { isIsoDate, nightsBetween, plural, todayInBrazil } from "@/lib/reservas/dates";
+import { isIsoDate, nightsBetween, todayInBrazil } from "@/lib/reservas/dates";
+import { getT } from "@/lib/reservas/lang";
+import { publicStars } from "@/lib/reservas/rating";
 import type { Listing } from "@/lib/reservas/types";
 
 // A cold cache (first request after the Hostaway data expires) can take a while.
@@ -23,6 +25,7 @@ const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").to
 
 export default async function ReservasPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
+  const t = await getT();
   const destino = (sp.destino ?? "").slice(0, 80);
   const guests = Math.max(1, Math.min(50, Number(sp.hospedes) || 1));
   const hasDates = isIsoDate(sp.checkin) && isIsoDate(sp.checkout) && sp.checkin < sp.checkout && sp.checkin >= todayInBrazil();
@@ -44,7 +47,7 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     let nightly = l.basePrice;
     let estimate = true;
     if (index && checkin && checkout) {
-      const m = matchesIndex(l, { listingId: l.id, checkin, checkout, guests }, index);
+      const m = matchesIndex(t, l, { listingId: l.id, checkin, checkout, guests }, index);
       if (!m.ok) continue;
       if (m.nightlyAverage) {
         nightly = m.nightlyAverage;
@@ -54,12 +57,13 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     const nights = checkin && checkout ? nightsBetween(checkin, checkout) : null;
     results.push({
       id: l.id,
-      name: l.name,
+      name: t.lang === "en" ? l.nameEn || l.name : l.name,
       place: placeOf(l),
       images: l.images.slice(0, 6).map((i) => i.url),
       personCapacity: l.personCapacity,
       bedrooms: l.bedrooms,
-      rating: l.rating,
+      stars: publicStars(l.rating),
+      unrated: l.rating === null,
       nightly,
       nightlyIsEstimate: estimate,
       // Nightly rates only; cleaning and fees are added on the listing page quote.
@@ -68,7 +72,7 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
       currency: l.currency,
     });
   }
-  results.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+  results.sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0));
 
   const query = new URLSearchParams();
   if (checkin && checkout) {
@@ -82,15 +86,15 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     <>
       <section className="rs-hero">
         <div className="rs-wrap">
-          <h1 className="rs-hero-title">Hospede-se com o <em>padrão WeCare</em>.</h1>
-          <p className="rs-hero-sub">Reserve direto com quem cuida do imóvel — disponibilidade em tempo real, sem taxa de plataforma.</p>
+          <h1 className="rs-hero-title">{t.heroA} <em>{t.heroEm}</em>.</h1>
+          <p className="rs-hero-sub">{t.heroSub}</p>
           <SearchBar destinations={destinations} initial={{ destino, checkin, checkout, hospedes: guests }} />
         </div>
       </section>
 
       <section className="rs-wrap rs-results">
-        <div className="rs-chips" aria-label="Destinos">
-          <Link href={`/reservas${qs}`} className={`rs-chip${q ? "" : " is-on"}`}>Todos</Link>
+        <div className="rs-chips" aria-label={t.destinations}>
+          <Link href={`/reservas${qs}`} className={`rs-chip${q ? "" : " is-on"}`}>{t.all}</Link>
           {destinations.slice(0, 10).map((d) => {
             const p = new URLSearchParams(query);
             p.set("destino", d.label);
@@ -101,9 +105,9 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
         </div>
 
         <p className="rs-results-count">
-          {results.length ? plural(results.length, "acomodação", "acomodações") : "Nenhuma acomodação"}
-          {destino ? ` em ${destino}` : ""}
-          {checkin && checkout ? ` disponíveis para ${plural(nightsBetween(checkin, checkout), "noite", "noites")}` : ""}
+          {results.length ? t.n(results.length, t.accommodation) : t.noAccommodation}
+          {destino ? t.inPlace(destino) : ""}
+          {checkin && checkout ? t.availableFor(t.n(nightsBetween(checkin, checkout), t.night)) : ""}
         </p>
 
         {results.length ? (
@@ -112,8 +116,8 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
           </div>
         ) : (
           <div className="rs-empty">
-            <p>Não encontramos imóveis para essa busca. Tente outras datas ou outro destino.</p>
-            <Link href="/reservas" className="rs-btn-dark rs-inline-btn">Ver todos os imóveis</Link>
+            <p>{t.emptySearch}</p>
+            <Link href="/reservas" className="rs-btn-dark rs-inline-btn">{t.seeAll}</Link>
           </div>
         )}
       </section>

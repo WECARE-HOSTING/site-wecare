@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import ReservasHeader from "@/components/reservas/ReservasHeader";
+import { I18nProvider } from "@/components/reservas/I18n";
+import { getT } from "@/lib/reservas/lang";
 import "./reservas.css";
 
 export const metadata: Metadata = {
@@ -10,12 +12,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ReservasLayout({ children }: { children: React.ReactNode }) {
+export default async function ReservasLayout({ children }: { children: React.ReactNode }) {
+  const { lang } = await getT();
   return (
-    <div className="rs-root">
-      <ReservasHeader />
-      <main>{children}</main>
-      <Footer />
-    </div>
+    <I18nProvider lang={lang}>
+      <div className="rs-root" lang={lang === "pt" ? "pt-BR" : lang}>
+        <ReservasHeader />
+        <main>{children}</main>
+        <Footer />
+      </div>
+    </I18nProvider>
   );
 }
