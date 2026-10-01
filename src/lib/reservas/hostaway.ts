@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import type { CalendarDay, GuestDetails, HeldReservation, Listing, Quote, QuoteLine, StayRequest } from "./types";
+import type { CalendarDay, DescriptionSection, GuestDetails, HeldReservation, Listing, Quote, QuoteLine, SectionKey, StayRequest } from "./types";
 import { addDays, nightsBetween, todayInBrazil } from "./dates";
 import * as mock from "./mock";
 import { amenityId } from "./amenities";
@@ -98,6 +98,16 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 // ---------------------------------------------------------------------------
 
 type Raw = Record<string, unknown>;
+
+const SECTION_FIELDS: [SectionKey, string][] = [
+  ["summary", "airbnbSummary"],
+  ["space", "airbnbSpace"],
+  ["access", "airbnbAccess"],
+  ["interaction", "airbnbInteraction"],
+  ["neighborhood", "airbnbNeighborhoodOverview"],
+  ["transit", "airbnbTransit"],
+  ["notes", "airbnbNotes"],
+];
 const num = (v: unknown, fallback = 0) => (v === null || v === undefined || v === "" || Number.isNaN(Number(v)) ? fallback : Number(v));
 const numOrNull = (v: unknown) => (v === null || v === undefined || v === "" || Number.isNaN(Number(v)) ? null : Number(v));
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -132,9 +142,15 @@ function mapListing(raw: Raw): Listing {
     .map((a) => amenityId(str(a.amenityName)))
     .filter((a): a is string => Boolean(a));
 
-  // Portuguese copy lives in the channel-specific fields; `name`/`description` are English.
+  // Hostaway's `name`/`description` (Basic Info) are English; the Portuguese text of the same
+  // description is split across the Airbnb section fields, so we rebuild it from those.
   const summaryEn = str(raw.description);
-  const summary = str(raw.homeawayPropertyDescription) || [str(raw.airbnbSummary), str(raw.airbnbSpace)].filter(Boolean).join("\n\n") || str(raw.description);
+  let sections: DescriptionSection[] = SECTION_FIELDS.map(([key, field]) => ({ key, text: str(raw[field]) })).filter((s) => s.text);
+  if (!sections.length) {
+    const text = str(raw.homeawayPropertyDescription) || str(raw.description);
+    if (text) sections = [{ key: "summary", text }];
+  }
+  const summary = sections.map((s) => s.text).join("\n\n");
 
   return {
     id: num(raw.id),
@@ -143,6 +159,7 @@ function mapListing(raw: Raw): Listing {
     state: str(raw.state),
     neighborhood: "",
     description: summary,
+    sections,
     nameEn: cleanTitle(str(raw.name)),
     descriptionEn: summaryEn,
     houseRules: str(raw.houseRules),
@@ -208,7 +225,7 @@ async function fetchAllRawListings(): Promise<Raw[]> {
  * on every single page view. The slim list is ~150 KB; full detail is cached per listing.
  */
 function toSummary(l: Listing): Listing {
-  return { ...l, description: "", descriptionEn: "", houseRules: "", amenities: [], images: l.images.slice(0, 6) };
+  return { ...l, description: "", sections: [], descriptionEn: "", houseRules: "", amenities: [], images: l.images.slice(0, 6) };
 }
 
 const fetchListings = unstable_cache(

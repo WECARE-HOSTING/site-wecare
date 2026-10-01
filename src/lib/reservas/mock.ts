@@ -10,7 +10,7 @@ const img = (name: string, caption = "") => ({ url: `/uploads/${name}`, caption 
 
 const AMENITIES = ["Wi-Fi rápido", "Ar-condicionado", "Cozinha completa", "Máquina de lavar", "Espaço de trabalho", "Roupa de cama e banho", "Smart TV", "Portaria 24h"];
 
-const base: Omit<Listing, "nameEn" | "descriptionEn">[] = [
+const base: Omit<Listing, "nameEn" | "descriptionEn" | "sections">[] = [
   {
     id: 900001,
     name: "Apartamento com vista no Itaim Bibi",
@@ -111,7 +111,7 @@ const base: Omit<Listing, "nameEn" | "descriptionEn">[] = [
 ];
 
 // No English copy for the samples; reuse the Portuguese text.
-export const listings: Listing[] = base.map((l) => ({ ...l, nameEn: l.name, descriptionEn: l.description }));
+export const listings: Listing[] = base.map((l) => ({ ...l, nameEn: l.name, descriptionEn: l.description, sections: [{ key: "summary" as const, text: l.description }] }));
 
 /** Deterministic pseudo-occupancy so the calendar looks realistic and stable. */
 function isBooked(listingId: number, date: string): boolean {

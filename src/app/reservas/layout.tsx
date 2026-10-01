@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import ReservasHeader from "@/components/reservas/ReservasHeader";
-import { I18nProvider } from "@/components/reservas/I18n";
+import { I18nProvider, MainFrame } from "@/components/reservas/I18n";
 import { getT } from "@/lib/reservas/lang";
 import "./reservas.css";
 
@@ -18,7 +18,7 @@ export default async function ReservasLayout({ children }: { children: React.Rea
     <I18nProvider lang={lang}>
       <div className="rs-root" lang={lang === "pt" ? "pt-BR" : lang}>
         <ReservasHeader />
-        <main>{children}</main>
+        <MainFrame>{children}</MainFrame>
         <Footer />
       </div>
     </I18nProvider>
