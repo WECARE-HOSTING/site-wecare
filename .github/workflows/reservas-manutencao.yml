@@ -29,3 +29,11 @@ jobs:
           if [ -z "$CRON_SECRET" ]; then echo "CRON_SECRET not set, skipping"; exit 0; fi
           curl -fsS --max-time 320 -H "Authorization: Bearer $CRON_SECRET" \
             https://www.wecarehosting.com.br/api/reservas/traducoes
+      - name: Montar mapa de pontos de interesse
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        continue-on-error: true
+        run: |
+          if [ -z "$CRON_SECRET" ]; then echo "CRON_SECRET not set, skipping"; exit 0; fi
+          curl -fsS --max-time 320 -H "Authorization: Bearer $CRON_SECRET" \
+            https://www.wecarehosting.com.br/api/reservas/pontos

@@ -370,3 +370,10 @@ main.rs-switching { opacity: 0.6; transition: opacity 0.15s; pointer-events: non
 .rs-review-stars { display: flex; gap: 2px; margin-bottom: 8px; color: var(--gold-600); }
 .rs-review p { margin: 0; font-size: 0.92rem; line-height: 1.6; color: var(--text-body); white-space: pre-line; overflow-wrap: anywhere; }
 @media (max-width: 880px) { .rs-reviews { grid-template-columns: 1fr; gap: 22px; } }
+
+/* Nearby places */
+.rs-map-nearby { height: 380px; min-height: 280px; margin-top: 16px; }
+.rs-poi { display: grid; place-items: center; transform: translate(-50%, -50%); width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 2px solid var(--navy-800); box-shadow: 0 2px 8px rgba(8,23,32,0.3); font-size: 16px; line-height: 1; }
+.rs-poi-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; font-size: 0.92rem; color: var(--text-strong); }
+.rs-poi-list small { margin-left: 4px; color: var(--text-muted); font-size: 0.78rem; }
+@media (max-width: 880px) { .rs-poi-list { grid-template-columns: 1fr; } .rs-map-nearby { height: 320px; } }
