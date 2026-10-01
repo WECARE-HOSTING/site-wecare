@@ -5,7 +5,7 @@ import { after } from "next/server";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import type { Listing } from "./types";
-import { TRANSLATION_MODEL } from "./translate";
+import { CACHE_MODEL_TAG, aiModel } from "./model";
 
 /**
  * "What's nearby" for a listing, taken from the places its own description names (Hostaway text
@@ -69,7 +69,7 @@ async function geocode(name: string, city: string, lat: number, lng: number): Pr
 
 async function build(city: string, state: string, text: string, lat: number, lng: number): Promise<Poi[]> {
   const { output } = await generateText({
-    model: TRANSLATION_MODEL,
+    model: aiModel(),
     temperature: 0,
     instructions: INSTRUCTIONS,
     prompt: `Property city: ${city}, ${state}.\n\nDESCRIPTION:\n${text}`,
@@ -95,7 +95,7 @@ export function nearbyPlaces(listing: Listing): Promise<Poi[]> {
   const text = sourceText(listing);
   if (!text || listing.lat === null || listing.lng === null) return Promise.resolve([]);
   const { lat, lng } = { lat: listing.lat, lng: listing.lng };
-  const id = `${listing.id}-${createHash("sha256").update([TRANSLATION_MODEL, listing.city, lat, lng, text].join("\u0000")).digest("hex").slice(0, 20)}`;
+  const id = `${listing.id}-${createHash("sha256").update([CACHE_MODEL_TAG, listing.city, lat, lng, text].join("\u0000")).digest("hex").slice(0, 20)}`;
   return durable("nearby", id, () => build(listing.city, listing.state, text, lat, lng));
 }
 
