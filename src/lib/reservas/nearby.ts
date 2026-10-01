@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import { unstable_cache } from "next/cache";
+import { durable } from "./durable";
 import { after } from "next/server";
 import { generateText, Output } from "ai";
 import { z } from "zod";
@@ -21,7 +21,6 @@ export const POI_CATEGORIES = ["transit", "food", "shopping", "nature", "culture
 export type PoiCategory = (typeof POI_CATEGORIES)[number];
 export type Poi = { name: string; category: PoiCategory; lat: number; lng: number };
 
-const TTL_SECONDS = 60 * 60 * 24 * 30;
 const MAX_DISTANCE_KM = 7;
 const MAX_POIS = 10;
 export const MIN_POIS = 3;
@@ -90,20 +89,14 @@ async function build(city: string, state: string, text: string, lat: number, lng
 }
 
 const sourceText = (listing: Listing) => listing.sections.map((s) => s.text).join("\n\n").slice(0, 12_000);
-const inFlight = new Map<string, Promise<Poi[]>>();
 
 /** Get-or-compute. Resolves with [] when the listing has nothing to work from. */
 export function nearbyPlaces(listing: Listing): Promise<Poi[]> {
   const text = sourceText(listing);
   if (!text || listing.lat === null || listing.lng === null) return Promise.resolve([]);
   const { lat, lng } = { lat: listing.lat, lng: listing.lng };
-  const id = createHash("sha256").update([TRANSLATION_MODEL, listing.city, lat, lng, text].join("\u0000")).digest("hex").slice(0, 24);
-  let p = inFlight.get(id);
-  if (!p) {
-    p = unstable_cache(() => build(listing.city, listing.state, text, lat, lng), ["reservas-nearby-v1", id], { revalidate: TTL_SECONDS, tags: ["reservas-nearby"] })().finally(() => inFlight.delete(id));
-    inFlight.set(id, p);
-  }
-  return p;
+  const id = `${listing.id}-${createHash("sha256").update([TRANSLATION_MODEL, listing.city, lat, lng, text].join("\u0000")).digest("hex").slice(0, 20)}`;
+  return durable("nearby", id, () => build(listing.city, listing.state, text, lat, lng));
 }
 
 /** For pages: the places if already cached (or ready within `waitMs`); otherwise null and the work finishes after the response. */
