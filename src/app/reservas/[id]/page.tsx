@@ -3,8 +3,9 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { BedDouble, Bath, Clock, DoorOpen, ShieldCheck, Sparkles, Star, Users } from "lucide-react";
 import Gallery from "@/components/reservas/Gallery";
+import ReviewCard from "@/components/reservas/ReviewCard";
 import BookingPanel from "@/components/reservas/BookingPanel";
-import { getListing } from "@/lib/reservas/hostaway";
+import { getListing, getReviewsWithin } from "@/lib/reservas/hostaway";
 import type { Listing } from "@/lib/reservas/types";
 import { isIsoDate } from "@/lib/reservas/dates";
 import { amenityLabel } from "@/lib/reservas/amenities";
@@ -48,6 +49,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   if (!listing) notFound();
   const text = textFor(listing, t.lang);
   const stars = publicStars(listing.rating);
+  const reviews = await getReviewsWithin(listing.id, 2500);
   const sp = await searchParams;
   const checkin = isIsoDate(sp.checkin) ? sp.checkin : null;
   const checkout = isIsoDate(sp.checkout) && checkin && sp.checkout! > checkin ? sp.checkout! : null;
@@ -172,6 +174,31 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
               </ul>
             )}
           </section>
+
+          {reviews.items.length > 0 && (
+            <section className="rs-section" id="avaliacoes">
+              <h2 className="rs-h2">
+                {t.reviewsTitle}
+                <span className="rs-reviews-meta">
+                  {stars !== null && <><Star size={15} fill="currentColor" /> {stars.toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · </>}
+                  {t.reviewCount(reviews.total)}
+                </span>
+              </h2>
+              {/* Every published review is shown, not a selection. The stars follow the same rule as the
+                  listing score: below the public threshold they are left out, the text stays. */}
+              <div className="rs-reviews">
+                {reviews.items.slice(0, 6).map((r, i) => <ReviewCard key={i} review={r} showStars={stars !== null} />)}
+              </div>
+              {reviews.items.length > 6 && (
+                <details className="rs-more">
+                  <summary>{reviews.total > reviews.items.length ? t.showRecentReviews(reviews.items.length) : t.showAllReviews(reviews.total)}</summary>
+                  <div className="rs-reviews">
+                    {reviews.items.slice(6).map((r, i) => <ReviewCard key={i} review={r} showStars={stars !== null} />)}
+                  </div>
+                </details>
+              )}
+            </section>
+          )}
 
           <section className="rs-section">
             <h2 className="rs-h2">{t.stayInfo}</h2>

@@ -21,6 +21,9 @@ export type ListingCardData = {
   total: number | null;
   nights: number | null;
   currency: string;
+  /** Rounded to ~1 km: enough for the results map, never the building. */
+  lat: number | null;
+  lng: number | null;
 };
 
 export default function ListingCard({ listing, query, priority = false }: { listing: ListingCardData; query: string; priority?: boolean }) {

@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import type { CalendarDay, DescriptionSection, GuestDetails, HeldReservation, Listing, Quote, QuoteLine, SectionKey, StayRequest } from "./types";
+import { after } from "next/server";
+import type { CalendarDay, DescriptionSection, GuestDetails, HeldReservation, Listing, Quote, QuoteLine, Review, ReviewSet, SectionKey, StayRequest } from "./types";
 import { addDays, nightsBetween, todayInBrazil } from "./dates";
 import * as mock from "./mock";
 import { amenityId } from "./amenities";
@@ -265,6 +266,85 @@ export async function getListing(id: number): Promise<Listing | null> {
     ["hostaway-listing-v1", String(id)],
     { revalidate: 3600, tags: ["hostaway-listings", `hostaway-listing-${id}`] },
   )();
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+//
+// GET /reviews ignores listingId/listingMapId, so the only way to get one listing's reviews is to
+// read them all (~4 600 rows, 10 pages) and group. That is done at most every 6 hours, in the
+// background, into one compact blob (~0.5 MB: well under the 2 MB cache limit).
+// ---------------------------------------------------------------------------
+
+const CHANNEL_SOURCE: Record<number, Review["source"]> = { 2018: "airbnb", 2002: "airbnb", 2005: "booking" };
+const MAX_REVIEWS_PER_LISTING = 40;
+const MAX_REVIEW_CHARS = 700;
+
+const firstName = (s: string) => s.split(/\s+/)[0] ?? "";
+
+const fetchAllReviews = unstable_cache(
+  async (): Promise<Record<number, ReviewSet>> => {
+    const rows: Raw[] = [];
+    for (let offset = 0; ; offset += 500) {
+      const page = await call<Raw[]>(`/reviews?limit=500&offset=${offset}`);
+      rows.push(...page);
+      if (page.length < 500 || offset > 20_000) break;
+    }
+    const byListing: Record<number, Review[]> = {};
+    const result: Record<number, ReviewSet> = {};
+    for (const r of rows) {
+      // Only what Hostaway itself marks as publishable on a booking site, and no host-to-guest reviews.
+      if (str(r.type) !== "guest-to-host" || str(r.status) !== "published") continue;
+      if (num(r.isHidden) === 1 || num(r.isCancelled) === 1 || num(r.bookingEngineVisibility, 1) !== 1) continue;
+      const text = str(r.publicReview);
+      if (!text) continue;
+      const id = num(r.listingMapId);
+      (byListing[id] ??= []).push({
+        name: firstName(str(r.reviewerName) || str(r.guestName)),
+        rating: num(r.rating),
+        text: text.length > MAX_REVIEW_CHARS ? `${text.slice(0, MAX_REVIEW_CHARS).trimEnd()}…` : text,
+        date: (str(r.submittedAt) || str(r.departureDate) || str(r.arrivalDate)).slice(0, 10),
+        source: CHANNEL_SOURCE[num(r.channelId)] ?? null,
+      });
+    }
+    for (const [id, list] of Object.entries(byListing)) {
+      list.sort((a, b) => b.date.localeCompare(a.date));
+      result[Number(id)] = { total: list.length, items: list.slice(0, MAX_REVIEWS_PER_LISTING) };
+    }
+    return result;
+  },
+  ["hostaway-reviews-v1"],
+  { revalidate: 6 * 3600, tags: ["hostaway-reviews"] },
+);
+
+// Visitors arriving together while the cache is empty share one pass over Hostaway's reviews.
+let reviewsInFlight: Promise<Record<number, ReviewSet>> | null = null;
+const allReviews = () => (reviewsInFlight ??= fetchAllReviews().finally(() => (reviewsInFlight = null)));
+
+const NO_REVIEWS: ReviewSet = { total: 0, items: [] };
+
+export async function getReviews(listingId: number): Promise<ReviewSet> {
+  if (mockMode()) return NO_REVIEWS;
+  return (await allReviews())[listingId] ?? NO_REVIEWS;
+}
+
+/**
+ * For pages: the reviews if they are ready within `waitMs`, otherwise none for now. Building the
+ * reviews cache from scratch takes ~20 s, which no visitor should wait for; it finishes after the
+ * response (and in the maintenance job) so the next visit has them.
+ */
+export async function getReviewsWithin(listingId: number, waitMs: number): Promise<ReviewSet> {
+  const work = getReviews(listingId);
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), waitMs));
+  const ready = await Promise.race([work.catch(() => NO_REVIEWS), timeout]);
+  if (ready) return ready;
+  work.catch((err) => console.error("[reservas] reviews failed to load", err));
+  try {
+    after(() => work.then(() => undefined, () => undefined));
+  } catch {
+    // outside a request: the promise simply keeps running
+  }
+  return NO_REVIEWS;
 }
 
 /** Always fresh: availability is the one thing we can never serve stale. */
