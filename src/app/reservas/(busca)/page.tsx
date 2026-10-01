@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BadgeCheck, Headset, Sparkles } from "lucide-react";
 import SearchBar, { type Destination } from "@/components/reservas/SearchBar";
 import ListingCard, { type ListingCardData } from "@/components/reservas/ListingCard";
+import ResultsView from "@/components/reservas/ResultsView";
 import { getAvailabilityIndex, getListings } from "@/lib/reservas/hostaway";
 import { matchesIndex } from "@/lib/reservas/booking";
 import { isIsoDate, nightsBetween, todayInBrazil } from "@/lib/reservas/dates";
@@ -73,6 +74,8 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     total: nights && !estimate ? nightly * nights : null,
     nights: !estimate ? nights : null,
     currency: l.currency,
+    lat: l.lat,
+    lng: l.lng,
   });
 
   const q = norm(destino);
@@ -211,9 +214,7 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
         </p>
 
         {results.length ? (
-          <div className="rs-grid">
-            {results.map((r, n) => <ListingCard key={r.id} listing={r} query={qs} priority={searching && n < 4} />)}
-          </div>
+          <ResultsView items={results} query={qs} priority={searching} />
         ) : (
           <div className="rs-empty">
             <p>{t.emptySearch}</p>

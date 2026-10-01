@@ -56,7 +56,7 @@ function TestimonialCard({ quote, initials, name, role }: { quote: string; initi
       }}
     >
       {initials ? (
-        <span aria-hidden="true" style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "4.4rem", lineHeight: 0.6, color: "var(--gold-500)" }}>"</span>
+        <span aria-hidden="true" style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "4.4rem", lineHeight: 0.6, color: "var(--gold-500)" }}>&ldquo;</span>
       ) : (
         <div aria-label="Cinco estrelas" style={{ color: "var(--gold-700)", fontSize: "1rem", letterSpacing: 4, marginBottom: 20 }}>★★★★★</div>
       )}

@@ -46,7 +46,7 @@ export default function ProofBar() {
           className="wc-proof-border"
           style={{ margin: 0, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "1.3rem", lineHeight: 1.5, color: "var(--ivory-100)", borderLeft: "1px solid var(--gold-500)", paddingLeft: 32 }}
         >
-          "Só gerimos o que acreditamos que vai ganhar."
+          &ldquo;Só gerimos o que acreditamos que vai ganhar.&rdquo;
           <span style={{ display: "block", marginTop: 10, fontFamily: "var(--font-sans)", fontStyle: "normal", fontSize: "0.66rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--gold-300)" }}>
             Shortstay feito para longo prazo
           </span>

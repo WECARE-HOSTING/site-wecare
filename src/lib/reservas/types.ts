@@ -35,6 +35,21 @@ export type Listing = {
   amenities: string[];
 };
 
+/** A published guest review, reduced to what the listing page shows. Never includes private feedback. */
+export type Review = {
+  /** First name only (LGPD); empty when Hostaway has none. */
+  name: string;
+  /** 0–10 as Hostaway stores it; stars = rating / 2. */
+  rating: number;
+  text: string;
+  /** YYYY-MM-DD */
+  date: string;
+  source: "airbnb" | "booking" | null;
+};
+
+/** `total` counts every publishable review; `items` holds only the most recent ones. */
+export type ReviewSet = { total: number; items: Review[] };
+
 export type CalendarDay = {
   date: string; // YYYY-MM-DD
   available: boolean;

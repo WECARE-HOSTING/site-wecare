@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { getAvailabilityIndex, getListings } from "@/lib/reservas/hostaway";
+import { getAvailabilityIndex, getListings, getReviews } from "@/lib/reservas/hostaway";
 import { expireHolds } from "@/lib/reservas/payments";
 
 // Rebuilding the availability index can take a couple of minutes.
@@ -17,5 +17,6 @@ export async function GET(request: NextRequest) {
   const holds = await expireHolds();
   const listings = await getListings();
   const index = await getAvailabilityIndex();
+  await getReviews(0); // warms the reviews cache (one pass over all of Hostaway's reviews)
   return Response.json({ holds, listings: listings.length, indexBuiltAt: index.builtAt });
 }
