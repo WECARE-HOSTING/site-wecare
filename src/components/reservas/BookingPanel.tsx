@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, X } from "lucide-react";
 import DateRangeCalendar, { type DayRules } from "./DateRangeCalendar";
 import GuestStepper from "./GuestStepper";
-import { addDays, formatDateBR, formatMoney, plural, todayInBrazil } from "@/lib/reservas/dates";
+import { addDays, todayInBrazil } from "@/lib/reservas/dates";
+import { useT } from "./I18n";
 import type { Quote } from "@/lib/reservas/types";
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
 type QuoteState = { status: "idle" } | { status: "loading" } | { status: "ok"; quote: Quote } | { status: "error"; message: string };
 
 export default function BookingPanel({ listingId, basePrice, currency, personCapacity, initial }: Props) {
+  const t = useT();
   const router = useRouter();
   const [checkin, setCheckin] = useState(initial.checkin);
   const [checkout, setCheckout] = useState(initial.checkout);
@@ -66,13 +68,13 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
     })
       .then(async (res) => {
         const body = await res.json();
-        setQuoteResult({ key: stayKey, state: res.ok ? { status: "ok", quote: body.quote } : { status: "error", message: body.error ?? "Não foi possível calcular o preço." } });
+        setQuoteResult({ key: stayKey, state: res.ok ? { status: "ok", quote: body.quote } : { status: "error", message: body.error ?? t.quoteFailed } });
       })
       .catch((err) => {
-        if (err.name !== "AbortError") setQuoteResult({ key: stayKey, state: { status: "error", message: "Sem conexão. Tente novamente." } });
+        if (err.name !== "AbortError") setQuoteResult({ key: stayKey, state: { status: "error", message: t.offline } });
       });
     return () => ctrl.abort();
-  }, [listingId, stayKey]);
+  }, [listingId, stayKey, t]);
 
   const quote: QuoteState = !stayKey ? { status: "idle" } : quoteResult?.key === stayKey ? quoteResult.state : { status: "loading" };
 
@@ -94,24 +96,24 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
     <div className="rs-book">
       <div className="rs-book-head">
         {quote.status === "ok" ? (
-          <><strong>{formatMoney(quote.quote.total, currency)}</strong> <span>por {plural(quote.quote.nights, "noite", "noites")}</span></>
+          <><strong>{t.money(quote.quote.total, currency)}</strong> <span>{t.forNights(t.n(quote.quote.nights, t.night))}</span></>
         ) : (
-          <><strong>{formatMoney(nightly, currency)}</strong> <span>/ noite</span></>
+          <><strong>{t.money(nightly, currency)}</strong> <span>{t.perNight}</span></>
         )}
       </div>
 
       <div className="rs-book-fields">
         <button type="button" className="rs-book-field" onClick={() => setOpen(open === "datas" ? null : "datas")}>
-          <span className="rs-search-k">Check-in</span>
-          <span>{checkin ? formatDateBR(checkin, { day: "2-digit", month: "2-digit", year: "numeric" }) : "Adicionar"}</span>
+          <span className="rs-search-k">{t.checkIn}</span>
+          <span>{checkin ? t.date(checkin, { day: "2-digit", month: "2-digit", year: "numeric" }) : t.add}</span>
         </button>
         <button type="button" className="rs-book-field" onClick={() => setOpen(open === "datas" ? null : "datas")}>
-          <span className="rs-search-k">Check-out</span>
-          <span>{checkout ? formatDateBR(checkout, { day: "2-digit", month: "2-digit", year: "numeric" }) : "Adicionar"}</span>
+          <span className="rs-search-k">{t.checkOut}</span>
+          <span>{checkout ? t.date(checkout, { day: "2-digit", month: "2-digit", year: "numeric" }) : t.add}</span>
         </button>
         <button type="button" className="rs-book-field is-wide" onClick={() => setOpen(open === "hospedes" ? null : "hospedes")}>
-          <span className="rs-search-k">Hóspedes</span>
-          <span>{plural(guests, "hóspede", "hóspedes")}</span>
+          <span className="rs-search-k">{t.guests}</span>
+          <span>{t.n(guests, t.guest)}</span>
           <ChevronDown size={16} className="rs-book-chev" />
         </button>
       </div>
@@ -131,32 +133,32 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
             }}
           />
           <div className="rs-pop-foot">
-            <button type="button" className="rs-link" onClick={() => { setCheckin(null); setCheckout(null); }}>Limpar datas</button>
-            <button type="button" className="rs-btn-dark" onClick={() => setOpen(null)}>Fechar</button>
+            <button type="button" className="rs-link" onClick={() => { setCheckin(null); setCheckout(null); }}>{t.clearDates}</button>
+            <button type="button" className="rs-btn-dark" onClick={() => setOpen(null)}>{t.close}</button>
           </div>
         </div>
       )}
       {open === "hospedes" && (
         <div className="rs-book-pop">
           <GuestStepper value={guests} onChange={setGuests} max={personCapacity} />
-          <p className="rs-muted rs-small">Acomoda no máximo {plural(personCapacity, "hóspede", "hóspedes")}.</p>
+          <p className="rs-muted rs-small">{t.maxGuests(t.n(personCapacity, t.guest))}</p>
         </div>
       )}
 
       <button type="button" className="rs-btn-gold rs-book-cta" onClick={reserve} disabled={quote.status === "loading" || quote.status === "error"}>
-        {!checkin || !checkout ? "Verificar disponibilidade" : quote.status === "loading" ? "Calculando…" : "Reservar"}
+        {!checkin || !checkout ? t.checkAvailability : quote.status === "loading" ? t.calculating : t.reserve}
       </button>
 
       {quote.status === "error" && <p className="rs-error">{quote.message}</p>}
       {quote.status === "ok" && (
         <>
-          <p className="rs-muted rs-small rs-center">Você ainda não será cobrado</p>
+          <p className="rs-muted rs-small rs-center">{t.notChargedYet}</p>
           <ul className="rs-lines">
             {quote.quote.lines.map((l) => (
-              <li key={l.label}><span>{l.label}</span><span>{formatMoney(l.amount, currency)}</span></li>
+              <li key={l.label}><span>{l.label}</span><span>{t.money(l.amount, currency)}</span></li>
             ))}
           </ul>
-          <div className="rs-total"><span>Total</span><span>{formatMoney(quote.quote.total, currency)}</span></div>
+          <div className="rs-total"><span>{t.total}</span><span>{t.money(quote.quote.total, currency)}</span></div>
         </>
       )}
     </div>
@@ -169,20 +171,20 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
       <div className="rs-book-bar">
         <div>
           {quote.status === "ok" ? (
-            <><strong>{formatMoney(quote.quote.total, currency)}</strong><span>{formatDateBR(checkin!)} – {formatDateBR(checkout!)}</span></>
+            <><strong>{t.money(quote.quote.total, currency)}</strong><span>{t.date(checkin!)} – {t.date(checkout!)}</span></>
           ) : (
-            <><strong>{formatMoney(nightly, currency)} <small>/ noite</small></strong><span>Escolha as datas</span></>
+            <><strong>{t.money(nightly, currency)} <small>{t.perNight}</small></strong><span>{t.chooseDates}</span></>
           )}
         </div>
         <button type="button" className="rs-btn-gold" onClick={() => (quote.status === "ok" ? reserve() : setSheet(true))}>
-          {quote.status === "ok" ? "Reservar" : "Ver datas"}
+          {quote.status === "ok" ? t.reserve : t.seeDates}
         </button>
       </div>
 
       {sheet && (
         <div className="rs-sheet" role="dialog" aria-modal="true">
           <div className="rs-sheet-bar">
-            <button type="button" onClick={() => setSheet(false)} aria-label="Fechar"><X size={20} /></button>
+            <button type="button" onClick={() => setSheet(false)} aria-label={t.close}><X size={20} /></button>
           </div>
           {panel}
         </div>

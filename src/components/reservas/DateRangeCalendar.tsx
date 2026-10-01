@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { addDays, nightsBetween, todayInBrazil } from "@/lib/reservas/dates";
+import { useT } from "./I18n";
 
 export type DayRules = { available: boolean; minimumStay: number; closedOnArrival: boolean; closedOnDeparture: boolean; price?: number };
 
@@ -16,9 +17,8 @@ type Props = {
   onMonthChange?: (firstVisibleMonth: string) => void;
 };
 
-const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
-const monthLabel = (ym: string) => {
-  const label = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${ym}-01T00:00:00Z`));
+const monthLabel = (ym: string, locale: string) => {
+  const label = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${ym}-01T00:00:00Z`));
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 const addMonths = (ym: string, n: number) => {
@@ -35,6 +35,7 @@ function monthCells(ym: string): (string | null)[] {
 }
 
 export default function DateRangeCalendar({ checkin, checkout, onChange, rules, loadedUntil, onMonthChange }: Props) {
+  const t = useT();
   const today = todayInBrazil();
   const [month, setMonth] = useState((checkin ?? today).slice(0, 7));
   const [hover, setHover] = useState<string | null>(null);
@@ -91,9 +92,9 @@ export default function DateRangeCalendar({ checkin, checkout, onChange, rules, 
 
   const renderMonth = (ym: string) => (
     <div className="rs-cal-month" key={ym}>
-      <div className="rs-cal-title">{monthLabel(ym)}</div>
+      <div className="rs-cal-title">{monthLabel(ym, t.locale)}</div>
       <div className="rs-cal-grid" role="grid">
-        {WEEKDAYS.map((w, i) => (
+        {t.weekdays.map((w, i) => (
           <div key={i} className="rs-cal-wd">{w}</div>
         ))}
         {monthCells(ym).map((d, i) => {
@@ -114,7 +115,7 @@ export default function DateRangeCalendar({ checkin, checkout, onChange, rules, 
               onMouseEnter={() => setHover(d)}
               aria-pressed={isStart || isEnd}
               aria-label={d}
-              title={tooShort && minCheckout && checkin ? `Mínimo de ${nightsBetween(checkin, minCheckout)} noites` : undefined}
+              title={tooShort && minCheckout && checkin ? t.minStayTitle(nightsBetween(checkin, minCheckout)) : undefined}
             >
               <span>{Number(d.slice(8))}</span>
             </button>
@@ -127,10 +128,10 @@ export default function DateRangeCalendar({ checkin, checkout, onChange, rules, 
   return (
     <div className="rs-cal" onMouseLeave={() => setHover(null)}>
       <div className="rs-cal-nav">
-        <button type="button" onClick={() => go(-1)} disabled={month <= today.slice(0, 7)} aria-label="Mês anterior">
+        <button type="button" onClick={() => go(-1)} disabled={month <= today.slice(0, 7)} aria-label={t.prevMonth}>
           <ChevronLeft size={18} />
         </button>
-        <button type="button" onClick={() => go(1)} aria-label="Próximo mês">
+        <button type="button" onClick={() => go(1)} aria-label={t.nextMonth}>
           <ChevronRight size={18} />
         </button>
       </div>
@@ -139,7 +140,7 @@ export default function DateRangeCalendar({ checkin, checkout, onChange, rules, 
         {renderMonth(addMonths(month, 1))}
       </div>
       {checkin && !checkout && minCheckout && nightsBetween(checkin, minCheckout) > 1 && (
-        <p className="rs-cal-hint">Estadia mínima de {nightsBetween(checkin, minCheckout)} noites a partir desta data.</p>
+        <p className="rs-cal-hint">{t.minStayHint(nightsBetween(checkin, minCheckout))}</p>
       )}
     </div>
   );

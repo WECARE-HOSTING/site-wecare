@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import { orderStatus, type SettleResult } from "@/lib/reservas/payments";
-import { WHATSAPP_RESERVAS } from "@/lib/reservas/contact";
+import { orderStatus, type AttentionReason, type SettleResult } from "@/lib/reservas/payments";
+import { whatsappLink } from "@/lib/reservas/contact";
+import { getT } from "@/lib/reservas/lang";
 
 export const metadata: Metadata = {
   title: "Confirmação da reserva",
@@ -14,6 +15,8 @@ type Search = Promise<{ order_nsu?: string; transaction_nsu?: string; slug?: str
 /** InfinitePay sends the guest here after paying. Read-only: the webhook is what confirms the reservation. */
 export default async function ConfirmacaoPage({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams;
+  const t = await getT();
+  const reasons: Record<AttentionReason, string> = { unknown_order: t.unknownOrder, paid_late: t.paidTooLate, amount_mismatch: t.amountMismatch };
   let result: SettleResult;
   try {
     result = await orderStatus({ orderNsu: sp.order_nsu ?? null, transactionNsu: sp.transaction_nsu, slug: sp.slug });
@@ -29,37 +32,37 @@ export default async function ConfirmacaoPage({ searchParams }: { searchParams: 
       {result.state === "confirmed" && (
         <>
           <CheckCircle2 size={48} className="rs-ok-ico" />
-          <h1 className="rs-h1">Reserva confirmada!</h1>
-          <p>Pagamento recebido e datas garantidas. Você vai receber a confirmação e as instruções de chegada por e-mail e WhatsApp.</p>
-          <p className="rs-muted">Código da reserva: <strong>{result.reservationId}</strong></p>
+          <h1 className="rs-h1">{t.confirmed}</h1>
+          <p>{t.confirmedBody}</p>
+          <p className="rs-muted">{t.bookingCode} <strong>{result.reservationId}</strong></p>
         </>
       )}
       {result.state === "processing" && (
         <>
           <meta httpEquiv="refresh" content="5" />
           <Clock size={48} className="rs-wait-ico" />
-          <h1 className="rs-h1">Pagamento recebido!</h1>
-          <p>Estamos finalizando sua reserva — isso leva só alguns segundos. Esta página atualiza sozinha.</p>
+          <h1 className="rs-h1">{t.paymentReceived}</h1>
+          <p>{t.paymentReceivedBody}</p>
         </>
       )}
       {result.state === "pending" && (
         <>
           <Clock size={48} className="rs-wait-ico" />
-          <h1 className="rs-h1">Estamos confirmando seu pagamento</h1>
-          <p>Assim que a InfinitePay confirmar, sua reserva é concluída automaticamente e você recebe a confirmação por e-mail. Pagamentos via Pix costumam levar poucos segundos.</p>
-          <a href={retry} className="rs-btn-dark rs-inline-btn">Atualizar</a>
+          <h1 className="rs-h1">{t.confirmingPayment}</h1>
+          <p>{t.confirmingBody}</p>
+          <a href={retry} className="rs-btn-dark rs-inline-btn">{t.refresh}</a>
         </>
       )}
       {result.state === "needs_attention" && (
         <>
           <AlertTriangle size={48} className="rs-warn-ico" />
-          <h1 className="rs-h1">Precisamos de um minuto seu</h1>
-          <p>{result.reason} Nossa equipe já foi avisada e vai falar com você — se preferir, chame a gente agora no WhatsApp.</p>
-          <a href={WHATSAPP_RESERVAS} target="_blank" rel="noopener noreferrer" className="rs-btn-gold rs-inline-btn">Falar no WhatsApp</a>
+          <h1 className="rs-h1">{t.needAMinute}</h1>
+          <p>{t.needAMinuteBody(reasons[result.reason])}</p>
+          <a href={whatsappLink(t.whatsappGreeting)} target="_blank" rel="noopener noreferrer" className="rs-btn-gold rs-inline-btn">{t.talkOnWhatsapp}</a>
         </>
       )}
-      {receipt && <p><a className="rs-link" href={receipt} target="_blank" rel="noopener noreferrer">Ver comprovante do pagamento</a></p>}
-      <p><Link href="/reservas" className="rs-link">Voltar para as reservas</Link></p>
+      {receipt && <p><a className="rs-link" href={receipt} target="_blank" rel="noopener noreferrer">{t.viewReceipt}</a></p>}
+      <p><Link href="/reservas" className="rs-link">{t.backToBookings}</Link></p>
     </div>
   );
 }

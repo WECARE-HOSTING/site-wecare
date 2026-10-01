@@ -4,7 +4,11 @@ import { BedDouble, Bath, Clock, DoorOpen, ShieldCheck, Sparkles, Star, Users } 
 import Gallery from "@/components/reservas/Gallery";
 import BookingPanel from "@/components/reservas/BookingPanel";
 import { getListing } from "@/lib/reservas/hostaway";
-import { isIsoDate, plural } from "@/lib/reservas/dates";
+import type { Listing } from "@/lib/reservas/types";
+import { isIsoDate } from "@/lib/reservas/dates";
+import { amenityLabel } from "@/lib/reservas/amenities";
+import { getT } from "@/lib/reservas/lang";
+import { publicStars } from "@/lib/reservas/rating";
 
 export const maxDuration = 300;
 
@@ -19,50 +23,66 @@ async function load(params: Params) {
   return getListing(Number(id));
 }
 
+/** English visitors get Hostaway's English copy; Portuguese and Spanish get the Portuguese listing text. */
+const textFor = (listing: Listing, lang: string) => (lang === "en" ? { name: listing.nameEn || listing.name, description: listing.descriptionEn || listing.description } : { name: listing.name, description: listing.description });
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const listing = await load(params);
+  const [listing, t] = await Promise.all([load(params), getT()]);
   if (!listing) return {};
-  const description = listing.description.replace(/\s+/g, " ").slice(0, 155);
+  const text = textFor(listing, t.lang);
+  const description = text.description.replace(/\s+/g, " ").slice(0, 155);
   return {
-    title: listing.name,
+    title: text.name,
     description,
     alternates: { canonical: `${SITE_URL}/reservas/${listing.id}` },
-    openGraph: { title: listing.name, description, url: `${SITE_URL}/reservas/${listing.id}`, images: listing.images.slice(0, 1).map((i) => i.url), locale: "pt_BR", siteName: "WeCare Hosting" },
+    openGraph: { title: text.name, description, url: `${SITE_URL}/reservas/${listing.id}`, images: listing.images.slice(0, 1).map((i) => i.url), locale: t.locale.replace("-", "_"), siteName: "WeCare Hosting" },
   };
 }
 
 const hour = (h: number | null) => (h === null ? null : `${String(h).padStart(2, "0")}:00`);
 
 export default async function ListingPage({ params, searchParams }: { params: Params; searchParams: Search }) {
-  const listing = await load(params);
+  const [listing, t] = await Promise.all([load(params), getT()]);
   if (!listing) notFound();
+  const text = textFor(listing, t.lang);
+  const stars = publicStars(listing.rating);
   const sp = await searchParams;
   const checkin = isIsoDate(sp.checkin) ? sp.checkin : null;
   const checkout = isIsoDate(sp.checkout) && checkin && sp.checkout! > checkin ? sp.checkout! : null;
   const guests = Math.max(1, Number(sp.hospedes) || 1);
   const place = listing.state && listing.state !== listing.city ? `${listing.city}, ${listing.state}` : listing.city;
-  const paragraphs = listing.description.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  const paragraphs = text.description.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
 
   return (
     <article className="rs-wrap rs-detail">
       <header className="rs-detail-head">
-        <h1 className="rs-h1">{listing.name}</h1>
+        <h1 className="rs-h1">{text.name}</h1>
         <div className="rs-detail-sub">
-          {listing.rating ? <span className="rs-card-rating"><Star size={14} fill="currentColor" /> {(listing.rating / 2).toFixed(2).replace(".", ",")}</span> : <span className="rs-card-new">Novo</span>}
-          <span>·</span>
+          {stars !== null && (
+            <>
+              <span className="rs-card-rating"><Star size={14} fill="currentColor" /> {stars.toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span>·</span>
+            </>
+          )}
+          {stars === null && listing.rating === null && (
+            <>
+              <span className="rs-card-new">{t.isNew}</span>
+              <span>·</span>
+            </>
+          )}
           <span>{place}</span>
         </div>
       </header>
 
-      <Gallery images={listing.images} name={listing.name} />
+      <Gallery images={listing.images} name={text.name} />
 
       <div className="rs-detail-cols">
         <div className="rs-detail-main">
           <section className="rs-section rs-host">
             <div>
-              <h2 className="rs-h2">Hospedagem com gestão WeCare</h2>
+              <h2 className="rs-h2">{t.hostedBy}</h2>
               <p className="rs-facts">
-                {plural(listing.personCapacity, "hóspede", "hóspedes")} · {listing.bedrooms ? plural(listing.bedrooms, "quarto", "quartos") : "Studio"} · {plural(listing.beds || 1, "cama", "camas")} · {plural(listing.bathrooms || 1, "banheiro", "banheiros")}
+                {t.n(listing.personCapacity, t.guest)} · {listing.bedrooms ? t.n(listing.bedrooms, t.bedroom) : t.studio} · {t.n(listing.beds || 1, t.bed)} · {t.n(listing.bathrooms || 1, t.bathroom)}
               </p>
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element -- static brand SVG */}
@@ -70,18 +90,18 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
           </section>
 
           <section className="rs-section rs-highlights">
-            <div><ShieldCheck size={22} /><div><strong>Reserva direta e segura</strong><p>Você reserva com a WeCare, sem intermediários e sem taxa de plataforma.</p></div></div>
-            <div><Sparkles size={22} /><div><strong>Padrão de hotel boutique</strong><p>Limpeza profissional, enxoval de hotel e vistoria antes de cada chegada.</p></div></div>
-            <div><DoorOpen size={22} /><div><strong>Suporte durante toda a estadia</strong><p>Nossa equipe acompanha sua hospedagem do check-in ao check-out.</p></div></div>
+            <div><ShieldCheck size={22} /><div><strong>{t.hl1[0]}</strong><p>{t.hl1[1]}</p></div></div>
+            <div><Sparkles size={22} /><div><strong>{t.hl2[0]}</strong><p>{t.hl2[1]}</p></div></div>
+            <div><DoorOpen size={22} /><div><strong>{t.hl3[0]}</strong><p>{t.hl3[1]}</p></div></div>
           </section>
 
           {paragraphs.length > 0 && (
             <section className="rs-section">
-              <h2 className="rs-h2">Sobre este espaço</h2>
+              <h2 className="rs-h2">{t.about}</h2>
               <div className="rs-prose">{paragraphs.slice(0, 3).map((p, i) => <p key={i}>{p}</p>)}</div>
               {paragraphs.length > 3 && (
                 <details className="rs-more">
-                  <summary>Mostrar mais</summary>
+                  <summary>{t.showMore}</summary>
                   <div className="rs-prose">{paragraphs.slice(3).map((p, i) => <p key={i}>{p}</p>)}</div>
                 </details>
               )}
@@ -89,29 +109,29 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
           )}
 
           <section className="rs-section">
-            <h2 className="rs-h2">O que tem aqui</h2>
+            <h2 className="rs-h2">{t.whatsHere}</h2>
             <div className="rs-facts-grid">
-              <span><Users size={18} /> Até {plural(listing.personCapacity, "hóspede", "hóspedes")}</span>
-              <span><BedDouble size={18} /> {plural(listing.beds || 1, "cama", "camas")}</span>
-              <span><Bath size={18} /> {plural(listing.bathrooms || 1, "banheiro", "banheiros")}</span>
+              <span><Users size={18} /> {t.upTo(t.n(listing.personCapacity, t.guest))}</span>
+              <span><BedDouble size={18} /> {t.n(listing.beds || 1, t.bed)}</span>
+              <span><Bath size={18} /> {t.n(listing.bathrooms || 1, t.bathroom)}</span>
             </div>
             {listing.amenities.length > 0 && (
               <ul className="rs-amenities">
-                {listing.amenities.map((a) => <li key={a}>{a}</li>)}
+                {listing.amenities.map((a) => <li key={a}>{amenityLabel(a, t.lang)}</li>)}
               </ul>
             )}
           </section>
 
           <section className="rs-section">
-            <h2 className="rs-h2">Informações da estadia</h2>
+            <h2 className="rs-h2">{t.stayInfo}</h2>
             <div className="rs-facts-grid">
-              {hour(listing.checkInTime) && <span><Clock size={18} /> Check-in a partir das {hour(listing.checkInTime)}</span>}
-              {hour(listing.checkOutTime) && <span><Clock size={18} /> Check-out até as {hour(listing.checkOutTime)}</span>}
-              <span><Clock size={18} /> Estadia mínima de {plural(listing.minNights, "noite", "noites")}</span>
+              {hour(listing.checkInTime) && <span><Clock size={18} /> {t.checkInFrom(hour(listing.checkInTime)!)}</span>}
+              {hour(listing.checkOutTime) && <span><Clock size={18} /> {t.checkOutUntil(hour(listing.checkOutTime)!)}</span>}
+              <span><Clock size={18} /> {t.minStay(t.n(listing.minNights, t.night))}</span>
             </div>
             {listing.houseRules && (
               <details className="rs-more">
-                <summary>Regras da casa</summary>
+                <summary>{t.houseRules}</summary>
                 <div className="rs-prose">{listing.houseRules.split(/\n+/).filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}</div>
               </details>
             )}

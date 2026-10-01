@@ -31,15 +31,3 @@ export function stayNights(checkin: string, checkout: string): string[] {
 export function todayInBrazil(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 }
-
-export function formatDateBR(date: string, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" }): string {
-  return new Intl.DateTimeFormat("pt-BR", { ...opts, timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
-}
-
-export function formatMoney(value: number, currency = "BRL"): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency, maximumFractionDigits: value % 1 === 0 ? 0 : 2 }).format(value);
-}
-
-export function plural(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`;
-}

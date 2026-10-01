@@ -1,6 +1,5 @@
 import "server-only";
 import type { GuestDetails, Listing, Quote } from "./types";
-import { formatDateBR } from "./dates";
 
 const API = "https://api.checkout.infinitepay.io";
 
@@ -40,7 +39,9 @@ export async function createCheckoutLink(params: {
   siteUrl: string;
 }): Promise<string> {
   const { order, listing, quote, guest, siteUrl } = params;
-  const stay = `${formatDateBR(quote.checkin)} a ${formatDateBR(quote.checkout)}`;
+  // The InfinitePay page is Portuguese-only, whatever language the guest browsed in.
+  const fmt = (d: string) => new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
+  const stay = `${fmt(quote.checkin)} a ${fmt(quote.checkout)}`;
   const res = await fetch(`${API}/links`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

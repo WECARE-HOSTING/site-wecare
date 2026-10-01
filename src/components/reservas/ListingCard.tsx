@@ -3,7 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { formatMoney, plural } from "@/lib/reservas/dates";
+import { useT } from "./I18n";
 
 export type ListingCardData = {
   id: number;
@@ -12,7 +12,10 @@ export type ListingCardData = {
   images: string[];
   personCapacity: number;
   bedrooms: number;
-  rating: number | null;
+  /** Display score (0–5) or null: already filtered by publicStars. */
+  stars: number | null;
+  /** True when the listing has no reviews at all (shown as "New"). */
+  unrated: boolean;
   nightly: number;
   nightlyIsEstimate: boolean;
   total: number | null;
@@ -21,6 +24,7 @@ export type ListingCardData = {
 };
 
 export default function ListingCard({ listing, query }: { listing: ListingCardData; query: string }) {
+  const t = useT();
   const [i, setI] = useState(0);
   const photos = listing.images.slice(0, 6);
   const step = (e: React.MouseEvent, n: number) => {
@@ -37,8 +41,8 @@ export default function ListingCard({ listing, query }: { listing: ListingCardDa
         )))}
         {photos.length > 1 && (
           <>
-            <button type="button" className="rs-card-arrow is-left" onClick={(e) => step(e, -1)} aria-label="Foto anterior"><ChevronLeft size={16} /></button>
-            <button type="button" className="rs-card-arrow is-right" onClick={(e) => step(e, 1)} aria-label="Próxima foto"><ChevronRight size={16} /></button>
+            <button type="button" className="rs-card-arrow is-left" onClick={(e) => step(e, -1)} aria-label={t.prevPhoto}><ChevronLeft size={16} /></button>
+            <button type="button" className="rs-card-arrow is-right" onClick={(e) => step(e, 1)} aria-label={t.nextPhoto}><ChevronRight size={16} /></button>
             <div className="rs-card-dots">
               {photos.map((_, idx) => <span key={idx} className={idx === i ? "is-on" : ""} />)}
             </div>
@@ -48,23 +52,23 @@ export default function ListingCard({ listing, query }: { listing: ListingCardDa
       <div className="rs-card-body">
         <div className="rs-card-row">
           <span className="rs-card-place">{listing.place}</span>
-          {listing.rating ? (
-            <span className="rs-card-rating"><Star size={12} fill="currentColor" /> {(listing.rating / 2).toFixed(2).replace(".", ",")}</span>
-          ) : (
-            <span className="rs-card-new">Novo</span>
-          )}
+          {listing.stars !== null ? (
+            <span className="rs-card-rating"><Star size={12} fill="currentColor" /> {listing.stars.toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          ) : listing.unrated ? (
+            <span className="rs-card-new">{t.isNew}</span>
+          ) : null}
         </div>
         <div className="rs-card-name">{listing.name}</div>
-        <div className="rs-card-meta">{plural(listing.personCapacity, "hóspede", "hóspedes")} · {listing.bedrooms ? plural(listing.bedrooms, "quarto", "quartos") : "Studio"}</div>
+        <div className="rs-card-meta">{t.n(listing.personCapacity, t.guest)} · {listing.bedrooms ? t.n(listing.bedrooms, t.bedroom) : t.studio}</div>
         <div className="rs-card-price">
           {listing.total && listing.nights ? (
             <>
-              <strong>{formatMoney(listing.total, listing.currency)}</strong> <span>por {plural(listing.nights, "noite", "noites")}</span>
+              <strong>{t.money(listing.total, listing.currency)}</strong> <span>{t.forNights(t.n(listing.nights, t.night))}</span>
             </>
           ) : (
             <>
-              <span>{listing.nightlyIsEstimate ? "A partir de " : ""}</span>
-              <strong>{formatMoney(listing.nightly, listing.currency)}</strong> <span>/ noite</span>
+              <span>{listing.nightlyIsEstimate ? t.from : ""}</span>
+              <strong>{t.money(listing.nightly, listing.currency)}</strong> <span>{t.perNight}</span>
             </>
           )}
         </div>

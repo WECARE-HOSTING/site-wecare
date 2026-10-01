@@ -1,6 +1,7 @@
 import "server-only";
 import type { CalendarDay, GuestDetails, HeldReservation, Listing, Quote, StayRequest } from "./types";
 import { addDays, nightsBetween, stayNights } from "./dates";
+import type { T } from "./i18n";
 
 // Sample data used only when Hostaway credentials are absent outside production
 // (see useMock in hostaway.ts). Photos are the site's own portfolio uploads.
@@ -9,7 +10,7 @@ const img = (name: string, caption = "") => ({ url: `/uploads/${name}`, caption 
 
 const AMENITIES = ["Wi-Fi rápido", "Ar-condicionado", "Cozinha completa", "Máquina de lavar", "Espaço de trabalho", "Roupa de cama e banho", "Smart TV", "Portaria 24h"];
 
-export const listings: Listing[] = [
+const base: Omit<Listing, "nameEn" | "descriptionEn">[] = [
   {
     id: 900001,
     name: "Apartamento com vista no Itaim Bibi",
@@ -109,6 +110,9 @@ export const listings: Listing[] = [
   },
 ];
 
+// No English copy for the samples; reuse the Portuguese text.
+export const listings: Listing[] = base.map((l) => ({ ...l, nameEn: l.name, descriptionEn: l.description }));
+
 /** Deterministic pseudo-occupancy so the calendar looks realistic and stable. */
 function isBooked(listingId: number, date: string): boolean {
   let h = listingId;
@@ -140,7 +144,7 @@ export function calendar(listingId: number, startDate: string, endDate: string):
   return days;
 }
 
-export function quote(stay: StayRequest, currency: string): Quote {
+export function quote(stay: StayRequest, currency: string, t: T): Quote {
   const listing = listings.find((l) => l.id === stay.listingId)!;
   const nights = nightsBetween(stay.checkin, stay.checkout);
   const days = calendar(stay.listingId, stay.checkin, addDays(stay.checkout, -1));
@@ -151,8 +155,8 @@ export function quote(stay: StayRequest, currency: string): Quote {
     nights,
     currency,
     lines: [
-      { label: `${nights} ${nights === 1 ? "noite" : "noites"}`, amount: lodging },
-      { label: "Taxa de limpeza", amount: cleaning },
+      { label: t.n(nights, t.night), amount: lodging },
+      { label: t.fee.cleaningFee, amount: cleaning },
     ],
     total: lodging + cleaning,
   };

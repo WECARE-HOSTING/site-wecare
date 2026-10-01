@@ -7,6 +7,9 @@ export type Listing = {
   state: string;
   neighborhood: string;
   description: string;
+  /** Hostaway keeps its own `name`/`description` in English; used when the guest browses in English. */
+  nameEn: string;
+  descriptionEn: string;
   houseRules: string;
   personCapacity: number;
   bedrooms: number;
@@ -22,6 +25,7 @@ export type Listing = {
   lng: number | null;
   rating: number | null;
   images: ListingImage[];
+  /** Amenity ids (see amenities.ts), not display text. */
   amenities: string[];
 };
 

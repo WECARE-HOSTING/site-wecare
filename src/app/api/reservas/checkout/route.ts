@@ -1,10 +1,12 @@
+import { getT } from "@/lib/reservas/lang";
+import type { T } from "@/lib/reservas/i18n";
 import { parseStay, quoteStay, StayError } from "@/lib/reservas/booking";
 import { HoldConflictError, createHold, releaseHold } from "@/lib/reservas/hostaway";
 import { createCheckoutLink, infinitePayConfigured } from "@/lib/reservas/infinitepay";
 import { siteUrl } from "@/lib/reservas/site-url";
 import type { GuestDetails } from "@/lib/reservas/types";
 
-function parseGuest(input: Record<string, unknown>): GuestDetails {
+function parseGuest(input: Record<string, unknown>, t: T): GuestDetails {
   const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
   const guest = {
     firstName: text(input.firstName, 60),
@@ -12,10 +14,10 @@ function parseGuest(input: Record<string, unknown>): GuestDetails {
     email: text(input.email, 120).toLowerCase(),
     phone: text(input.phone, 30).replace(/[^\d+]/g, ""),
   };
-  if (!guest.firstName || !guest.lastName) throw new StayError("Informe nome e sobrenome.");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email)) throw new StayError("Informe um e-mail válido.");
+  if (!guest.firstName || !guest.lastName) throw new StayError(t.errName);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email)) throw new StayError(t.errEmail);
   const digits = guest.phone.replace(/\D/g, "");
-  if (digits.length < 10) throw new StayError("Informe um telefone com DDD.");
+  if (digits.length < 10) throw new StayError(t.errPhone);
   if (!guest.phone.startsWith("+")) guest.phone = digits.startsWith("55") && digits.length >= 12 ? `+${digits}` : `+55${digits}`;
   return guest;
 }
@@ -26,28 +28,29 @@ function parseGuest(input: Record<string, unknown>): GuestDetails {
  * payment link can't be created the hold is released immediately.
  */
 export async function POST(request: Request) {
+  const t = await getT();
   if (!infinitePayConfigured()) {
-    return Response.json({ error: "O pagamento online ainda não está disponível. Fale com a gente pelo WhatsApp para reservar." }, { status: 503 });
+    return Response.json({ error: t.errPaymentsOff }, { status: 503 });
   }
   let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "Requisição inválida." }, { status: 400 });
+    return Response.json({ error: t.errBadRequest }, { status: 400 });
   }
 
   try {
-    const stay = parseStay(body);
-    const guest = parseGuest((body.guest ?? {}) as Record<string, unknown>);
-    if (body.acceptedTerms !== true) throw new StayError("É preciso aceitar as regras da casa e a política de cancelamento.");
+    const stay = parseStay(body, t);
+    const guest = parseGuest((body.guest ?? {}) as Record<string, unknown>, t);
+    if (body.acceptedTerms !== true) throw new StayError(t.errTerms);
 
-    const { listing, quote } = await quoteStay(stay);
+    const { listing, quote } = await quoteStay(stay, t);
     if (typeof body.expectedTotal === "number" && Math.abs(body.expectedTotal - quote.total) > 0.5) {
-      return Response.json({ error: "O preço dessas datas foi atualizado. Confira o novo valor antes de pagar.", quote }, { status: 409 });
+      return Response.json({ error: t.errPriceChanged, quote }, { status: 409 });
     }
 
     const hold = await createHold(quote, guest).catch((err) => {
-      if (err instanceof HoldConflictError) throw new StayError("Essas datas acabaram de ser reservadas. Escolha outras datas.");
+      if (err instanceof HoldConflictError) throw new StayError(t.errJustBooked);
       throw err;
     });
 
@@ -57,11 +60,11 @@ export async function POST(request: Request) {
     } catch (err) {
       console.error(`[reservas] payment link failed, releasing hold ${hold.id}`, err);
       await releaseHold(hold.id).catch((e) => console.error(`[reservas] ALERTA: não foi possível liberar a reserva ${hold.id}`, e));
-      return Response.json({ error: "Não foi possível abrir o pagamento agora. Tente novamente em instantes." }, { status: 502 });
+      return Response.json({ error: t.errPaymentLink }, { status: 502 });
     }
   } catch (err) {
     if (err instanceof StayError) return Response.json({ error: err.message }, { status: 422 });
     console.error("[reservas] checkout failed", err);
-    return Response.json({ error: "Não foi possível concluir agora. Tente novamente em instantes." }, { status: 502 });
+    return Response.json({ error: t.errCheckoutFailed }, { status: 502 });
   }
 }
