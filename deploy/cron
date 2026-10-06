@@ -1,0 +1,2 @@
+# crontab do usuário jarvis — auto-deploy do site WeCare (a cada 5 minutos, como as outras apps)
+*/5 * * * * /home/jarvis/apps/wecare-site/deploy/auto-deploy.sh

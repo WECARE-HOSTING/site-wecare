@@ -1,0 +1,4 @@
+# Instalar em /etc/sudoers.d/wecare-site-deploy (modo 0440). Permite ao auto-deploy (usuário jarvis)
+# reiniciar o site e aquecer o cache depois da publicação — nada além disso.
+jarvis ALL=(root) NOPASSWD: /usr/bin/systemctl restart wecare-site
+jarvis ALL=(root) NOPASSWD: /usr/local/bin/wecare-reservas-cron.sh manutencao
