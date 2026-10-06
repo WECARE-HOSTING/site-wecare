@@ -46,3 +46,4 @@ preciso `ANTHROPIC_API_KEY` nesse arquivo.
 Usuário `wecaresite`; `/srv/wecare-site/{releases,cache}`; `deploy/systemd/*.service` em `/etc/systemd/system/`;
 `deploy/sudoers/*` em `/etc/sudoers.d/` (0440); clone em `/home/jarvis/apps/wecare-site`; `deploy/cron` no crontab do jarvis;
 `deploy/nginx/*` em `sites-available` + link em `sites-enabled` + `certbot --nginx`.
+
