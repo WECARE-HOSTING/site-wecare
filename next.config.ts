@@ -101,6 +101,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Self-contained server (server.js + traced node_modules) that scripts/deploy-vps.sh ships to the VPS.
+  output: "standalone",
   images: {
     // Listing photos never change under the same URL; keep optimized copies for 30 days instead of the 4 h default.
     minimumCacheTTL: 60 * 60 * 24 * 30,

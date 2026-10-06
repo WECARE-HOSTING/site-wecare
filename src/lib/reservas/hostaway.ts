@@ -36,7 +36,8 @@ export function hostawayConfigured(): boolean {
  */
 function mockMode(): boolean {
   if (hostawayConfigured()) return false;
-  if (process.env.VERCEL_ENV === "production") {
+  // WECARE_PRODUCTION is set on the VPS (and VERCEL_ENV on Vercel): either way, never serve sample data.
+  if (process.env.WECARE_PRODUCTION === "1" || process.env.VERCEL_ENV === "production") {
     throw new HostawayError("Hostaway credentials are not configured");
   }
   return true;
