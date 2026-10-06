@@ -3,3 +3,4 @@
 */10 * * * * /usr/local/bin/wecare-reservas-cron.sh manutencao
 5 * * * * /usr/local/bin/wecare-reservas-cron.sh traducoes
 35 * * * * /usr/local/bin/wecare-reservas-cron.sh pontos
+* * * * * /usr/local/bin/wecare-site-monitor.sh
