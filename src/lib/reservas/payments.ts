@@ -90,7 +90,7 @@ export async function expireHolds(now = Date.now()): Promise<{ checked: number; 
         console.error(`[reservas] payment check still failing for hold ${hold.id} after the grace period; releasing`, err);
       }
     }
-    await releaseHold(hold.id);
+    await releaseHold(hold.id, hold);
     released.push(hold.id);
   }
   return { checked: holds.length, released, confirmed };

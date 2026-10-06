@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       return Response.json({ url, reservationId: hold.id });
     } catch (err) {
       console.error(`[reservas] payment link failed, releasing hold ${hold.id}`, err);
-      await releaseHold(hold.id).catch((e) => console.error(`[reservas] ALERTA: não foi possível liberar a reserva ${hold.id}`, e));
+      await releaseHold(hold.id, quote).catch((e) => console.error(`[reservas] ALERTA: não foi possível liberar a reserva ${hold.id}`, e));
       return Response.json({ error: t.errPaymentLink }, { status: 502 });
     }
   } catch (err) {
