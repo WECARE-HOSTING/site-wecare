@@ -1,0 +1,5 @@
+# crontab do usuário root — agendador das rotinas do site de reservas (script: /usr/local/bin/wecare-reservas-cron.sh,
+# cópia em deploy/reservas-cron.sh). Quem trabalha é o próprio site; o cron só chama as rotas protegidas por CRON_SECRET.
+*/10 * * * * /usr/local/bin/wecare-reservas-cron.sh manutencao
+5 * * * * /usr/local/bin/wecare-reservas-cron.sh traducoes
+35 * * * * /usr/local/bin/wecare-reservas-cron.sh pontos

@@ -4,8 +4,9 @@ import { getListings } from "@/lib/reservas/hostaway";
 
 const SITE_URL = "https://www.wecarehosting.com.br";
 
-// Listing pages come from Hostaway, so the sitemap is rebuilt hourly rather than frozen at build time.
-export const revalidate = 3600;
+// Listing pages come from Hostaway, so the sitemap is built per request (cheap: the listings are cached)
+// instead of being frozen at build time, which also keeps the build independent of Hostaway credentials.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const listings = await getListings().catch((err) => {
