@@ -104,7 +104,15 @@ export async function checkPayment(params: { orderNsu: string; transactionNsu?: 
     body: JSON.stringify({ handle: handle(), order_nsu: params.orderNsu, transaction_nsu: params.transactionNsu ?? undefined, slug: params.slug ?? undefined }),
   });
   const b = (await res.json().catch(() => null)) as { success?: boolean; paid?: boolean; amount?: number; paid_amount?: number; capture_method?: string; installments?: number } | null;
-  if (!res.ok || !b?.success) throw new InfinitePayError(`InfinitePay payment_check failed (${res.status})`);
+  if (!res.ok || !b) throw new InfinitePayError(`InfinitePay payment_check failed (${res.status})`);
+  // For an order nobody has paid (the guest opened the checkout and left), InfinitePay answers 200 with
+  // {"success":false} and no `paid` field. That is "not paid", not an outage: treating it as an error kept
+  // abandoned holds blocking the calendar for hours instead of the promised 30 minutes (found 06/10/2026).
+  if (b.success === false) {
+    console.warn(`[reservas] payment_check says success:false for ${params.orderNsu}; treating as not paid`);
+    return { paid: false, amountCents: 0, paidAmountCents: 0, method: null, installments: null };
+  }
+  if (!b.success) throw new InfinitePayError(`InfinitePay payment_check returned an unexpected body (${res.status})`);
   return { paid: Boolean(b.paid), amountCents: Number(b.amount ?? 0), paidAmountCents: Number(b.paid_amount ?? 0), method: b.capture_method ?? null, installments: b.installments ?? null };
 }
 
