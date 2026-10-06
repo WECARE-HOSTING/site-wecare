@@ -538,14 +538,14 @@ export async function createHold(quote: Quote, guest: GuestDetails): Promise<Hel
   );
 
   const conflicts = await conflictingReservations(quote.listingId, quote.checkin, quote.checkout, hold.id).catch(async (err) => {
-    await releaseHold(hold.id).catch(() => {});
+    await releaseHold(hold.id, quote).catch(() => {});
     throw err;
   });
   // A newer hold on the same nights yields to us (it runs this same check);
   // anything else — an older hold or a real booking — wins over ours.
   const blocking = conflicts.filter((c) => !(c.status === HOLD_STATUS && c.id > hold.id));
   if (blocking.length) {
-    await releaseHold(hold.id);
+    await releaseHold(hold.id, quote);
     throw new HoldConflictError(`Dates taken by reservation(s) ${blocking.map((c) => c.id).join(", ")}`);
   }
   return hold;
@@ -579,9 +579,48 @@ export async function confirmHold(hold: HeldReservation, orderNsu: string, payme
 }
 
 /** Unpaid holds are deleted, not cancelled: Hostaway refuses to cancel them, and they never were real bookings. */
-export async function releaseHold(id: number): Promise<void> {
+type Stay = { listingId: number; checkin: string; checkout: string };
+
+/**
+ * Hostaway does NOT always reopen the calendar when a reservation is deleted. Verified 06/10/2026 on the
+ * real listing: a hold that lived 5 seconds left its nights "available" after the DELETE, but holds that
+ * lived 10 and 30 minutes left them "blocked" (isAvailable 0, no reservation attached) and they stayed
+ * that way (9+ minutes watched), so the site kept answering "datas indisponíveis" for a booking nobody
+ * paid. Our holds last 30 minutes, so this is the normal case. After deleting a hold we therefore reopen
+ * exactly its nights that are still closed with nothing attached to them. Nights covered by another reservation are never touched, and price/min-stay are untouched
+ * (only isAvailable is sent).
+ */
+async function reopenNights(stay: Stay): Promise<void> {
+  await sleep(1500); // let Hostaway finish processing the deletion
+  const days = await call<Raw[]>(`/listings/${stay.listingId}/calendar?startDate=${stay.checkin}&endDate=${addDays(stay.checkout, -1)}&includeResources=1`);
+  const stale = days
+    .filter((d) => num(d.isAvailable) === 0 && ["blocked", "reserved"].includes(str(d.status)) && !(Array.isArray(d.reservations) && d.reservations.length))
+    .map((d) => str(d.date))
+    .sort();
+  // contiguous runs, so one PUT frees "01–03/05" instead of three calls
+  const runs: [string, string][] = [];
+  for (const date of stale) {
+    const last = runs.at(-1);
+    if (last && addDays(last[1], 1) === date) last[1] = date;
+    else runs.push([date, date]);
+  }
+  for (const [startDate, endDate] of runs) {
+    await call(`/listings/${stay.listingId}/calendar`, { method: "PUT", body: JSON.stringify({ startDate, endDate, isAvailable: 1 }) });
+  }
+}
+
+/**
+ * Deletes an unpaid hold and, when `stay` is given, frees its nights again (see reopenNights).
+ * A failure to reopen is logged loudly but does not undo the deletion.
+ */
+export async function releaseHold(id: number, stay?: Stay): Promise<void> {
   if (mockMode()) return mock.releaseHold(id);
   await call(`/reservations/${id}`, { method: "DELETE" });
+  if (stay) {
+    await reopenNights(stay).catch((err) =>
+      console.error(`[reservas] ALERTA: reserva ${id} apagada, mas não consegui reabrir as noites ${stay.checkin}→${stay.checkout} do imóvel ${stay.listingId}; elas podem ficar bloqueadas`, err),
+    );
+  }
 }
 
 /** Our unpaid holds: Hostaway filters by status; the host-note marker proves the hold is ours. */
