@@ -10,7 +10,7 @@ import { CACHE_MODEL_TAG, aiModel } from "./model";
 /**
  * "What's nearby" for a listing, taken from the places its own description names (Hostaway text
  * is the source of truth; nothing is added from the model's own knowledge):
- *   1. Claude Haiku lists the specific named places in the description;
+ *   1. The model lists the specific named places in the description;
  *   2. OpenStreetMap's Nominatim finds each one near the listing's (rounded) location;
  *   3. roads, rivers and anything implausibly far are dropped.
  * Slow (a geocode per place, 1 request/second as Nominatim requires), so it is cached for 30 days
