@@ -28,9 +28,11 @@ log() { printf '%s %s\n' "$(date -Is)" "$1" >> "$LOG_FILE"; }
 main() {
 
   # Evita duas execuções sobrepostas (um build pode levar mais de 5 min).
+  # Os dois ambientes compartilham este lock. Esperar (em vez de desistir na hora) evita que um deles perca para
+  # sempre a corrida quando os dois crons disparam juntos — foi o que deixou a produção sem publicar em 07/10/2026.
   exec 9>"$LOCK_FILE"
-  if ! flock -n 9; then
-    log "Já existe um deploy em andamento — saindo."
+  if ! flock -w 900 9; then
+    log "Outro deploy ocupou o servidor por mais de 15 min — saindo; o próximo ciclo tenta de novo."
     exit 0
   fi
 
