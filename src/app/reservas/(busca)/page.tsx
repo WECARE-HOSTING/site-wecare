@@ -28,9 +28,9 @@ type Search = { destino?: string; checkin?: string; checkout?: string; hospedes?
 const placeOf = (l: Listing) => (l.state && l.state !== l.city ? `${l.city}, ${l.state}` : l.city);
 const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
 
-// The photo behind the search bar. Change the id to feature another property; when it is not
-// (or no longer) among our listings the best-rated one is used.
-const HERO_LISTING_ID = 415609;
+// The photo behind the search bar. To change it, replace public/reservas/hero-sala.jpg (about 2000 px wide;
+// the image is optimised on the fly) or point this at another file in public/.
+const HERO_IMAGE = "/reservas/hero-sala.jpg";
 
 // Cities that count as "near the sea" for the home-page section.
 const COAST_CITIES = new Set(
@@ -138,7 +138,6 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
     .slice(0, 8)
     .map((l) => card(l, l.basePrice, true, null));
 
-  const hero = listings.find((l) => l.id === HERO_LISTING_ID && l.images.length) ?? [...listings].filter((l) => l.images.length).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
 
   const curated = (title: string, sub: string, items: ListingCardData[]) =>
     items.length ? (
@@ -151,23 +150,16 @@ export default async function ReservasPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <section className={`rs-hero${hero ? " rs-hero-photo" : ""}`}>
-        {hero && (
-          <>
-            <div className="rs-hero-bg" aria-hidden="true">
-              <Image src={hero.images[0].url} alt="" fill priority sizes="100vw" />
-            </div>
-            <div className="rs-hero-shade" aria-hidden="true" />
-          </>
-        )}
+      <section className="rs-hero rs-hero-photo">
+        <div className="rs-hero-bg" aria-hidden="true">
+          <Image src={HERO_IMAGE} alt="" fill priority sizes="100vw" />
+        </div>
+        <div className="rs-hero-shade" aria-hidden="true" />
         <div className="rs-wrap rs-hero-in">
           <h1 className="rs-hero-title">{t.heroA} <em>{t.heroEm}</em>.</h1>
           <p className="rs-hero-sub">{t.heroSub}</p>
           <SearchBar destinations={destinations} initial={{ destino, checkin, checkout, hospedes: sp.hospedes ? guests : null }} />
         </div>
-        {hero && (
-          <Link href={`/reservas/${hero.id}`} className="rs-hero-credit">{t.heroCredit(nameOf(hero))}</Link>
-        )}
       </section>
 
       {!searching && (

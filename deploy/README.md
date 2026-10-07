@@ -14,6 +14,26 @@ Saímos da Vercel porque o plano Hobby pausou a conta por excesso de requisiçõ
 
 Falhas de build ou de `npm ci` deixam a versão atual no ar (o log diz o motivo).
 
+## Ambientes e fluxo de trabalho
+| | Produção | Desenvolvimento |
+|---|---|---|
+| Endereço | https://www.wecarehosting.com.br | https://dev-site.wecarehosting.com.br |
+| Branch | `main` | `develop` |
+| Publicação | em até 5 min depois do merge no `main` | em até 5 min depois do merge no `develop` |
+| Clone no servidor | `/home/jarvis/apps/wecare-site` | `/home/jarvis/apps/wecare-site-dev` |
+| Serviço / porta | `wecare-site` / 3010 | `wecare-site-dev` / 3011 (teto de 800 MB de RAM) |
+| Releases | `/srv/wecare-site` | `/srv/wecare-site-dev` |
+| Variáveis | `/etc/wecare-site.env` | `/etc/wecare-site-dev.env` |
+| Pagamento (InfinitePay) | ligado | **desligado** (sem `INFINITEPAY_HANDLE`): não cria reservas nem links de pagamento |
+| Rotinas agendadas (manutenção, traduções…) | sim | não |
+| Indexação no Google | sim | **não** (`X-Robots-Tag: noindex`) e faixa laranja "AMBIENTE DE TESTES" no topo |
+
+**Como mudar o site com segurança:** `feature` → PR para **`develop`** → (publica sozinho no ambiente de testes) →
+quem pediu a mudança confere em dev-site → PR de **`develop` para `main`** → (publica sozinho em produção).
+`develop` e `main` usam o mesmo `deploy/auto-deploy.sh`; o do desenvolvimento só troca parâmetros (`deploy/auto-deploy-dev.sh`).
+Há **um lock só** para os dois ambientes: o servidor é pequeno e nunca faz dois builds ao mesmo tempo (um ciclo é
+pulado e o seguinte, 5 min depois, publica).
+
 ## Peças
 | Peça | Onde |
 |---|---|

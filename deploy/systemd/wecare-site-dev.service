@@ -1,0 +1,28 @@
+[Unit]
+Description=WeCare site - AMBIENTE DE DESENVOLVIMENTO (Next.js standalone) - dev-site.wecarehosting.com.br
+After=network.target
+
+[Service]
+User=wecaresite
+Group=wecaresite
+WorkingDirectory=/srv/wecare-site-dev/current
+EnvironmentFile=/etc/wecare-site-dev.env
+Environment=NODE_ENV=production
+Environment=PORT=3011
+Environment=HOSTNAME=127.0.0.1
+Environment=NEXT_TELEMETRY_DISABLED=1
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+# Servidor compartilhado: o ambiente de testes tem teto de memória menor que o de produção.
+MemoryHigh=600M
+MemoryMax=800M
+CPUWeight=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/wecare-site-dev/cache
+
+[Install]
+WantedBy=multi-user.target
