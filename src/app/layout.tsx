@@ -23,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full">
       <body className="min-h-full">
+        {process.env.SITE_ENV_LABEL && <div className="wc-env-banner">{process.env.SITE_ENV_LABEL}</div>}
         {children}
         <GtagLeadTracker />
         <WhatsAppFloat />

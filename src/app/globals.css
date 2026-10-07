@@ -552,3 +552,6 @@ details[open] .faq-chevron {
 .wc-wa-float:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 5px #128c7e; }
 /* On a listing page the booking bar sits at the bottom on phones: stay clear of it. */
 @media (max-width: 880px) { body:has(.rs-book-bar) .wc-wa-float { bottom: 96px; } }
+
+/* Faixa do ambiente de testes (só aparece quando SITE_ENV_LABEL está definido, ou seja, nunca em produção) */
+.wc-env-banner { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 9999; background: #b45309; color: #fff; font: 700 11px/1 system-ui, sans-serif; letter-spacing: 0.06em; padding: 4px 14px 5px; border-radius: 0 0 8px 8px; pointer-events: none; text-transform: uppercase; }

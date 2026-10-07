@@ -1,0 +1,29 @@
+# Ambiente de desenvolvimento do site. O certificado HTTPS é emitido com `certbot --nginx -d dev-site.wecarehosting.com.br`
+# depois que o DNS apontar para o servidor (o certbot completa este arquivo).
+server {
+    listen 80;
+    server_name dev-site.wecarehosting.com.br;
+
+    client_max_body_size 2m;
+
+    # Ambiente de testes: nunca deve aparecer no Google.
+    add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+
+    location /api/reservas/ {
+        limit_req zone=wecare_api burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3011;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:3011;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+}
