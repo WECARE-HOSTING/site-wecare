@@ -9,8 +9,7 @@ import { CACHE_MODEL_TAG, aiModel } from "./model";
 
 /**
  * Machine translation of listing copy (Hostaway only holds it in Portuguese, plus English for the
- * description). Claude Haiku 4.5 through Anthropic's API (see model.ts), a few US$ for the whole
- * catalogue the first time and cents afterwards.
+ * description). A few US$ for the whole catalogue the first time and cents afterwards.
  *
  * One stored file per listing and language (see durable.ts), keyed by a hash of the source text:
  * reused across deploys, and redone only when someone edits the text in Hostaway.
