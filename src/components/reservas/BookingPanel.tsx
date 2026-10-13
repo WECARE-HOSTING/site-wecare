@@ -60,20 +60,32 @@ export default function BookingPanel({ listingId, basePrice, currency, personCap
     if (!stayKey) return;
     const ctrl = new AbortController();
     const [ci, co, g] = stayKey.split("|");
-    fetch("/api/reservas/cotacao", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId, checkin: ci, checkout: co, guests: Number(g) }),
-      signal: ctrl.signal,
-    })
-      .then(async (res) => {
-        const body = await res.json();
-        setQuoteResult({ key: stayKey, state: res.ok ? { status: "ok", quote: body.quote } : { status: "error", message: body.error ?? t.quoteFailed } });
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") setQuoteResult({ key: stayKey, state: { status: "error", message: t.offline } });
-      });
-    return () => ctrl.abort();
+    // Cada clique em +/- hóspedes muda a chave: espera o visitante parar de clicar antes de consultar.
+    const timer = setTimeout(async () => {
+      const ask = () =>
+        fetch("/api/reservas/cotacao", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ listingId, checkin: ci, checkout: co, guests: Number(g) }),
+          signal: ctrl.signal,
+        });
+      try {
+        let res = await ask();
+        if (res.status === 429) {
+          // limite de requisições do servidor: espera um pouco e tenta uma vez mais
+          await new Promise((r) => setTimeout(r, 2500));
+          res = await ask();
+        }
+        const body = await res.json().catch(() => null);
+        setQuoteResult({ key: stayKey, state: res.ok && body?.quote ? { status: "ok", quote: body.quote } : { status: "error", message: body?.error ?? t.quoteFailed } });
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") setQuoteResult({ key: stayKey, state: { status: "error", message: t.offline } });
+      }
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
   }, [listingId, stayKey, t]);
 
   const quote: QuoteState = !stayKey ? { status: "idle" } : quoteResult?.key === stayKey ? quoteResult.state : { status: "loading" };
