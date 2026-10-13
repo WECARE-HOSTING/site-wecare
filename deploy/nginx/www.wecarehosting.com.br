@@ -15,7 +15,7 @@ server {
 
     client_max_body_size 2m;
 
-    # APIs que falam com o Hostaway/InfinitePay: mesmo teto que existia no WAF (20 req/min por IP)
+    # APIs que falam com o Hostaway/InfinitePay: teto de 50 req/min por IP (zona wecare_api)
     # Cotação e calendário: leves e disparados a cada clique (datas, hóspedes); teto mais folgado que o resto da API
     # (zona wecare_quote, 120 req/min por IP, em /etc/nginx/conf.d/wecare-site-ratelimit.conf)
     location ~ ^/api/reservas/(cotacao|calendario)(/|$) {
