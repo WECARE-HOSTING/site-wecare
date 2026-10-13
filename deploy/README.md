@@ -42,7 +42,7 @@ pulado e o seguinte, 5 min depois, publica).
 | Releases | `/srv/wecare-site/releases/` (guarda as 4 últimas); `current` = a ativa |
 | Cache do Next (imagens otimizadas) | `/srv/wecare-site/cache`, compartilhado entre releases |
 | Segredos | `/etc/wecare-site.env` (root, modo 600) — fora do repositório |
-| nginx + HTTPS | `deploy/nginx/www.wecarehosting.com.br`; certificado Let's Encrypt (certbot, renovação automática); limite 20 req/min por IP em `/api/reservas/` e `/api/infinitepay/` |
+| nginx + HTTPS | `deploy/nginx/www.wecarehosting.com.br`; certificado Let's Encrypt (certbot, renovação automática); limite 50 req/min por IP em `/api/reservas/` e `/api/infinitepay/`, exceto cotação e calendário (zona `wecare_quote`: 120 req/min, burst 30; declarar `limit_req_zone ... zone=wecare_quote:10m rate=120r/m;` em `conf.d/wecare-site-ratelimit.conf`) |
 | sudoers do deploy | `deploy/sudoers/wecare-site-deploy` (só reiniciar o site e aquecer o cache) |
 | Agendador de rotinas | cron do root (`deploy/cron-root`) + `deploy/reservas-cron.sh`; log em `/var/log/wecare-reservas-cron.log` |
 | Monitor e alertas | `deploy/monitor.sh` → `/usr/local/bin/wecare-site-monitor.sh`, cron do root a cada minuto; config em `/etc/wecare-monitor.env`; log `/var/log/wecare-monitor.log` (ver abaixo) |

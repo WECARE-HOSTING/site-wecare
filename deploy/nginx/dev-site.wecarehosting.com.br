@@ -9,6 +9,18 @@ server {
     # Ambiente de testes: nunca deve aparecer no Google.
     add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
 
+    # Cotação e calendário: leves e disparados a cada clique (datas, hóspedes); teto mais folgado que o resto da API
+    # (zona wecare_quote, 120 req/min por IP, em /etc/nginx/conf.d/wecare-site-ratelimit.conf)
+    location ~ ^/api/reservas/(cotacao|calendario)(/|$) {
+        limit_req zone=wecare_quote burst=30 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3011;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 320s;
+    }
     location /api/reservas/ {
         limit_req zone=wecare_api burst=10 nodelay;
         limit_req_status 429;
