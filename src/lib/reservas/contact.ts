@@ -1,4 +1,4 @@
-// Same WeCare sales number the rest of the site uses (CTAFinal, Footer).
-const WA = "https://wa.me/5511969760183";
+// WeCare contact number for the booking pages (+55 11 96976-0096).
+const WA = "https://wa.me/5511969760096";
 
 export const whatsappLink = (text: string) => `${WA}?text=${encodeURIComponent(text)}`;
