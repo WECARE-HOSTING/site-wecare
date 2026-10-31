@@ -19,11 +19,11 @@ export default function Avaliador() {
       <button style={{ padding: 14, fontSize: 17, background: "#0f5132", color: "#fff", border: 0, borderRadius: 8 }}>Ver estimativa</button>
     </form>
     {r?.tipo === "estimativa" && <section>
-      <h2>Receita bruta estimada por ano</h2>
-      <div style={{ display: "flex", gap: 12 }}>{(["conservadora","provavel","otimista"] as const).map(k => <div key={k} style={{ flex: 1, padding: 14, borderRadius: 10, background: k === "provavel" ? "#e7f5ee" : "#f5f5f5" }}><small>{k === "provavel" ? "Provável" : k[0].toUpperCase() + k.slice(1)}</small><div style={{ fontSize: 22, fontWeight: 700 }}>{brl(r.anual[k])}</div></div>)}</div>
+      <h2>Potencial com gestão WeCare (receita bruta por ano)</h2>
+      <div style={{ display: "flex", gap: 12 }}>{(["provavel","otimista"] as const).map(k => <div key={k} style={{ flex: 1, padding: 14, borderRadius: 10, background: k === "provavel" ? "#e7f5ee" : "#f5f5f5" }}><small>{k === "provavel" ? "Potencial provável" : "Potencial otimista"}</small><div style={{ fontSize: 22, fontWeight: 700 }}>{brl(r.anual[k])}</div></div>)}</div>
       <p>≈ {brl(r.mensalMedia)}/mês em média. Sazonalidade (provável):</p>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 90 }}>{MESES.map(m => <div key={m} title={brl(r.sazonal[m])} style={{ flex: 1, textAlign: "center", fontSize: 11 }}><div style={{ background: "#0f5132", height: Math.max(4, r.sazonal[m] / Math.max(...Object.values(r.sazonal as Record<string, number>)) * 70) }} />{m}</div>)}</div>
-      <p style={{ fontSize: 13, color: "#666" }}>Base: {r.base.comparaveis} imóveis comparáveis {r.base.fonte ? `do mercado (${r.base.fonte})` : "geridos pela WeCare"} (diária mediana {brl(r.base.diariaMediana)}, ocupação mediana {r.base.ocupacaoMediana}%), últimos 12 meses, atualizado em {r.base.atualizado}. Confiança {r.confianca}. Valor bruto antes de taxas de plataforma, limpeza e gestão. Não é garantia de receita: localização exata, padrão e fotos mudam o resultado.</p>
+      <p style={{ fontSize: 13, color: "#666" }}>Base: {r.base.comparaveis} imóveis comparáveis {r.base.fonte ? `do mercado (${r.base.fonte})` : "geridos pela WeCare"} (diária mediana {brl(r.base.diariaMediana)}, ocupação mediana {r.base.ocupacaoMediana}%), últimos 12 meses, atualizado em {r.base.atualizado}. Confiança {r.confianca}. Estimativa baseada em imóveis que gerimos e em dados de mercado; não é garantia. Valor bruto, antes de taxas de plataforma, limpeza e gestão.</p>
     </section>}
     {r?.tipo === "personalizada" && <section><h2>Avaliação personalizada</h2><p>{r.motivo}</p></section>}
     {r && <a href={wa()} style={{ display: "block", textAlign: "center", marginTop: 20, padding: 14, background: "#25d366", color: "#fff", borderRadius: 8, fontWeight: 700, textDecoration: "none" }}>Receber avaliação detalhada no WhatsApp</a>}
