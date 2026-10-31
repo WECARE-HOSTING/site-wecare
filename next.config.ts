@@ -109,6 +109,13 @@ const nextConfig: NextConfig = {
     // Listing photos for /reservas (Hostaway bucket + Airbnb CDN).
     remotePatterns: LISTING_IMAGE_PATTERNS.map((p) => new URL(p)),
   },
+  // Hot sites estáticos em public/casas: /casas e /casas/<slug> servem o index.html da pasta.
+  async rewrites() {
+    return [
+      { source: "/casas", destination: "/casas/index.html" },
+      { source: "/casas/:slug([a-z0-9-]+)", destination: "/casas/:slug/index.html" },
+    ];
+  },
   async redirects() {
     return [...bookingSiteRedirects, { source: "/reserva", destination: "/reservas", permanent: true }, ...legacyRedirects];
   },
