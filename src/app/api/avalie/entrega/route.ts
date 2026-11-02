@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { estimar, linkWhatsapp, quartosValidos, resumoTexto, type Input, type Regiao, type TipoImovel } from "@/lib/avaliador";
-import { hashIp, registrarUso, salvarLead, validarContato, enviarTexto } from "@/lib/avaliador-leads";
-import { marcarCookies } from "@/lib/avaliador-cookies";
+import { hashIp, salvarLead, validarContato, enviarTexto } from "@/lib/avaliador-leads";
 import { pdfEstimativa } from "@/lib/avaliador-pdf";
 
 export const runtime = "nodejs";
@@ -34,11 +33,6 @@ export async function POST(req: Request) {
   const resultado = estimar(input);
   const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "0").trim();
   await salvarLead(contato, hashIp(ip), { ...input, canal });
-  try {
-    await registrarUso(hashIp(ip), true);
-  } catch (err) {
-    console.error("[avaliador] falha ao registrar uso na entrega", err);
-  }
 
   const resumo = resumoTexto(input, resultado);
   if (canal === "pdf") {
@@ -50,17 +44,14 @@ export async function POST(req: Request) {
         "Cache-Control": "no-store",
       },
     });
-    marcarCookies(res, req, { uso: true, lead: true });
     return res;
   }
   if (canal === "whatsapp") {
-    const res = NextResponse.json({
+    return NextResponse.json({
       ok: true,
       url: linkWhatsapp(contato.telefone, resumo),
       mensagem: "Abrimos o WhatsApp com o resumo pronto para enviar.",
     });
-    marcarCookies(res, req, { uso: true, lead: true });
-    return res;
   }
   const envio = await enviarTexto(contato.email, "Sua estimativa WeCare Hosting", resumo);
   const mensagem = envio === "enviado"
@@ -68,7 +59,5 @@ export async function POST(req: Request) {
     : envio === "sem-smtp"
       ? "Recebemos seu e-mail. O envio automático está desligado neste servidor até definirem AVALIADOR_SMTP_HOST; o contato fica registrado."
       : "Não foi possível enviar o e-mail agora. Seu contato foi registrado.";
-  const res = NextResponse.json({ ok: true, enviado: envio === "enviado", mensagem });
-  marcarCookies(res, req, { uso: true, lead: true });
-  return res;
+  return NextResponse.json({ ok: true, enviado: envio === "enviado", mensagem });
 }

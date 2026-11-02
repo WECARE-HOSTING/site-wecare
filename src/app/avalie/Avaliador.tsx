@@ -12,36 +12,29 @@ type R = any;
 const box = { padding: 12, fontSize: 16, width: "100%", marginTop: 6, border: "1px solid var(--stone-400)", borderRadius: 8, background: "#fff", color: "var(--text-strong)", fontFamily: "var(--font-sans)" } as const;
 const btn = { padding: "14px 16px", fontSize: 16, border: 0, borderRadius: 8, fontWeight: 600, cursor: "pointer", width: "100%", fontFamily: "var(--font-sans)" } as const;
 
-function jaUsouSemContato() {
-  let uso = false;
-  let lead = false;
-  try {
-    uso = Number(localStorage.getItem("wc_av_usos") || 0) >= 1;
-    lead = localStorage.getItem("wc_av_lead") === "1";
-  } catch { /* modo privado */ }
-  if (typeof document !== "undefined" && /(?:^|;\s*)wc_av_visto=1(?:;|$)/.test(document.cookie)) uso = true;
-  if (typeof document !== "undefined" && /(?:^|;\s*)wc_av_contato=1(?:;|$)/.test(document.cookie)) lead = true;
-  return uso && !lead;
-}
+/** v2 ignora wc_av_uso, wc_av_visto e o contador por IP das versões de teste. */
+const CHAVE_N = "wc_av_v2_n";
+const CHAVE_CONTATO = "wc_av_v2_contato";
 
 type ContatoSalvo = { email: string; telefone: string; consentimento: true };
 
-function marcarUsoLocal(comContato: boolean) {
-  try { localStorage.setItem("wc_av_usos", "1"); if (comContato) localStorage.setItem("wc_av_lead", "1"); } catch { /* segue o cookie */ }
-  const base = "Path=/; Max-Age=31536000; SameSite=Lax";
-  document.cookie = `wc_av_visto=1; ${base}`;
-  if (comContato) document.cookie = `wc_av_contato=1; ${base}`;
+function calculosMostrados() {
+  try { return Number(localStorage.getItem(CHAVE_N) || 0) || 0; } catch { return 0; }
 }
 
 function lerContato(): ContatoSalvo | null {
   try {
-    const j = JSON.parse(localStorage.getItem("wc_av_contato_dados") || "null") as Partial<ContatoSalvo> | null;
+    const j = JSON.parse(localStorage.getItem(CHAVE_CONTATO) || "null") as Partial<ContatoSalvo> | null;
     if (!j || j.consentimento !== true) return null;
     const email = String(j.email || "");
     const telefone = String(j.telefone || "");
     if (!email && !telefone) return null;
     return { email, telefone, consentimento: true };
   } catch { return null; }
+}
+
+function jaViuResultadoSemContato() {
+  return calculosMostrados() >= 1 && !lerContato();
 }
 
 function abrirEmNovaAba(url: string) {
@@ -56,8 +49,11 @@ function abrirEmNovaAba(url: string) {
 }
 
 function guardarContato(email: string, telefone: string) {
-  marcarUsoLocal(true);
-  try { localStorage.setItem("wc_av_contato_dados", JSON.stringify({ email, telefone, consentimento: true })); } catch { /* o cookie já marca o contato */ }
+  try { localStorage.setItem(CHAVE_CONTATO, JSON.stringify({ email, telefone, consentimento: true })); } catch { /* a próxima ação pede de novo */ }
+}
+
+function marcarCalculoMostrado() {
+  try { localStorage.setItem(CHAVE_N, String(calculosMostrados() + 1)); } catch { /* sem storage, cada visita começa do zero */ }
 }
 
 export default function Avaliador() {
@@ -83,9 +79,8 @@ export default function Avaliador() {
 
   async function enviar(leadInformado?: { email: string; telefone: string; consentimento: boolean } | null) {
     setErro("");
-    const salvo = lerContato();
-    if (!leadInformado && !salvo && jaUsouSemContato()) { setErroModal(""); setModal("novamente"); return; }
-    const leadEnvio = leadInformado ?? (jaUsouSemContato() ? salvo : null);
+    if (!leadInformado && jaViuResultadoSemContato()) { setErroModal(""); setModal("novamente"); return; }
+    const leadEnvio = leadInformado ?? null;
     const corpo = leadEnvio ? { ...corpoBase, lead: { ...leadEnvio, nome: "" } } : corpoBase;
     let res: Response;
     try {
@@ -95,21 +90,15 @@ export default function Avaliador() {
       return;
     }
     const j = await res.json().catch(() => null);
-    if (res.status === 422) { setErroModal(typeof j?.erro === "string" ? j.erro : "Confira o contato e o consentimento."); setModal("novamente"); return; }
-    if (j?.tipo === "lead" || res.status === 403) {
-      if (salvo && !leadInformado) { await enviar(salvo); return; }
-      setErroModal(typeof j?.erro === "string" ? j.erro : "");
-      setModal("novamente");
-      return;
-    }
+    if (res.status === 422 && leadInformado) { setErroModal(typeof j?.erro === "string" ? j.erro : "Confira o contato e o consentimento."); setModal("novamente"); return; }
     if (!res.ok || !j || (j.tipo !== "estimativa" && j.tipo !== "personalizada")) {
       setErro(typeof j?.erro === "string" ? j.erro : "Não foi possível calcular a estimativa.");
       return;
     }
     if (leadEnvio?.consentimento) guardarContato(leadEnvio.email, leadEnvio.telefone);
-    else marcarUsoLocal(false);
-    fecharModal();
     setR(j);
+    marcarCalculoMostrado();
+    fecharModal();
   }
 
   function abrirAcao(c: Canal) {

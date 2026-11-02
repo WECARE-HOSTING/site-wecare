@@ -105,7 +105,7 @@ AVALIADOR_SMTP_PASS=
 # AVALIADOR_SMTP_SECURE=starttls   # padrão na porta 587; tls na 465; plain só em relay local de confiança
 ```
 
-Os dois caminhos podem ficar ligados juntos. A segunda simulação pede contato pelo cookie `wc_av_uso`, mesmo se `AVALIADOR_DATA_DIR` ainda não existir. O e-mail da estimativa para o endereço digitado na tela usa o mesmo SMTP; sem `AVALIADOR_SMTP_HOST` a tela confirma o contato e não envia. Detalhe em `README.md`.
+Os dois caminhos podem ficar ligados juntos. A segunda simulação pede contato só no navegador (não por IP). O e-mail da estimativa para o endereço digitado na tela usa o mesmo SMTP; sem `AVALIADOR_SMTP_HOST` a tela confirma o contato e não envia. Detalhe em `README.md`.
 
 ## Operação
 ```bash
