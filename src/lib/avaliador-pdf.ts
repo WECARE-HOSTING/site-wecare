@@ -56,6 +56,7 @@ export async function pdfEstimativa(input: Input, r: Resultado): Promise<Uint8Ar
     y -= 84;
     linha(`Cerca de ${brl(r.mensalMedia)} por mês no cenário provável.`, 12, bold);
     y -= 6;
+    if (r.base.aproximada) linha(`Referência aproximada: ${r.base.referencia} (${r.base.comparaveis} comparáveis).`, 11, bold);
     linha("Premissas", 12, bold, NAVY);
     linha(`Faixa de quartos: ${r.base.faixa}${r.base.serie ? ` (serie tabelada: ${r.base.serie})` : ""}`);
     linha(`Comparáveis: ${r.base.comparaveis}. Diária mediana ${brl(r.base.diariaMediana)}. Ocupação mediana ${r.base.ocupacaoMediana}%.`);

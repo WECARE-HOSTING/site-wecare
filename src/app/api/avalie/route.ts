@@ -27,5 +27,5 @@ export async function POST(req: Request) {
     const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "0").trim();
     await salvarLead(lead, hashIp(ip), input);
   }
-  return NextResponse.json(estimar(input));
+  return NextResponse.json(estimar(input), { headers: { "Cache-Control": "private, no-store, max-age=0", "X-Avalie-Versao": "referencia-aproximada" } });
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Avaliador from "./Avaliador";
 // noindex até o lançamento. A URL não entra em src/app/sitemap.ts.
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Avalie seu imóvel | WeCare Hosting", description: "Estimativa grátis de receita de aluguel por temporada com dados reais de imóveis geridos pela WeCare.", robots: { index: false } };
 export default function Page() {
   return <main style={{ background: "var(--surface-page)", minHeight: "100vh", color: "var(--text-body)", fontFamily: "var(--font-sans)", paddingBottom: 48 }}>

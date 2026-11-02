@@ -122,6 +122,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      // /avalie muda com o deploy; não deixar o navegador guardar o HTML antigo.
+      { source: "/avalie", headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }, { key: "X-Avalie-Versao", value: "referencia-aproximada" }] },
+      { source: "/api/avalie", headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }] },
+      { source: "/api/avalie/:path*", headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }] },
       // Static brand/portfolio files are served as-is with max-age=0 by default, so every visit revalidated them.
       { source: "/(brand|uploads)/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
     ];

@@ -66,24 +66,6 @@ export function quartosValidos(v: unknown): number | null {
   return n;
 }
 
-function tokenCabeNaFaixa(token: string, faixa: Faixa): boolean {
-  if (token === faixa) return true;
-  if (!/^\d+$/.test(token)) return false;
-  return faixaDeQuartos(Number(token)) === faixa;
-}
-
-function linhas(tabela: Record<string, Serie> | undefined, faixa: Faixa, aceita: (partes: string[]) => boolean): Linha[] {
-  if (!tabela) return [];
-  const out: Linha[] = [];
-  for (const [chave, serie] of Object.entries(tabela)) {
-    const partes = chave.split("|");
-    const token = partes[partes.length - 1];
-    if (!token || !aceita(partes) || !tokenCabeNaFaixa(token, faixa)) continue;
-    out.push({ ...serie, token });
-  }
-  return out;
-}
-
 /**
  * Provável = mediana (p50), não a média.
  * Em SP 1 quarto a média da tabela é ~R$ 74 mil e a mediana ~R$ 62 mil; em SP 2 quartos, ~R$ 190 mil contra ~R$ 161 mil.
@@ -101,33 +83,62 @@ function sazonalidade(regiao: Regiao): Record<string, number> | null {
   return null;
 }
 
-function serieUnica(linhasDaFaixa: Linha[]): Linha | null {
-  if (linhasDaFaixa.length !== 1) return null;
-  if (linhasDaFaixa[0].n < MIN_N) return null;
-  return linhasDaFaixa[0];
+const ORDEM_FAIXA: Faixa[] = ["1", "2", "3", "4-5", "6+"];
+
+/** 4+ fica entre 4–5 e 6+, para servir de referência quando a faixa exata não tem série. */
+function posicaoFaixa(token: string): number | null {
+  if (token === "4+") return 3.5;
+  const direta = ORDEM_FAIXA.indexOf(token as Faixa);
+  if (direta >= 0) return direta;
+  if (/^\d+$/.test(token)) return ORDEM_FAIXA.indexOf(faixaDeQuartos(Number(token)));
+  return null;
+}
+
+function descricaoToken(token: string) {
+  if (token === "4+") return "4+ quartos";
+  if (/^\d+$/.test(token)) {
+    const n = Number(token);
+    return n === 1 ? "1 quarto" : `${n} quartos`;
+  }
+  return FAIXA_ROTULO[token as Faixa] ?? token;
+}
+
+type Escolha = Linha & { distancia: number; mercado: boolean };
+
+function escolherSerie(i: Input): Escolha | null {
+  const alvo = ORDEM_FAIXA.indexOf(faixaDeQuartos(i.quartos));
+  const lista: Escolha[] = [];
+  const incluir = (tabela: Record<string, Serie> | undefined, aceita: (partes: string[]) => boolean, mercado: boolean) => {
+    for (const [chave, serie] of Object.entries(tabela ?? {})) {
+      const partes = chave.split("|");
+      const token = partes[partes.length - 1];
+      if (!token || !aceita(partes)) continue;
+      const pos = posicaoFaixa(token);
+      if (pos == null) continue;
+      lista.push({ ...serie, token, distancia: Math.abs(pos - alvo), mercado });
+    }
+  };
+  incluir(dados.market, ([regiao, tipo]) => regiao === i.regiao && tipo === i.tipo, true);
+  // Casa em SP usa a série da cidade: a tabela WeCare não separa casa de apartamento.
+  if (i.tipo === "apto" || (i.tipo === "casa" && i.regiao === "sp")) {
+    incluir(dados.segments, ([regiao]) => regiao === i.regiao, false);
+  }
+  if (lista.length === 0) return null;
+  lista.sort((a, b) => a.distancia - b.distancia || Number(b.mercado) - Number(a.mercado) || b.n - a.n);
+  return lista[0];
 }
 
 export function estimar(i: Input) {
   if (i.regiao === "outra") return PERSONALIZADA;
   const faixa = faixaDeQuartos(i.quartos);
-  const mercado = linhas(dados.market, faixa, ([regiao, tipo]) => regiao === i.regiao && tipo === i.tipo);
-  // Casa em SP usa a série da cidade quando ela existe: a tabela WeCare não separa casa de apartamento.
-  const usaSegmento = i.tipo === "apto" || (i.tipo === "casa" && i.regiao === "sp");
-  const segmento = usaSegmento ? linhas(dados.segments, faixa, ([regiao]) => regiao === i.regiao) : [];
-  // Mercado é a série com tipo (casa/apto). Não mistura com o segmento WeCare: percentis não se somam.
-  const fonte = mercado.length > 0 ? mercado : segmento;
-  if (fonte.length > 1) {
-    console.error("[avaliador] faixa com mais de uma série agregada; medianas não são combinadas");
-  }
-  const serie = serieUnica(fonte);
-  if (!serie) return PERSONALIZADA;
+  const serie = escolherSerie(i);
   const sea = sazonalidade(i.regiao);
-  if (!sea) return PERSONALIZADA;
+  if (!serie || !sea) return PERSONALIZADA;
 
+  const exata = serie.distancia === 0 && serie.n >= MIN_N;
   const mil = (x: number) => Math.round(x / 1000) * 1000;
   const { bruto, central } = valorProvavel(serie);
   const otimista = serie.p90 ?? serie.p75;
-  const larga = faixa === "4-5" || faixa === "6+";
   const quartosDaSerie = /^\d+$/.test(serie.token) ? Number(serie.token) : null;
   return {
     tipo: "estimativa" as const,
@@ -141,11 +152,13 @@ export function estimar(i: Input) {
       atualizado: serie.lido ?? dados.updated,
       fonte: serie.fonte,
       faixa: FAIXA_ROTULO[faixa],
-      serie: larga && quartosDaSerie != null ? (quartosDaSerie === 1 ? "1 quarto" : `${quartosDaSerie} quartos`) : undefined,
+      serie: quartosDaSerie != null ? (quartosDaSerie === 1 ? "1 quarto" : `${quartosDaSerie} quartos`) : descricaoToken(serie.token),
+      referencia: `${descricaoToken(serie.token)} em ${({ sp: "São Paulo (capital)", bertioga: "Bertioga", guaruja: "Guarujá", litoral: "Litoral" } as Record<string, string>)[i.regiao] ?? i.regiao}`,
+      aproximada: !exata,
       central,
-      casaNaSerieDaRegiao: i.tipo === "casa" && i.regiao === "sp" && mercado.length === 0,
+      casaNaSerieDaRegiao: i.tipo === "casa" && i.regiao === "sp" && !serie.mercado,
     },
-    confianca: !serie.fonte && serie.n >= 15 ? "alta" : "média",
+    confianca: !exata ? "baixa" : !serie.fonte && serie.n >= 15 ? "alta" : "média",
   };
 }
 
@@ -175,7 +188,7 @@ export function resumoTexto(i: Input, r: Resultado) {
     `Potencial provável: ${moeda(r.anual.provavel)} por ano.`,
     `Potencial otimista: ${moeda(r.anual.otimista)} por ano.`,
     `Cerca de ${moeda(r.mensalMedia)} por mês no cenário provável.`,
-    `Faixa: ${r.base.faixa}. ${r.base.comparaveis} comparáveis.`,
+    r.base.aproximada ? `Referência aproximada: ${r.base.referencia} (${r.base.comparaveis} comparáveis).` : `Faixa: ${r.base.faixa}. ${r.base.comparaveis} comparáveis.`,
     "Valor bruto, antes de taxas. Não é garantia de receita.",
   ].join("\n");
 }
