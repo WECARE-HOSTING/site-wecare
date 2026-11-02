@@ -56,6 +56,10 @@ O serviço systemd só escreve nos caminhos de `ReadWritePaths`. A criação da 
 Sem as variáveis abaixo, cada lead gravado registra `notificação de lead desligada` e fica só no arquivo. Nada é enviado.
 
 - `AVALIADOR_LEAD_WEBHOOK` — URL que recebe `POST` com o JSON do lead.
-- `AVALIADOR_LEAD_EMAIL` — destinatário. Exige `AVALIADOR_SMTP_HOST`. Opcionais: `AVALIADOR_LEAD_EMAIL_FROM` (padrão `avaliador@wecarehosting.com.br`), `AVALIADOR_SMTP_PORT` (padrão `587`), `AVALIADOR_SMTP_USER`, `AVALIADOR_SMTP_PASS`, `AVALIADOR_SMTP_SECURE` (`starttls` na 587, `tls` na 465, `plain` só em relay local).
+- `AVALIADOR_LEAD_EMAIL` — destinatário interno. Exige `AVALIADOR_SMTP_HOST`. Opcionais: `AVALIADOR_LEAD_EMAIL_FROM` (padrão `avaliador@wecarehosting.com.br`), `AVALIADOR_SMTP_PORT` (padrão `587`), `AVALIADOR_SMTP_USER`, `AVALIADOR_SMTP_PASS`, `AVALIADOR_SMTP_SECURE` (`starttls` na 587, `tls` na 465, `plain` só em relay local).
+
+A segunda simulação pede contato mesmo sem `AVALIADOR_DATA_DIR`: a primeira resposta grava o cookie `wc_av_uso` (e o navegador guarda `wc_av_visto`). O arquivo em disco continua valendo quando a pasta existe.
+
+**Enviar por e-mail** na tela manda a estimativa para o endereço que a pessoa digitou, pelo mesmo SMTP. Sem `AVALIADOR_SMTP_HOST` o contato é registrado e a tela avisa que o envio automático está desligado. PDF e WhatsApp não dependem de SMTP.
 
 Webhook e e-mail podem ficar ligados ao mesmo tempo. Falha de envio vai para o log e não esconde a estimativa.

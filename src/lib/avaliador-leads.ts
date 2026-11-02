@@ -54,21 +54,38 @@ export async function registrarUso(h: string, lead = false) {
 
 export type Lead = { nome: string; email: string; telefone: string; consentimento: true };
 
-export function validarLead(l: unknown): Lead | null {
+/** `email` ou `telefone` obrigatório naquele canal; `um` aceita qualquer um dos dois. Consentimento é sempre obrigatório. */
+export function validarContato(l: unknown, precisa: "email" | "telefone" | "um"): Lead | null {
   const x = l as Partial<Record<keyof Lead, unknown>> | null;
-  if (!x) return null;
+  if (!x || x.consentimento !== true) return null;
   const nome = String(x.nome ?? "").trim().slice(0, 100);
   const email = String(x.email ?? "").trim().slice(0, 120);
   const tel = String(x.telefone ?? "").replace(/\D/g, "").slice(0, 15);
-  if (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || tel.length < 10 || x.consentimento !== true) return null;
-  return { nome, email, telefone: tel, consentimento: true };
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const telOk = tel.length >= 10;
+  if (email && !emailOk) return null;
+  if (tel && !telOk) return null;
+  if (precisa === "email" && !emailOk) return null;
+  if (precisa === "telefone" && !telOk) return null;
+  if (precisa === "um" && !emailOk && !telOk) return null;
+  return { nome, email: emailOk ? email : "", telefone: telOk ? tel : "", consentimento: true };
+}
+
+export function validarLead(l: unknown): Lead | null {
+  const contato = validarContato(l, "um");
+  if (!contato || contato.nome.length < 2 || !contato.email || !contato.telefone) return null;
+  return contato;
 }
 
 export async function salvarLead(l: Lead, ipHash: string, simulacao: unknown) {
-  const dir = diretorioDeDados();
-  await fs.mkdir(dir, { recursive: true, mode: 0o700 });
   const reg = { quando: new Date().toISOString(), ...l, consentimentoTexto: "LGPD v1 avaliador", ipHash, simulacao };
-  await fs.appendFile(path.join(dir, "leads.jsonl"), JSON.stringify(reg) + "\n", { mode: 0o600 });
+  try {
+    const dir = diretorioDeDados();
+    await fs.mkdir(dir, { recursive: true, mode: 0o700 });
+    await fs.appendFile(path.join(dir, "leads.jsonl"), JSON.stringify(reg) + "\n", { mode: 0o600 });
+  } catch (err) {
+    console.error("[avaliador] falha ao gravar lead em disco; o contato segue na resposta e no aviso, se houver", err);
+  }
   await notificar(reg);
 }
 
@@ -100,29 +117,6 @@ async function notificar(reg: Record<string, unknown>) {
 
 function umaLinha(s: string) {
   return s.replace(/[\r\n]/g, " ").trim();
-}
-
-function corpoEmail(to: string, from: string, reg: Record<string, unknown>) {
-  const sim = (reg.simulacao ?? {}) as { regiao?: string; tipo?: string; quartos?: number; bairro?: string };
-  const assunto = umaLinha(`Novo lead do avaliador — ${String(reg.nome ?? "")}`);
-  const texto = [
-    `Nome: ${reg.nome}`,
-    `E-mail: ${reg.email}`,
-    `WhatsApp: ${reg.telefone}`,
-    `Quando: ${reg.quando}`,
-    `Imóvel: ${sim.tipo ?? ""} ${sim.quartos ?? ""} quarto(s), ${sim.bairro || sim.regiao || ""}`,
-    "Consentimento: LGPD v1 avaliador",
-  ].join("\n");
-  const linhas = [
-    `From: ${umaLinha(from)}`,
-    `To: ${umaLinha(to)}`,
-    `Subject: ${assunto}`,
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=UTF-8",
-    "",
-    ...texto.split("\n").map((l) => (l.startsWith(".") ? `.${l}` : l)),
-  ];
-  return linhas.join("\r\n");
 }
 
 type SmtpSocket = net.Socket;
@@ -264,11 +258,16 @@ async function sessaoSmtp(host: string, port: number): Promise<Smtp> {
   }
 }
 
-async function enviarEmail(to: string, reg: Record<string, unknown>) {
+export function smtpConfigurado() {
+  return Boolean(process.env.AVALIADOR_SMTP_HOST?.trim());
+}
+
+/** Envia um texto simples. `sem-smtp` é o padrão (host vazio): nada sai, e quem chamou confirma na tela. */
+export async function enviarTexto(to: string, subject: string, text: string): Promise<"enviado" | "sem-smtp" | "falhou"> {
   const host = process.env.AVALIADOR_SMTP_HOST?.trim() ?? "";
   if (!host) {
-    console.error("[avaliador] AVALIADOR_LEAD_EMAIL está definido, mas AVALIADOR_SMTP_HOST não. E-mail não enviado.");
-    return;
+    console.info("[avaliador] e-mail ao usuário não enviado: AVALIADOR_SMTP_HOST vazio. O contato fica registrado.");
+    return "sem-smtp";
   }
   const port = Number(process.env.AVALIADOR_SMTP_PORT || 587);
   const from = process.env.AVALIADOR_LEAD_EMAIL_FROM?.trim() || "avaliador@wecarehosting.com.br";
@@ -278,12 +277,44 @@ async function enviarEmail(to: string, reg: Record<string, unknown>) {
     await smtp.cmd(`MAIL FROM:<${umaLinha(from)}>`, 250);
     await smtp.cmd(`RCPT TO:<${umaLinha(to)}>`, 250);
     await smtp.cmd("DATA", 354);
-    await smtp.cmd(`${corpoEmail(to, from, reg)}\r\n.`, 250);
+    await smtp.cmd(`${mensagemEmail(to, from, subject, text)}\r\n.`, 250);
     await smtp.cmd("QUIT", 221);
-    console.info("[avaliador] e-mail de lead enviado");
+    console.info("[avaliador] e-mail enviado");
+    return "enviado";
   } catch (err) {
-    console.error("[avaliador] e-mail de lead falhou", err);
+    console.error("[avaliador] e-mail falhou", err);
+    return "falhou";
   } finally {
     smtp?.fecha();
   }
+}
+
+function mensagemEmail(to: string, from: string, subject: string, text: string) {
+  const linhas = [
+    `From: ${umaLinha(from)}`,
+    `To: ${umaLinha(to)}`,
+    `Subject: ${umaLinha(subject)}`,
+    "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=UTF-8",
+    "",
+    ...text.split("\n").map((l) => (l.startsWith(".") ? `.${l}` : l)),
+  ];
+  return linhas.join("\r\n");
+}
+
+async function enviarEmail(to: string, reg: Record<string, unknown>) {
+  if (!smtpConfigurado()) {
+    console.error("[avaliador] AVALIADOR_LEAD_EMAIL está definido, mas AVALIADOR_SMTP_HOST não. E-mail interno não enviado.");
+    return;
+  }
+  const sim = (reg.simulacao ?? {}) as { regiao?: string; tipo?: string; quartos?: number; bairro?: string };
+  const text = [
+    `Nome: ${reg.nome || "(não informado)"}`,
+    `E-mail: ${reg.email || "(não informado)"}`,
+    `WhatsApp: ${reg.telefone || "(não informado)"}`,
+    `Quando: ${reg.quando}`,
+    `Imóvel: ${sim.tipo ?? ""} ${sim.quartos ?? ""} quarto(s), ${sim.bairro || sim.regiao || ""}`,
+    "Consentimento: LGPD v1 avaliador",
+  ].join("\n");
+  await enviarTexto(to, `Novo lead do avaliador${reg.nome ? ` — ${reg.nome}` : ""}`, text);
 }

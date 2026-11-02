@@ -148,3 +148,41 @@ export function estimar(i: Input) {
     confianca: !serie.fonte && serie.n >= 15 ? "alta" : "média",
   };
 }
+
+export type Resultado = ReturnType<typeof estimar>;
+
+const REGIAO_NOME: Record<string, string> = {
+  sp: "São Paulo (capital)",
+  bertioga: "Bertioga",
+  guaruja: "Guarujá",
+  litoral: "Litoral",
+  outra: "Outra cidade",
+};
+
+export function nomeRegiao(regiao: string) {
+  return REGIAO_NOME[regiao] ?? regiao;
+}
+
+const moeda = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+export function resumoTexto(i: Input, r: Resultado) {
+  const onde = [nomeRegiao(i.regiao), i.bairro].filter(Boolean).join(", ");
+  const cabeca = `${i.tipo === "casa" ? "Casa" : "Apartamento"}, ${i.quartos} quarto(s), ${onde}.`;
+  if (r.tipo === "personalizada") return `Estimativa WeCare Hosting\n${cabeca}\n${r.motivo}`;
+  return [
+    "Estimativa WeCare Hosting",
+    cabeca,
+    `Potencial provável: ${moeda(r.anual.provavel)} por ano.`,
+    `Potencial otimista: ${moeda(r.anual.otimista)} por ano.`,
+    `Cerca de ${moeda(r.mensalMedia)} por mês no cenário provável.`,
+    `Faixa: ${r.base.faixa}. ${r.base.comparaveis} comparáveis.`,
+    "Valor bruto, antes de taxas. Não é garantia de receita.",
+  ].join("\n");
+}
+
+/** Abre conversa no WhatsApp do número informado, com o resumo pronto para enviar. */
+export function linkWhatsapp(telefone: string, texto: string) {
+  const digits = telefone.replace(/\D/g, "");
+  const comPais = digits.startsWith("55") ? digits : `55${digits}`;
+  return `https://wa.me/${comPais}?text=${encodeURIComponent(texto)}`;
+}
