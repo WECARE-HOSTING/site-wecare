@@ -24,6 +24,8 @@ function jaUsouSemContato() {
   return uso && !lead;
 }
 
+type ContatoSalvo = { email: string; telefone: string; consentimento: true };
+
 function marcarUsoLocal(comContato: boolean) {
   try { localStorage.setItem("wc_av_usos", "1"); if (comContato) localStorage.setItem("wc_av_lead", "1"); } catch { /* segue o cookie */ }
   const base = "Path=/; Max-Age=31536000; SameSite=Lax";
@@ -31,73 +33,122 @@ function marcarUsoLocal(comContato: boolean) {
   if (comContato) document.cookie = `wc_av_contato=1; ${base}`;
 }
 
+function lerContato(): ContatoSalvo | null {
+  try {
+    const j = JSON.parse(localStorage.getItem("wc_av_contato_dados") || "null") as Partial<ContatoSalvo> | null;
+    if (!j || j.consentimento !== true) return null;
+    const email = String(j.email || "");
+    const telefone = String(j.telefone || "");
+    if (!email && !telefone) return null;
+    return { email, telefone, consentimento: true };
+  } catch { return null; }
+}
+
+function abrirEmNovaAba(url: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  return true;
+}
+
+function guardarContato(email: string, telefone: string) {
+  marcarUsoLocal(true);
+  try { localStorage.setItem("wc_av_contato_dados", JSON.stringify({ email, telefone, consentimento: true })); } catch { /* o cookie já marca o contato */ }
+}
+
 export default function Avaliador() {
   const [f, setF] = useState<{ regiao: string; bairro: string; outro: string; tipo: string; quartos: number | "" }>({ regiao: "sp", bairro: "", outro: "", tipo: "apto", quartos: 1 });
   const [r, setR] = useState<R>(null);
   const [lead, setLead] = useState({ email: "", telefone: "", consentimento: false });
-  const [pedeLead, setPedeLead] = useState(false);
+  const [modal, setModal] = useState<null | "novamente" | Canal | "aviso">(null);
   const [erro, setErro] = useState("");
-  const [canal, setCanal] = useState<Canal | null>(null);
   const [contato, setContato] = useState({ email: "", telefone: "", consentimento: false });
-  const [erroAcao, setErroAcao] = useState("");
-  const [confirmacao, setConfirmacao] = useState("");
+  const [erroModal, setErroModal] = useState("");
+  const [aviso, setAviso] = useState("");
   const [linkWa, setLinkWa] = useState("");
 
   const bairroEnvio = f.bairro === OUTRO_BAIRRO ? (f.outro.trim() || OUTRO_BAIRRO) : f.bairro;
   const corpoBase = { regiao: f.regiao, tipo: f.tipo, quartos: f.quartos === "" ? null : f.quartos, bairro: bairroEnvio };
 
-  async function enviar(comLead: boolean) {
+  function fecharModal() {
+    setModal(null);
+    setErroModal("");
+    setAviso("");
+    setLinkWa("");
+  }
+
+  async function enviar(leadInformado?: { email: string; telefone: string; consentimento: boolean } | null) {
     setErro("");
-    if (!comLead && jaUsouSemContato()) { setPedeLead(true); setR(null); return; }
-    const corpo = comLead ? { ...corpoBase, lead: { ...lead, nome: "" } } : corpoBase;
+    const salvo = lerContato();
+    if (!leadInformado && !salvo && jaUsouSemContato()) { setErroModal(""); setModal("novamente"); return; }
+    const leadEnvio = leadInformado ?? (jaUsouSemContato() ? salvo : null);
+    const corpo = leadEnvio ? { ...corpoBase, lead: { ...leadEnvio, nome: "" } } : corpoBase;
     let res: Response;
     try {
       res = await fetch("/api/avalie", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(corpo) });
     } catch {
-      setR(null);
       setErro("Não foi possível falar com o servidor. Tente de novo.");
       return;
     }
     const j = await res.json().catch(() => null);
-    if (j?.tipo === "lead" || res.status === 403 || res.status === 422) {
-      setPedeLead(true); setR(null); setErro(typeof j?.erro === "string" ? j.erro : ""); return;
+    if (res.status === 422) { setErroModal(typeof j?.erro === "string" ? j.erro : "Confira o contato e o consentimento."); setModal("novamente"); return; }
+    if (j?.tipo === "lead" || res.status === 403) {
+      if (salvo && !leadInformado) { await enviar(salvo); return; }
+      setErroModal(typeof j?.erro === "string" ? j.erro : "");
+      setModal("novamente");
+      return;
     }
     if (!res.ok || !j || (j.tipo !== "estimativa" && j.tipo !== "personalizada")) {
-      setR(null); setErro(typeof j?.erro === "string" ? j.erro : "Não foi possível calcular a estimativa."); return;
+      setErro(typeof j?.erro === "string" ? j.erro : "Não foi possível calcular a estimativa.");
+      return;
     }
-    marcarUsoLocal(comLead);
-    setPedeLead(false); setErro(""); setCanal(null); setConfirmacao(""); setLinkWa(""); setR(j);
+    if (leadEnvio?.consentimento) guardarContato(leadEnvio.email, leadEnvio.telefone);
+    else marcarUsoLocal(false);
+    fecharModal();
+    setR(j);
   }
 
-  async function entregar(e: React.FormEvent) {
-    e.preventDefault();
-    if (!canal) return;
-    setErroAcao("");
-    setConfirmacao("");
+  function abrirAcao(c: Canal) {
+    const salvo = lerContato();
+    if (c === "whatsapp" && salvo?.telefone) { void entregarCanal(c, salvo); return; }
+    if (c !== "whatsapp" && salvo?.email) { void entregarCanal(c, salvo); return; }
+    setContato({ email: salvo?.email || "", telefone: salvo?.telefone || "", consentimento: false });
+    setErroModal("");
+    setAviso("");
     setLinkWa("");
-    let abriuWa = false;
-    if (canal === "whatsapp" && contato.consentimento && contato.telefone.replace(/\D/g, "").length >= 10 && r && typeof f.quartos === "number") {
-      const url = linkWhatsapp(contato.telefone, resumoTexto({ regiao: f.regiao, tipo: f.tipo, quartos: f.quartos, bairro: bairroEnvio } as Input, r));
-      const aberto = window.open(url, "_blank", "noopener,noreferrer");
-      abriuWa = true;
-      setLinkWa(url);
-      setConfirmacao(aberto ? "WhatsApp aberto com o resumo." : "Se a janela não abriu, use o link abaixo.");
+    setModal(c);
+  }
+
+  async function entregarCanal(c: Canal, dados: { email: string; telefone: string; consentimento: boolean }) {
+    setErroModal("");
+    let popupOk = false;
+    if (c === "whatsapp" && dados.consentimento && dados.telefone.replace(/\D/g, "").length >= 10 && r && typeof f.quartos === "number") {
+      const url = linkWhatsapp(dados.telefone, resumoTexto({ regiao: f.regiao, tipo: f.tipo, quartos: f.quartos, bairro: bairroEnvio } as Input, r));
+      fecharModal();
+      popupOk = abrirEmNovaAba(url);
+      if (!popupOk) { setLinkWa(url); setAviso("Se a janela não abriu, use o link abaixo."); setModal("aviso"); }
     }
     let res: Response;
     try {
       res = await fetch("/api/avalie/entrega", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...corpoBase, canal, contato: { ...contato, nome: "" } }),
+        body: JSON.stringify({ ...corpoBase, canal: c, contato: { ...dados, nome: "" } }),
       });
     } catch {
-      setErroAcao("Não foi possível falar com o servidor. Tente de novo.");
+      setErroModal("Não foi possível falar com o servidor. Tente de novo.");
+      setModal(c);
       return;
     }
-    if (canal === "pdf") {
+    if (c === "pdf") {
       if (!res.ok) {
         const j = await res.json().catch(() => null);
-        setErroAcao(typeof j?.erro === "string" ? j.erro : "Não foi possível gerar o PDF.");
+        setErroModal(typeof j?.erro === "string" ? j.erro : "Não foi possível gerar o PDF.");
+        setModal(c);
         return;
       }
       const blob = await res.blob();
@@ -109,30 +160,31 @@ export default function Avaliador() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      marcarUsoLocal(true);
-      setConfirmacao("O PDF da estimativa foi baixado.");
-      setCanal(null);
+      if (dados.consentimento) guardarContato(dados.email, dados.telefone);
+      fecharModal();
       return;
     }
     const j = await res.json().catch(() => null);
-    if (!res.ok) { setErroAcao(typeof j?.erro === "string" ? j.erro : "Não foi possível concluir."); return; }
-    marcarUsoLocal(true);
-    if (canal === "whatsapp" && typeof j?.url === "string") {
-      if (!abriuWa) {
-        const aberto = window.open(j.url, "_blank", "noopener,noreferrer");
-        setLinkWa(j.url);
-        setConfirmacao(aberto ? "WhatsApp aberto com o resumo." : "Se a janela não abriu, use o link abaixo.");
-      }
-      setCanal(null);
+    if (!res.ok) {
+      setErroModal(typeof j?.erro === "string" ? j.erro : "Não foi possível concluir.");
+      setModal(c);
       return;
     }
-    setConfirmacao(typeof j?.mensagem === "string" ? j.mensagem : "Contato registrado.");
-    setCanal(null);
+    if (dados.consentimento) guardarContato(dados.email, dados.telefone);
+    if (c === "whatsapp") {
+      if (!popupOk && typeof j?.url === "string") {
+        if (!abrirEmNovaAba(j.url)) { setLinkWa(j.url); setAviso("Se a janela não abriu, use o link abaixo."); setModal("aviso"); return; }
+      }
+      if (popupOk) fecharModal();
+      return;
+    }
+    setAviso(typeof j?.mensagem === "string" ? j.mensagem : "Contato registrado.");
+    setModal("aviso");
   }
 
   const bairros = bairrosDaRegiao(f.regiao);
   return <div data-avaliador>
-    <form noValidate onSubmit={(e) => { e.preventDefault(); void enviar(false); }} style={{ display: "grid", gap: 14, margin: "24px 0", padding: 24, background: "var(--surface-card)", border: "1px solid var(--border-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)", fontSize: 14, fontWeight: 500, color: "var(--navy)" }}>
+    <form noValidate onSubmit={(e) => { e.preventDefault(); void enviar(); }} style={{ display: "grid", gap: 14, margin: "24px 0", padding: 24, background: "var(--surface-card)", border: "1px solid var(--border-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)", fontSize: 14, fontWeight: 500, color: "var(--navy)" }}>
       <label>Região<select style={box} value={f.regiao} onChange={(e) => setF({ ...f, regiao: e.target.value, bairro: "", outro: "" })}><option value="sp">São Paulo (capital)</option><option value="bertioga">Bertioga</option><option value="guaruja">Guarujá</option><option value="outra">Outra cidade</option></select></label>
       <label>Bairro
         <select style={box} value={f.bairro} onChange={(e) => setF({ ...f, bairro: e.target.value, outro: e.target.value === OUTRO_BAIRRO ? f.outro : "" })}>
@@ -143,17 +195,9 @@ export default function Avaliador() {
       {f.bairro === OUTRO_BAIRRO && <label>Qual bairro?<input style={box} value={f.outro} maxLength={80} onChange={(e) => setF({ ...f, outro: e.target.value })} /></label>}
       <label>Tipo<select style={box} value={f.tipo} onChange={(e) => setF({ ...f, tipo: e.target.value })}><option value="apto">Apartamento</option><option value="casa">Casa</option></select></label>
       <label>Quartos<input required style={box} type="number" inputMode="numeric" min={1} max={20} step={1} value={f.quartos} onChange={(e) => setF({ ...f, quartos: e.target.value === "" ? "" : Number(e.target.value) })} /></label>
+      {erro && <p role="alert" style={{ color: "#9B2C2C", fontSize: 14, margin: 0 }}>{erro}</p>}
       <button type="submit" style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>Ver estimativa</button>
     </form>
-    {erro && <p role="alert" style={{ color: "#9B2C2C", fontSize: 14, margin: "0 0 16px" }}>{erro}</p>}
-    {pedeLead && <form noValidate onSubmit={(e) => { e.preventDefault(); void enviar(true); }} style={{ display: "grid", gap: 12, marginBottom: 16, padding: 24, background: "var(--surface-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)", fontSize: 14, fontWeight: 500, color: "var(--navy)" }}>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--navy)", fontSize: 24, margin: 0 }}>Para calcular de novo</h2>
-      <p style={{ margin: 0, color: "var(--text-muted)", fontWeight: 400 }}>Informe um e-mail ou WhatsApp. Usamos o contato só para esta estimativa e para a equipe retomar, com o seu consentimento.</p>
-      <label>E-mail<input type="email" style={box} value={lead.email} autoComplete="email" onChange={(e) => setLead({ ...lead, email: e.target.value })} /></label>
-      <label>WhatsApp<input type="tel" placeholder="(11) 99999-9999" style={box} value={lead.telefone} autoComplete="tel" onChange={(e) => setLead({ ...lead, telefone: e.target.value })} /></label>
-      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontWeight: 400, fontSize: 13, color: "var(--text-body)" }}><input type="checkbox" checked={lead.consentimento} onChange={(e) => setLead({ ...lead, consentimento: e.target.checked })} style={{ marginTop: 3 }} />Autorizo a WeCare Hosting a usar estes dados para enviar a estimativa e entrar em contato sobre a gestão do imóvel, conforme a LGPD (Lei 13.709/2018). Posso pedir a exclusão a qualquer momento.</label>
-      <button type="submit" style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>Ver estimativa</button>
-    </form>}
     {r?.tipo === "estimativa" && <section style={{ padding: 24, background: "var(--surface-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)" }}>
       <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--navy)", fontSize: 26, marginTop: 0 }}>Potencial com gestão WeCare (receita bruta por ano)</h2>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{(["provavel", "otimista"] as const).map((k) => <div key={k} style={{ flex: "1 1 140px", padding: 14, borderRadius: 10, background: k === "provavel" ? "var(--navy)" : "var(--ivory-200)", color: k === "provavel" ? "var(--ivory-100)" : "var(--navy)" }}><small>{k === "provavel" ? "Potencial provável" : "Potencial otimista"}</small><div style={{ fontSize: 26, fontFamily: "var(--font-serif)", marginTop: 4 }}>{brl(r.anual[k])}</div></div>)}</div>
@@ -174,21 +218,42 @@ export default function Avaliador() {
     </section>}
     {r?.tipo === "personalizada" && <section style={{ padding: 24, background: "var(--surface-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)" }}><h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--navy)", marginTop: 0 }}>Avaliação personalizada</h2><p>{r.motivo}</p></section>}
     {r && <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
-      <button type="button" onClick={() => { setCanal("pdf"); setErroAcao(""); setConfirmacao(""); setLinkWa(""); }} style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>Baixar PDF</button>
-      <button type="button" onClick={() => { setCanal("whatsapp"); setErroAcao(""); setConfirmacao(""); setLinkWa(""); }} style={{ ...btn, background: "var(--gold)", color: "var(--navy-900)" }}>Enviar pelo WhatsApp</button>
-      <button type="button" onClick={() => { setCanal("email"); setErroAcao(""); setConfirmacao(""); setLinkWa(""); }} style={{ ...btn, background: "#fff", color: "var(--navy)", border: "1px solid var(--stone-400)" }}>Enviar por e-mail</button>
+      <button type="button" onClick={() => abrirAcao("pdf")} style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>Baixar PDF</button>
+      <button type="button" onClick={() => abrirAcao("whatsapp")} style={{ ...btn, background: "var(--gold)", color: "var(--navy-900)" }}>Enviar pelo WhatsApp</button>
+      <button type="button" onClick={() => abrirAcao("email")} style={{ ...btn, background: "#fff", color: "var(--navy)", border: "1px solid var(--stone-400)" }}>Enviar por e-mail</button>
     </div>}
-    {canal && <form noValidate onSubmit={(e) => { void entregar(e); }} style={{ display: "grid", gap: 12, marginTop: 12, padding: 24, background: "var(--surface-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)", fontSize: 14, fontWeight: 500, color: "var(--navy)" }}>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 22, margin: 0 }}>{canal === "pdf" ? "Baixar PDF" : canal === "whatsapp" ? "Enviar pelo WhatsApp" : "Enviar por e-mail"}</h2>
-      <p style={{ margin: 0, color: "var(--text-muted)", fontWeight: 400 }}>{canal === "whatsapp" ? "Informe o WhatsApp que recebe o resumo." : "Informe o e-mail que recebe o resultado."}</p>
-      {canal === "whatsapp"
-        ? <label>WhatsApp<input required type="tel" placeholder="(11) 99999-9999" style={box} value={contato.telefone} autoComplete="tel" onChange={(e) => setContato({ ...contato, telefone: e.target.value })} /></label>
-        : <label>E-mail<input required type="email" style={box} value={contato.email} autoComplete="email" onChange={(e) => setContato({ ...contato, email: e.target.value })} /></label>}
-      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontWeight: 400, fontSize: 13, color: "var(--text-body)" }}><input type="checkbox" checked={contato.consentimento} onChange={(e) => setContato({ ...contato, consentimento: e.target.checked })} style={{ marginTop: 3 }} />Autorizo a WeCare Hosting a usar este contato para enviar a estimativa e falar sobre a gestão do imóvel, conforme a LGPD (Lei 13.709/2018).</label>
-      {erroAcao && <p role="alert" style={{ color: "#9B2C2C", margin: 0 }}>{erroAcao}</p>}
-      <button type="submit" style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>{canal === "pdf" ? "Gerar PDF" : canal === "whatsapp" ? "Abrir WhatsApp" : "Enviar e-mail"}</button>
-    </form>}
-    {confirmacao && <p role="status" style={{ marginTop: 12, color: "var(--navy)" }}>{confirmacao}</p>}
-    {linkWa && <a href={linkWa} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", marginTop: 8, color: "var(--navy)", fontWeight: 600 }}>Abrir o WhatsApp com o resumo</a>}
+    {modal && <div role="presentation" onClick={fecharModal} style={{ position: "fixed", inset: 0, zIndex: 10000, background: "rgba(8,23,32,.48)", display: "grid", placeItems: "center", padding: 20 }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="av-modal-titulo" onClick={(e) => e.stopPropagation()} style={{ width: "min(440px, 100%)", background: "var(--surface-card)", borderRadius: 12, padding: 24, boxShadow: "var(--shadow-sm)", color: "var(--navy)" }}>
+        {modal === "aviso" ? <>
+          <h2 id="av-modal-titulo" style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 24, margin: "0 0 12px" }}>Pronto</h2>
+          <p role="status" style={{ margin: "0 0 16px" }}>{aviso}</p>
+          {linkWa && <a href={linkWa} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", marginBottom: 12, fontWeight: 600 }}>Abrir o WhatsApp com o resumo</a>}
+          <button type="button" onClick={fecharModal} style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>Fechar</button>
+        </> : modal === "novamente" ? <form noValidate onSubmit={(e) => { e.preventDefault(); void enviar(lead); }}>
+          <h2 id="av-modal-titulo" style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 24, margin: "0 0 8px" }}>Seu contato</h2>
+          <p style={{ margin: "0 0 12px", color: "var(--text-muted)", fontWeight: 400 }}>Informe um e-mail ou WhatsApp e autorize o uso deste contato.</p>
+          <label>E-mail<input type="email" style={box} value={lead.email} autoComplete="email" onChange={(e) => setLead({ ...lead, email: e.target.value })} /></label>
+          <label>WhatsApp<input type="tel" placeholder="(11) 99999-9999" style={box} value={lead.telefone} autoComplete="tel" onChange={(e) => setLead({ ...lead, telefone: e.target.value })} /></label>
+          <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontWeight: 400, fontSize: 13, color: "var(--text-body)", margin: "12px 0" }}><input type="checkbox" checked={lead.consentimento} onChange={(e) => setLead({ ...lead, consentimento: e.target.checked })} style={{ marginTop: 3 }} />Autorizo a WeCare Hosting a usar estes dados para enviar a estimativa e entrar em contato sobre a gestão do imóvel, conforme a LGPD (Lei 13.709/2018).</label>
+          {erroModal && <p role="alert" style={{ color: "#9B2C2C", margin: "0 0 12px" }}>{erroModal}</p>}
+          <div style={{ display: "grid", gap: 8 }}>
+            <button type="submit" style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>Continuar</button>
+            <button type="button" onClick={fecharModal} style={{ ...btn, background: "#fff", color: "var(--navy)", border: "1px solid var(--stone-400)" }}>Cancelar</button>
+          </div>
+        </form> : <form noValidate onSubmit={(e) => { e.preventDefault(); if (modal === "pdf" || modal === "email" || modal === "whatsapp") void entregarCanal(modal, contato); }}>
+          <h2 id="av-modal-titulo" style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 24, margin: "0 0 8px" }}>{modal === "pdf" ? "Baixar PDF" : modal === "whatsapp" ? "Enviar pelo WhatsApp" : "Enviar por e-mail"}</h2>
+          <p style={{ margin: "0 0 12px", color: "var(--text-muted)", fontWeight: 400 }}>{modal === "whatsapp" ? "Informe o WhatsApp que recebe o resumo." : "Informe o e-mail que recebe o resultado."}</p>
+          {modal === "whatsapp"
+            ? <label>WhatsApp<input type="tel" placeholder="(11) 99999-9999" style={box} value={contato.telefone} autoComplete="tel" onChange={(e) => setContato({ ...contato, telefone: e.target.value })} /></label>
+            : <label>E-mail<input type="email" style={box} value={contato.email} autoComplete="email" onChange={(e) => setContato({ ...contato, email: e.target.value })} /></label>}
+          <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontWeight: 400, fontSize: 13, color: "var(--text-body)", margin: "12px 0" }}><input type="checkbox" checked={contato.consentimento} onChange={(e) => setContato({ ...contato, consentimento: e.target.checked })} style={{ marginTop: 3 }} />Autorizo a WeCare Hosting a usar este contato para enviar a estimativa e falar sobre a gestão do imóvel, conforme a LGPD (Lei 13.709/2018).</label>
+          {erroModal && <p role="alert" style={{ color: "#9B2C2C", margin: "0 0 12px" }}>{erroModal}</p>}
+          <div style={{ display: "grid", gap: 8 }}>
+            <button type="submit" style={{ ...btn, background: "var(--navy)", color: "var(--ivory-100)" }}>{modal === "pdf" ? "Gerar PDF" : modal === "whatsapp" ? "Abrir WhatsApp" : "Enviar e-mail"}</button>
+            <button type="button" onClick={fecharModal} style={{ ...btn, background: "#fff", color: "var(--navy)", border: "1px solid var(--stone-400)" }}>Cancelar</button>
+          </div>
+        </form>}
+      </div>
+    </div>}
   </div>;
 }
