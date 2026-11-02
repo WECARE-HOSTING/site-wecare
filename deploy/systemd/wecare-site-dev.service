@@ -22,7 +22,8 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=true
-ReadWritePaths=/srv/wecare-site-dev/cache
+# /data fica fora da release (AVALIADOR_DATA_DIR). Criar a pasta e dar ao usuário wecaresite; ver deploy/README.md.
+ReadWritePaths=/srv/wecare-site-dev/cache /srv/wecare-site-dev/data
 
 [Install]
 WantedBy=multi-user.target

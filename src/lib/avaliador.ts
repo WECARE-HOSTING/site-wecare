@@ -1,28 +1,150 @@
 import model from "./avaliador-model.json";
+
 export type Regiao = "sp" | "litoral" | "bertioga" | "guaruja" | "outra";
-export type Input = { regiao: Regiao; bairro?: string; tipo: "apto" | "casa"; quartos: number };
-const MIN_N = 5; // mínimo de imóveis comparáveis maduros para mostrar número
-export function estimar(i: Input) {
-  const q = i.quartos <= 1 ? "1" : i.quartos === 2 ? "2" : i.quartos === 3 ? "3" : "4+";
-  const seg = (model.segments as Record<string, { n: number; p25: number; p50: number; p75: number; mean: number; p90: number; adr: number; occ: number }>)[`${i.regiao}|${q}`];
-  const mk = (model as unknown as { market?: Record<string, { n: number; p25: number; p50: number; p75: number; mean: number; p90: number; adr: number; occ: number; fonte: string; lido: string }> }).market?.[`${i.regiao}|${i.tipo}|${Math.min(i.quartos, 6)}`];
-  if (mk) {
-    const r0 = (x: number) => Math.round(x / 1000) * 1000;
-    const sea0 = (model.seasonality as Record<string, Record<string, number>>).litoral;
-    return { tipo: "estimativa" as const, anual: { provavel: r0(mk.mean), otimista: r0(mk.p90) }, mensalMedia: r0(mk.mean / 12),
-      sazonal: Object.fromEntries(Object.entries(sea0).map(([m, f]) => [m, r0((mk.mean / 12) * f)])),
-      base: { comparaveis: mk.n, diariaMediana: Math.round(mk.adr), ocupacaoMediana: mk.occ, atualizado: mk.lido, fonte: mk.fonte }, confianca: "média" };
+export type TipoImovel = "apto" | "casa";
+export type Input = { regiao: Regiao; bairro?: string; tipo: TipoImovel; quartos: number };
+
+/** Faixas pedidas no lugar da contagem exata. 4+ legado não vira número: a tabela não separa 4–5 de 6+. */
+export type Faixa = "1" | "2" | "3" | "4-5" | "6+";
+
+const MIN_N = 5;
+
+const FAIXA_ROTULO: Record<Faixa, string> = {
+  "1": "1 quarto",
+  "2": "2 quartos",
+  "3": "3 quartos",
+  "4-5": "4–5 quartos",
+  "6+": "6 quartos ou mais",
+};
+
+type Serie = {
+  n: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  mean?: number;
+  p90?: number;
+  adr: number;
+  occ: number;
+  fonte?: string;
+  lido?: string;
+  fator?: number;
+};
+
+type Modelo = {
+  segments: Record<string, Serie>;
+  seasonality: Record<string, Record<string, number>>;
+  updated: string;
+  market?: Record<string, Serie>;
+};
+
+const dados = model as Modelo;
+
+type Linha = Serie & { token: string };
+
+const PERSONALIZADA = {
+  tipo: "personalizada" as const,
+  motivo:
+    "Ainda não temos imóveis comparáveis suficientes nessa combinação para um número confiável. Um especialista faz a avaliação personalizada, grátis.",
+};
+
+export function faixaDeQuartos(quartos: number): Faixa {
+  if (quartos <= 1) return "1";
+  if (quartos === 2) return "2";
+  if (quartos === 3) return "3";
+  if (quartos <= 5) return "4-5";
+  return "6+";
+}
+
+/** Inteiro de 1 a 20. Rejeita vazio, decimal e texto. */
+export function quartosValidos(v: unknown): number | null {
+  let n: number;
+  if (typeof v === "number") n = v;
+  else if (typeof v === "string" && /^\d+$/.test(v.trim())) n = Number(v.trim());
+  else return null;
+  if (!Number.isInteger(n) || n < 1 || n > 20) return null;
+  return n;
+}
+
+function tokenCabeNaFaixa(token: string, faixa: Faixa): boolean {
+  if (token === faixa) return true;
+  if (!/^\d+$/.test(token)) return false;
+  return faixaDeQuartos(Number(token)) === faixa;
+}
+
+function linhas(tabela: Record<string, Serie> | undefined, faixa: Faixa, aceita: (partes: string[]) => boolean): Linha[] {
+  if (!tabela) return [];
+  const out: Linha[] = [];
+  for (const [chave, serie] of Object.entries(tabela)) {
+    const partes = chave.split("|");
+    const token = partes[partes.length - 1];
+    if (!token || !aceita(partes) || !tokenCabeNaFaixa(token, faixa)) continue;
+    out.push({ ...serie, token });
   }
-  if (i.regiao === "outra" || i.regiao === "bertioga" || i.regiao === "guaruja" || !seg || seg.n < MIN_N || i.tipo === "casa")
-    return { tipo: "personalizada" as const, motivo: "Ainda não temos imóveis comparáveis suficientes nessa combinação para um número confiável. Um especialista faz a avaliação personalizada, grátis." };
-  const sea = (model.seasonality as Record<string, Record<string, number>>)[i.regiao];
-  const r = (x: number) => Math.round(x / 1000) * 1000;
+  return out;
+}
+
+/**
+ * Provável = mediana (p50), não a média.
+ * Em SP 1 quarto a média da tabela é ~R$ 74 mil e a mediana ~R$ 62 mil; em SP 2 quartos, ~R$ 190 mil contra ~R$ 161 mil.
+ * No mercado PriceLabs o campo `mean` não é a média da amostra: é a mediana vezes o fator WeCare já gravado (1,248).
+ * Nesse caso o provável continua sendo essa mediana calibrada — o mesmo número da tabela, sem média enviesada.
+ */
+function valorProvavel(s: Serie): { bruto: number; central: "mediana" | "mediana-calibrada" } {
+  if (typeof s.fator === "number" && s.fator > 0) return { bruto: s.p50 * s.fator, central: "mediana-calibrada" };
+  return { bruto: s.p50, central: "mediana" };
+}
+
+function sazonalidade(regiao: Regiao): Record<string, number> | null {
+  if (regiao === "sp") return dados.seasonality.sp ?? null;
+  if (regiao === "litoral" || regiao === "bertioga" || regiao === "guaruja") return dados.seasonality.litoral ?? null;
+  return null;
+}
+
+function serieUnica(linhasDaFaixa: Linha[]): Linha | null {
+  if (linhasDaFaixa.length !== 1) return null;
+  if (linhasDaFaixa[0].n < MIN_N) return null;
+  return linhasDaFaixa[0];
+}
+
+export function estimar(i: Input) {
+  if (i.regiao === "outra") return PERSONALIZADA;
+  const faixa = faixaDeQuartos(i.quartos);
+  const mercado = linhas(dados.market, faixa, ([regiao, tipo]) => regiao === i.regiao && tipo === i.tipo);
+  // Casa em SP usa a série da cidade quando ela existe: a tabela WeCare não separa casa de apartamento.
+  const usaSegmento = i.tipo === "apto" || (i.tipo === "casa" && i.regiao === "sp");
+  const segmento = usaSegmento ? linhas(dados.segments, faixa, ([regiao]) => regiao === i.regiao) : [];
+  // Mercado é a série com tipo (casa/apto). Não mistura com o segmento WeCare: percentis não se somam.
+  const fonte = mercado.length > 0 ? mercado : segmento;
+  if (fonte.length > 1) {
+    console.error("[avaliador] faixa com mais de uma série agregada; medianas não são combinadas");
+  }
+  const serie = serieUnica(fonte);
+  if (!serie) return PERSONALIZADA;
+  const sea = sazonalidade(i.regiao);
+  if (!sea) return PERSONALIZADA;
+
+  const mil = (x: number) => Math.round(x / 1000) * 1000;
+  const { bruto, central } = valorProvavel(serie);
+  const otimista = serie.p90 ?? serie.p75;
+  const larga = faixa === "4-5" || faixa === "6+";
+  const quartosDaSerie = /^\d+$/.test(serie.token) ? Number(serie.token) : null;
   return {
     tipo: "estimativa" as const,
-    anual: { provavel: r(seg.mean), otimista: r(Math.max(seg.p75, seg.p90)) },
-    mensalMedia: r(seg.mean / 12),
-    sazonal: Object.fromEntries(Object.entries(sea).map(([m, f]) => [m, r((seg.mean / 12) * f)])),
-    base: { comparaveis: seg.n, diariaMediana: Math.round(seg.adr), ocupacaoMediana: seg.occ, atualizado: model.updated },
-    confianca: seg.n >= 15 ? "alta" : "média",
+    anual: { provavel: mil(bruto), otimista: mil(otimista) },
+    mensalMedia: mil(bruto / 12),
+    sazonal: Object.fromEntries(Object.entries(sea).map(([m, f]) => [m, mil((bruto / 12) * f)])),
+    base: {
+      comparaveis: serie.n,
+      diariaMediana: Math.round(serie.adr),
+      ocupacaoMediana: serie.occ,
+      atualizado: serie.lido ?? dados.updated,
+      fonte: serie.fonte,
+      faixa: FAIXA_ROTULO[faixa],
+      serie: larga && quartosDaSerie != null ? (quartosDaSerie === 1 ? "1 quarto" : `${quartosDaSerie} quartos`) : undefined,
+      central,
+      casaNaSerieDaRegiao: i.tipo === "casa" && i.regiao === "sp" && mercado.length === 0,
+    },
+    confianca: !serie.fonte && serie.n >= 15 ? "alta" : "média",
   };
 }

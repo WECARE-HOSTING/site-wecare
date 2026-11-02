@@ -124,6 +124,10 @@ main() {
     sudo /usr/local/bin/wecare-reservas-cron.sh manutencao >> "$LOG_FILE" 2>&1 || log "(aquecimento falhou; o cron de manutenção tenta de novo em até 10 min)"
   fi
 
+  if [ ! -d "$BASE/data/avaliador" ]; then
+    log "AVISO: $BASE/data/avaliador não existe. Leads do /avalie não persistem entre deploys até criar esse diretório (dono wecaresite) e definir AVALIADOR_DATA_DIR. Ver deploy/README.md."
+  fi
+
   log "Deploy concluído. Release $REL no ar (HEAD ${REV_SHORT})."
 
 }

@@ -14,7 +14,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] could not load listings", err);
     return [];
   });
-  return [
+  // /avalie is noindex (see src/app/avalie/page.tsx) and stays out of the sitemap.
+  // Listing a noindex URL here is the Search Console inconsistency this filter avoids.
+  const entries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/reservas`, changeFrequency: "daily", priority: 0.8 },
@@ -28,4 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     })),
   ];
+  return entries.filter((entry) => {
+    try {
+      const path = new URL(entry.url).pathname.replace(/\/+$/, "") || "/";
+      return path !== "/avalie";
+    } catch {
+      return true;
+    }
+  });
 }

@@ -57,6 +57,56 @@ Para receber os avisos: `ALERT_TELEGRAM_CHAT=<id da conversa>` em `/etc/wecare-m
 **Limitação:** se o VPS inteiro cair, ninguém roda o monitor — para isso é preciso um aviso externo (healthchecks.io, UptimeRobot).
 Testar sem enviar nada: `DRY_RUN=1 FORCE_ALL=1 /usr/local/bin/wecare-site-monitor.sh`.
 
+## Avaliador (`/avalie`)
+
+Estimativa de receita para o proprietário. A página é `noindex` e fica de fora do sitemap.
+
+Os leads e o contador de uso **não** podem ficar dentro da release (`WorkingDirectory` = `/srv/wecare-site/current` ou `/srv/wecare-site-dev/current`): essa pasta é trocada a cada deploy. Defina um diretório fora dela.
+
+| Ambiente | `AVALIADOR_DATA_DIR` |
+|---|---|
+| Produção | `/srv/wecare-site/data/avaliador` |
+| Desenvolvimento | `/srv/wecare-site-dev/data/avaliador` |
+
+Sem a variável o processo grava em `.data/avaliador` dentro da release (some no próximo deploy) e avisa no journal. O unit em `deploy/systemd/` libera escrita em `/srv/.../data` (`ReadWritePaths`). O unit já instalado em `/etc/systemd/system` só muda se for copiado de novo e recarregado.
+
+```bash
+sudo mkdir -p /srv/wecare-site/data/avaliador /srv/wecare-site-dev/data/avaliador
+sudo chown wecaresite:wecaresite /srv/wecare-site/data/avaliador /srv/wecare-site-dev/data/avaliador
+sudo chmod 700 /srv/wecare-site/data/avaliador /srv/wecare-site-dev/data/avaliador
+sudo cp deploy/systemd/wecare-site.service deploy/systemd/wecare-site-dev.service /etc/systemd/system/
+sudo systemctl daemon-reload
+```
+
+Em `/etc/wecare-site.env` e `/etc/wecare-site-dev.env`:
+
+```bash
+AVALIADOR_DATA_DIR=/srv/wecare-site/data/avaliador   # no dev: /srv/wecare-site-dev/data/avaliador
+AVALIADOR_IP_SALT=<segredo longo; o padrão do código é público>
+```
+
+Arquivos no diretório: `uso.json` (contador por hash de IP) e `leads.jsonl` (um JSON por linha).
+
+### Aviso de lead — desligado por padrão
+
+Nada é enviado até uma das variáveis abaixo existir. Cada lead gravado deixa no journal a linha `notificação de lead desligada` quando as duas estão vazias. Falha de webhook ou de e-mail também vai para o journal; a estimativa continua sendo respondida.
+
+```bash
+# Webhook: POST JSON do lead. Vazio = desligado.
+AVALIADOR_LEAD_WEBHOOK=https://exemplo.interno/leads
+
+# E-mail. Sem AVALIADOR_SMTP_HOST o journal registra que o e-mail não saiu.
+AVALIADOR_LEAD_EMAIL=comercial@wecarehosting.com.br
+AVALIADOR_LEAD_EMAIL_FROM=avaliador@wecarehosting.com.br
+AVALIADOR_SMTP_HOST=smtp.exemplo.com
+AVALIADOR_SMTP_PORT=587
+AVALIADOR_SMTP_USER=
+AVALIADOR_SMTP_PASS=
+# AVALIADOR_SMTP_SECURE=starttls   # padrão na porta 587; tls na 465; plain só em relay local de confiança
+```
+
+Os dois caminhos podem ficar ligados juntos. Detalhe também em `README.md`.
+
 ## Operação
 ```bash
 ssh wecare-vps
