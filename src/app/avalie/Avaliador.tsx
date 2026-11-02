@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { bairrosDaRegiao, OUTRO_BAIRRO } from "@/lib/avaliador-bairros";
 import { linkWhatsapp, nomeRegiao, resumoTexto, type Input } from "@/lib/avaliador";
 
@@ -56,7 +56,25 @@ function marcarCalculoMostrado() {
   try { localStorage.setItem(CHAVE_N, String(calculosMostrados() + 1)); } catch { /* sem storage, cada visita começa do zero */ }
 }
 
-export default function Avaliador() {
+function hostDeTeste(hostname: string) {
+  return hostname === "dev-site.wecarehosting.com.br" || hostname.startsWith("dev-site.");
+}
+
+/** Zera a contagem deste navegador. Em produção (sem a flag e fora de dev-site) não faz nada. */
+function zerarContagemDeTeste(permitidoPeloEnv: boolean) {
+  if (typeof window === "undefined") return false;
+  if (new URLSearchParams(window.location.search).get("teste") !== "1") return false;
+  if (!permitidoPeloEnv && !hostDeTeste(window.location.hostname)) return false;
+  try {
+    localStorage.removeItem(CHAVE_N);
+    localStorage.removeItem(CHAVE_CONTATO);
+    localStorage.removeItem("wc_av_contato_dados");
+    localStorage.removeItem("wc_av_lead");
+  } catch { /* sem storage */ }
+  return true;
+}
+
+export default function Avaliador({ permitirResetTeste = false }: { permitirResetTeste?: boolean }) {
   const [f, setF] = useState<{ regiao: string; bairro: string; outro: string; tipo: string; quartos: number | "" }>({ regiao: "sp", bairro: "", outro: "", tipo: "apto", quartos: 1 });
   const [r, setR] = useState<R>(null);
   const [lead, setLead] = useState({ email: "", telefone: "", consentimento: false });
@@ -66,6 +84,11 @@ export default function Avaliador() {
   const [erroModal, setErroModal] = useState("");
   const [aviso, setAviso] = useState("");
   const [linkWa, setLinkWa] = useState("");
+  const modoTeste = useSyncExternalStore(
+    () => () => {},
+    () => zerarContagemDeTeste(permitirResetTeste),
+    () => false,
+  );
 
   const bairroEnvio = f.bairro === OUTRO_BAIRRO ? (f.outro.trim() || OUTRO_BAIRRO) : f.bairro;
   const corpoBase = { regiao: f.regiao, tipo: f.tipo, quartos: f.quartos === "" ? null : f.quartos, bairro: bairroEnvio };
@@ -173,6 +196,7 @@ export default function Avaliador() {
 
   const bairros = bairrosDaRegiao(f.regiao);
   return <div data-avaliador>
+    {modoTeste && <p role="status" style={{ margin: "12px 0 0", fontSize: 13, color: "var(--gold-700)" }}>modo teste: contagem zerada</p>}
     <form noValidate onSubmit={(e) => { e.preventDefault(); void enviar(); }} style={{ display: "grid", gap: 14, margin: "24px 0", padding: 24, background: "var(--surface-card)", border: "1px solid var(--border-card)", borderRadius: 12, boxShadow: "var(--shadow-sm)", fontSize: 14, fontWeight: 500, color: "var(--navy)" }}>
       <label>Região<select style={box} value={f.regiao} onChange={(e) => setF({ ...f, regiao: e.target.value, bairro: "", outro: "" })}><option value="sp">São Paulo (capital)</option><option value="bertioga">Bertioga</option><option value="guaruja">Guarujá</option><option value="outra">Outra cidade</option></select></label>
       <label>Bairro

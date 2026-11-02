@@ -13,7 +13,7 @@ export default function Page() {
       <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--gold-700)" }}>Gestão de aluguel por temporada</div>
       <h1 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 40, lineHeight: 1.15, color: "var(--navy)", margin: "10px 0 12px" }}>Quanto seu imóvel pode render por temporada?</h1>
       <p style={{ color: "var(--text-muted)", fontSize: 17 }}>Estimativa grátis com dados reais de imóveis que a WeCare administra.</p>
-      <Avaliador />
+      <Avaliador permitirResetTeste={process.env.AVALIADOR_TEST_RESET === "1"} />
     </div>
   </main>;
 }

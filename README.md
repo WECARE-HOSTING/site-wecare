@@ -60,6 +60,8 @@ Sem as variáveis abaixo, cada lead gravado registra `notificação de lead desl
 
 A segunda simulação pede contato só neste navegador, depois que um resultado foi mostrado (`localStorage` `wc_av_v2_n`). O servidor não usa IP nem o cookie antigo `wc_av_uso` para isso. O arquivo de leads continua em `AVALIADOR_DATA_DIR` quando a pasta existe.
 
+Para retestar a primeira simulação sem janela anônima, no ambiente de desenvolvimento abra `/avalie?teste=1` (https://dev-site.wecarehosting.com.br/avalie?teste=1). Isso zera `wc_av_v2_n` e o contato salvo e mostra “modo teste: contagem zerada”. Vale no host `dev-site.*` ou com `AVALIADOR_TEST_RESET=1` (só em `/etc/wecare-site-dev.env`, nunca em produção). Em www o parâmetro é ignorado.
+
 **Enviar por e-mail** na tela manda a estimativa para o endereço que a pessoa digitou, pelo mesmo SMTP. Sem `AVALIADOR_SMTP_HOST` o contato é registrado e a tela avisa que o envio automático está desligado. PDF e WhatsApp não dependem de SMTP.
 
 Webhook e e-mail podem ficar ligados ao mesmo tempo. Falha de envio vai para o log e não esconde a estimativa.
