@@ -3,7 +3,8 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 
-const A_CONFIRMAR = "[A CONFIRMAR]";
+const CNPJ = "30.870.784/0001-70";
+const EMAIL_PRIVACIDADE = "contato@wecarehosting.com.br";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade | WeCare Hosting",
@@ -87,13 +88,14 @@ export default function PoliticaDePrivacidadePage() {
                   <strong>Razão social:</strong> We Care Hosting Serviços Ltda
                 </li>
                 <li>
-                  <strong>CNPJ:</strong> {A_CONFIRMAR}
+                  <strong>CNPJ:</strong> {CNPJ}
                 </li>
                 <li>
                   <strong>Endereço:</strong> Rua Eduardo Souza Aranha, 67, São Paulo/SP
                 </li>
                 <li>
-                  <strong>E-mail para privacidade:</strong> {A_CONFIRMAR}
+                  <strong>E-mail para privacidade:</strong>{" "}
+                  <a href={`mailto:${EMAIL_PRIVACIDADE}`}>{EMAIL_PRIVACIDADE}</a>
                 </li>
                 <li>
                   <strong>Telefone:</strong> <a href="tel:+551150392569">+55 11 5039-2569</a>
@@ -234,8 +236,8 @@ export default function PoliticaDePrivacidadePage() {
               <p>Para exercer um desses direitos:</p>
               <ol>
                 <li>
-                  Escreva para {A_CONFIRMAR} dizendo o que você quer (acesso, correção, eliminação ou outro pedido da
-                  lista) e um meio de confirmarmos que o pedido é seu.
+                  Escreva para <a href={`mailto:${EMAIL_PRIVACIDADE}`}>{EMAIL_PRIVACIDADE}</a> dizendo o que você quer
+                  (acesso, correção, eliminação ou outro pedido da lista) e um meio de confirmarmos que o pedido é seu.
                 </li>
                 <li>
                   Se preferir, fale pelo telefone <a href="tel:+551150392569">+55 11 5039-2569</a> ou pelo WhatsApp{" "}
@@ -294,8 +296,9 @@ export default function PoliticaDePrivacidadePage() {
 
               <h2>Como falar com a gente</h2>
               <p>
-                Para exercer um direito ou tirar uma dúvida sobre os seus dados, escreva para {A_CONFIRMAR}. Enquanto
-                esse e-mail não estiver publicado, você também pode usar o telefone e o WhatsApp indicados acima.
+                Para exercer um direito ou tirar uma dúvida sobre os seus dados, escreva para{" "}
+                <a href={`mailto:${EMAIL_PRIVACIDADE}`}>{EMAIL_PRIVACIDADE}</a>. Você também pode usar o telefone e o
+                WhatsApp indicados acima.
               </p>
             </div>
           </div>
