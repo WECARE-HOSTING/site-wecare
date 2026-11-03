@@ -14,8 +14,8 @@ const faqs: Faq[] = [
     a: "Anúncio e marketing, precificação dinâmica, atendimento 24/7 ao hóspede, curadoria e gestão de reservas. Na Gestão 360, somam-se limpeza, manutenção e enxoval. Você escolhe quanto delega.",
   },
   {
-    q: "Tenho fidelidade ou multa?",
-    a: "Não. Sem fidelidade e sem multa — você entra e sai quando quiser. Não há cláusula de rescisão nem prazo mínimo: a relação se sustenta pelo resultado entregue mês a mês. O que continua valendo é só o seguro obrigatório (EasyCover) e a taxa de adesão única. O churn da WeCare fica abaixo de 1% ao mês.",
+    q: "Tem multa ou fidelidade?",
+    a: "Não. O contrato tem vigência de 12 meses com renovação automática, mas você pode encerrar quando quiser, sem multa, avisando com 30 dias de antecedência. As reservas já confirmadas nesse período são honradas normalmente.",
     link: { href: "/blog/gestao-airbnb-sem-fidelidade", label: "Ver como funciona a saída, na prática" },
   },
   {

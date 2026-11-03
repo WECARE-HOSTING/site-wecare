@@ -115,7 +115,7 @@ function Content() {
             <tr>
               <td>Contrato de fidelidade</td>
               <td>Não se aplica (papel dentro do app)</td>
-              <td>Nenhum — sem fidelidade, sem multa, 30 dias de aviso prévio</td>
+              <td>Sem multa. Vigência de 12 meses com renovação automática; saída com 30 dias de aviso. Reservas confirmadas são honradas.</td>
             </tr>
             <tr>
               <td>Para quem serve melhor</td>

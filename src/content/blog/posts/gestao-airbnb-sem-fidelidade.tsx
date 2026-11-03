@@ -6,9 +6,9 @@ const meta: BlogPost["meta"] = {
   eyebrow: "Contrato e condições",
   title: "Gestão de Airbnb sem fidelidade: como funciona na WeCare",
   description:
-    "Sem multa, sem contrato amarrado. Veja o que continua obrigatório (seguro, taxa única) e por que o churn da WeCare é menor que 1% ao mês mesmo sem fidelidade contratual.",
+    "Sem multa. Vigência de 12 meses com renovação automática e saída com 30 dias de aviso. Veja o que continua obrigatório e por que o churn fica abaixo de 1% ao mês.",
   datePublished: "2026-07-03",
-  dateModified: "2026-07-03",
+  dateModified: "2026-11-03",
   keywords: [
     "gestão de Airbnb sem fidelidade",
     "administração de Airbnb sem multa",
@@ -17,8 +17,8 @@ const meta: BlogPost["meta"] = {
   ],
   faq: [
     {
-      q: "Tenho fidelidade ou multa na WeCare?",
-      a: "Não. Sem fidelidade e sem multa — você entra e sai quando quiser. A relação se sustenta por resultado, não por contrato amarrado.",
+      q: "Tem multa ou fidelidade?",
+      a: "Não. O contrato tem vigência de 12 meses com renovação automática, mas você pode encerrar quando quiser, sem multa, avisando com 30 dias de antecedência. As reservas já confirmadas nesse período são honradas normalmente.",
     },
     {
       q: "Se eu sair, perco o seguro ou pago alguma taxa retroativa?",
@@ -41,10 +41,9 @@ function Content() {
     <>
       <h2>Resposta direta</h2>
       <p>
-        Sim. No contrato-padrão da WeCare não existe cláusula de fidelidade nem multa de rescisão. Você contrata a
-        gestão do seu imóvel e pode encerrar quando quiser, sem penalidade. A relação se sustenta pelo resultado
-        entregue mês a mês — não por uma cláusula que impede a sua saída. Isso vale para os dois{" "}
-        <Link href="/#planos">planos de gestão</Link>, Online e 360.
+        Não. O contrato tem vigência de 12 meses com renovação automática, mas você pode encerrar quando quiser, sem
+        multa, avisando com 30 dias de antecedência. As reservas já confirmadas nesse período são honradas
+        normalmente. Isso vale para os dois <Link href="/#planos">planos de gestão</Link>, Online e 360.
       </p>
 
       <h2>Por que a WeCare não usa contrato de fidelidade</h2>
@@ -92,10 +91,10 @@ function Content() {
 
       <h2>Como funciona a saída, na prática</h2>
       <p>
-        Encerrar a gestão não exige justificativa nem negociação de multa. O proprietário comunica a intenção de
-        sair e a transição é organizada para não deixar reservas confirmadas sem operação — o compromisso da WeCare
-        é com o hóspede que já reservou, não em reter o proprietário à força. Não há cobrança adicional pelo
-        encerramento, e o imóvel — sempre do proprietário — volta a ser gerido por quem ele escolher.
+        Encerrar a gestão não exige justificativa nem negociação de multa. O aviso é de 30 dias de antecedência. As
+        reservas já confirmadas nesse período são honradas normalmente — o compromisso da WeCare é com o hóspede que
+        já reservou, não em reter o proprietário à força. Não há cobrança adicional pelo encerramento, e o imóvel —
+        sempre do proprietário — volta a ser gerido por quem ele escolher.
       </p>
 
       <h2>Sem fidelidade não é sinônimo de sem compromisso — é o oposto</h2>
@@ -118,9 +117,9 @@ function Content() {
           </thead>
           <tbody>
             <tr>
-              <td>Prazo mínimo de contrato</td>
+              <td>Prazo do contrato</td>
               <td>Normalmente 12 meses</td>
-              <td>Nenhum</td>
+              <td>Vigência de 12 meses com renovação automática; saída sem multa, com 30 dias de aviso</td>
             </tr>
             <tr>
               <td>Custo para sair antes do prazo</td>

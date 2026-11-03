@@ -114,7 +114,7 @@ function Content() {
             <tr>
               <td>Fidelidade contratual</td>
               <td>Existe multa ou prazo mínimo para sair?</td>
-              <td>Sem fidelidade, sem multa — 30 dias de aviso prévio</td>
+              <td>Sem multa. Vigência de 12 meses com renovação automática; saída com 30 dias de aviso. Reservas confirmadas são honradas.</td>
             </tr>
             <tr>
               <td>Churn e permanência</td>

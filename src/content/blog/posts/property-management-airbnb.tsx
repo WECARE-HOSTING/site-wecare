@@ -259,8 +259,9 @@ function Content() {
           facultativo.
         </li>
         <li>
-          <strong>Contrato sem fidelidade e sem multa de rescisão</strong> — a relação se sustenta pelo resultado,
-          com 30 dias de aviso prévio.
+          <strong>Contrato sem multa de rescisão</strong> — vigência de 12 meses com renovação automática; você
+          encerra quando quiser, sem multa, com 30 dias de aviso. Reservas já confirmadas nesse período são
+          honradas.
         </li>
         <li>
           <strong>Verificação de hóspede antes de cada reserva</strong>, não apenas checagem de pagamento.
