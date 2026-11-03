@@ -160,10 +160,11 @@ function Content() {
 
       <h3>4. Existe fidelidade ou multa para sair?</h3>
       <p>
-        Não deveria existir — e na WeCare não existe.{" "}
-        <Link href="/blog/gestao-airbnb-sem-fidelidade">Sem fidelidade e sem multa</Link>: você entra e sai quando
-        quiser, porque a relação se sustenta pelo resultado do repasse, não por uma cláusula. Se uma gestora te
-        prende por contrato, está admitindo que não confia no próprio resultado para reter você.
+        Não.{" "}
+        <Link href="/blog/gestao-airbnb-sem-fidelidade">Sem fidelidade e sem multa</Link>: o contrato tem vigência de
+        12 meses com renovação automática, mas você pode encerrar quando quiser, sem multa, avisando com 30 dias de
+        antecedência. As reservas já confirmadas nesse período são honradas normalmente. Se uma gestora te prende
+        por contrato, está admitindo que não confia no próprio resultado para reter você.
       </p>
 
       <h3>5. Como a gestora escolhe quem entra na sua casa?</h3>
@@ -297,7 +298,7 @@ function Content() {
             <tr>
               <td>Existe fidelidade ou multa de saída?</td>
               <td>Contrato que prende é sinal de gestora que não confia no próprio resultado</td>
-              <td>Sem fidelidade, sem multa — 30 dias de aviso prévio</td>
+              <td>Sem multa. Vigência de 12 meses com renovação automática; saída com 30 dias de aviso. Reservas confirmadas são honradas.</td>
             </tr>
             <tr>
               <td>Quem responde pelo meu patrimônio tem nome verificável?</td>

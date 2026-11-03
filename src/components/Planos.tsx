@@ -24,7 +24,7 @@ const notes: {
   {
     label: "Sem fidelidade",
     title: "Entra e sai quando quiser",
-    body: "Sem multa e sem burocracia. A relação se sustenta por resultado.",
+    body: "Sem multa. Vigência de 12 meses com renovação automática; saída com 30 dias de aviso. Reservas confirmadas são honradas.",
     link: { href: "/blog/gestao-airbnb-sem-fidelidade", label: "Como funciona →" },
   },
   {
