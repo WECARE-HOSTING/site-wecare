@@ -53,6 +53,7 @@ export default function Footer() {
                 {[
                   { href: anchor("#porque"), label: "O Padrão WeCare" },
                   { href: anchor("#servicos"), label: "Serviços" },
+                  { href: "/politica-de-privacidade", label: "Política de Privacidade" },
                   { href: "https://instagram.com/wecarehosting", label: "@wecarehosting", external: true },
                   { href: "https://wecarehosting.com.br", label: "wecarehosting.com.br", external: true },
                 ].map(link => (
@@ -77,6 +78,14 @@ export default function Footer() {
         {/* Bottom bar */}
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, paddingTop: 26, fontFamily: "var(--font-sans)", fontSize: "0.76rem", color: "var(--navy-200)" }}>
           <span>© 2026 WeCare Hosting</span>
+          <a
+            href="/politica-de-privacidade"
+            style={{ color: "var(--ivory-100)", textDecoration: "none", transition: "color var(--dur) var(--ease)" }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--gold-300)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "var(--ivory-100)"; }}
+          >
+            Política de Privacidade
+          </a>
           <span style={{ letterSpacing: "0.16em", textTransform: "uppercase" }}>São Paulo · Brasil</span>
         </div>
       </div>
