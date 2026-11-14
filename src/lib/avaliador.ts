@@ -199,3 +199,51 @@ export function linkWhatsapp(telefone: string, texto: string) {
   const comPais = digits.startsWith("55") ? digits : `55${digits}`;
   return `https://wa.me/${comPais}?text=${encodeURIComponent(texto)}`;
 }
+
+/** WhatsApp comercial da We Care no site de captação (home e CTAs de proprietário). Não é o número das reservas. */
+export const WHATSAPP_WECARE_CAPTACAO = "5511969760183";
+
+export type UtmOrigem = {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  content?: string;
+};
+
+export function textoOrigem(utm?: UtmOrigem | null): string | null {
+  if (!utm) return null;
+  const partes = [utm.source, utm.medium, utm.campaign, utm.content]
+    .map((s) => (s ?? "").trim())
+    .filter(Boolean);
+  return partes.length ? partes.join(" / ") : null;
+}
+
+/** Mensagem pré-preenchida para o WhatsApp da We Care, com o resumo da simulação e a origem da peça. */
+export function mensagemWhatsappEspecialista(i: Input, r: Resultado, utm?: UtmOrigem | null): string {
+  const onde = [nomeRegiao(i.regiao), i.bairro].filter(Boolean).join(", ");
+  const imovel = `${i.tipo === "casa" ? "Casa" : "Apartamento"}, ${i.quartos} quarto(s), ${onde}.`;
+  const origem = textoOrigem(utm);
+  const linhas = [
+    r.tipo === "personalizada" || (r.tipo === "estimativa" && r.base.aproximada)
+      ? "Olá! Simulei meu imóvel no site da WeCare e quero falar com um especialista."
+      : "Olá! Simulei meu imóvel no site da WeCare e quero agendar uma conversa de 15 minutos.",
+    imovel,
+  ];
+  if (r.tipo === "personalizada") {
+    linhas.push(r.motivo);
+  } else {
+    linhas.push(`Potencial provável: ${moeda(r.anual.provavel)} por ano (otimista: ${moeda(r.anual.otimista)}).`);
+    if (r.base.aproximada) {
+      linhas.push(`Referência aproximada: ${r.base.referencia} (${r.base.comparaveis} comparáveis).`);
+    } else {
+      linhas.push(`Faixa: ${r.base.faixa}.`);
+    }
+    linhas.push("Valor bruto, antes de taxas. Não é garantia de receita.");
+  }
+  if (origem) linhas.push(`Origem: ${origem}.`);
+  return linhas.join("\n");
+}
+
+export function linkWhatsappWeCare(texto: string) {
+  return `https://wa.me/${WHATSAPP_WECARE_CAPTACAO}?text=${encodeURIComponent(texto)}`;
+}

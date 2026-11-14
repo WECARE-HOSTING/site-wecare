@@ -96,7 +96,7 @@ Nada é enviado até uma das variáveis abaixo existir. Cada lead gravado deixa 
 AVALIADOR_LEAD_WEBHOOK=https://exemplo.interno/leads
 
 # E-mail. Sem AVALIADOR_SMTP_HOST o journal registra que o e-mail não saiu.
-AVALIADOR_LEAD_EMAIL=comercial@wecarehosting.com.br
+AVALIADOR_LEAD_EMAIL=leceron@gmail.com,carlos@wecarehosting.com.br,gabriela@wecarehosting.com.br
 AVALIADOR_LEAD_EMAIL_FROM=avaliador@wecarehosting.com.br
 AVALIADOR_SMTP_HOST=smtp.exemplo.com
 AVALIADOR_SMTP_PORT=587
