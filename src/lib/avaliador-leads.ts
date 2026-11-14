@@ -119,6 +119,19 @@ function umaLinha(s: string) {
   return s.replace(/[\r\n]/g, " ").trim();
 }
 
+/** AVALIADOR_LEAD_EMAIL aceita vários destinatários, separados por vírgula ou ponto e vírgula. */
+export function destinatarios(lista: string): string[] {
+  const vistos = new Set<string>();
+  const saida: string[] = [];
+  for (const bruto of lista.split(/[,;]/)) {
+    const email = bruto.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || vistos.has(email)) continue;
+    vistos.add(email);
+    saida.push(email);
+  }
+  return saida;
+}
+
 type SmtpSocket = net.Socket;
 
 class Smtp {
@@ -273,11 +286,13 @@ export async function enviarTexto(to: string, subject: string, text: string): Pr
   const from = process.env.AVALIADOR_LEAD_EMAIL_FROM?.trim() || "avaliador@wecarehosting.com.br";
   let smtp: Smtp | null = null;
   try {
+    const tos = destinatarios(to);
+    if (tos.length === 0) throw new Error("Nenhum destinatário de e-mail válido");
     smtp = await sessaoSmtp(host, Number.isInteger(port) && port > 0 ? port : 587);
     await smtp.cmd(`MAIL FROM:<${umaLinha(from)}>`, 250);
-    await smtp.cmd(`RCPT TO:<${umaLinha(to)}>`, 250);
+    for (const dest of tos) await smtp.cmd(`RCPT TO:<${umaLinha(dest)}>`, 250);
     await smtp.cmd("DATA", 354);
-    await smtp.cmd(`${mensagemEmail(to, from, subject, text)}\r\n.`, 250);
+    await smtp.cmd(`${mensagemEmail(tos.join(", "), from, subject, text)}\r\n.`, 250);
     await smtp.cmd("QUIT", 221);
     console.info("[avaliador] e-mail enviado");
     return "enviado";
