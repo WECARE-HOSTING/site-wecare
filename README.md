@@ -34,3 +34,24 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Avaliador (`/avalie`)
+
+Estimativa de receita de aluguel por temporada para o proprietário. A página é `noindex` e fica de fora do sitemap. Depois do resultado, o CTA principal abre o WhatsApp comercial da We Care (`+55 11 96976-0183`) com o resumo e as UTMs da peça. PDF e e-mail são opções secundárias.
+
+### Leads persistentes
+
+O deploy troca a pasta da release. Defina `AVALIADOR_DATA_DIR` **fora** dessa pasta, senão `leads.jsonl` some no deploy seguinte e o processo avisa no log.
+
+O serviço systemd só escreve nos caminhos de `ReadWritePaths`. A criação da pasta, o `chown` para `wecaresite` e a cópia do unit estão em `deploy/README.md`. `AVALIADOR_IP_SALT` troca o sal do hash de IP (o padrão do código é público).
+
+### Aviso de lead (desligado por padrão)
+
+Nada é enviado à equipe até uma das variáveis abaixo existir no env do servidor (nunca no repositório):
+
+- `AVALIADOR_LEAD_WEBHOOK` — URL que recebe `POST` com o JSON do lead.
+- `AVALIADOR_LEAD_EMAIL` — destinatários internos, separados por vírgula. Exige `AVALIADOR_SMTP_HOST`. Opcionais: `AVALIADOR_LEAD_EMAIL_FROM` (padrão `avaliador@wecarehosting.com.br`), `AVALIADOR_SMTP_PORT` (padrão `587`), `AVALIADOR_SMTP_USER`, `AVALIADOR_SMTP_PASS`, `AVALIADOR_SMTP_SECURE` (`starttls` na 587, `tls` na 465, `plain` só em relay local).
+
+**Enviar por e-mail** na tela manda a estimativa para o endereço que a pessoa digitou, pelo mesmo SMTP. Sem `AVALIADOR_SMTP_HOST` o contato é registrado e a tela avisa que o envio automático está desligado. PDF não depende de SMTP.
+
+Webhook e e-mail podem ficar ligados ao mesmo tempo. Falha de envio vai para o log e não esconde a estimativa.
