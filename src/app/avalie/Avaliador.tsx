@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { bairrosDaRegiao, OUTRO_BAIRRO } from "@/lib/avaliador-bairros";
 import {
   linkWhatsappWeCare,
@@ -143,10 +143,8 @@ export default function Avaliador() {
   const [contato, setContato] = useState({ email: "", telefone: "", consentimento: false });
   const [erroModal, setErroModal] = useState("");
   const [aviso, setAviso] = useState("");
-  const [utm, setUtm] = useState<UtmOrigem>({});
-  useEffect(() => {
-    setUtm(capturarUtms());
-  }, []);
+  // Lido na hora do clique/resultado (já no cliente). Evita useSyncExternalStore com objeto novo a cada snapshot (React #185).
+  const utm = capturarUtms();
 
   const bairroEnvio = f.bairro === OUTRO_BAIRRO ? f.outro.trim() || OUTRO_BAIRRO : f.bairro;
   const corpoBase = { regiao: f.regiao, tipo: f.tipo, quartos: f.quartos === "" ? null : f.quartos, bairro: bairroEnvio };
