@@ -108,6 +108,17 @@ AVALIADOR_SMTP_PASS=
 Os dois caminhos podem ficar ligados juntos. O e-mail da estimativa para o endereço digitado na tela usa o mesmo SMTP; sem `AVALIADOR_SMTP_HOST` a tela confirma o contato e não envia.
 
 
+## Meta Pixel
+
+Uma variável só, lida em runtime (não precisa rebuild para trocar o ID; reinicie o serviço):
+
+```bash
+# ID numérico do Gerenciador de Eventos. Vazio = o Pixel não carrega. Não inventar ID.
+META_PIXEL_ID=
+```
+
+Vale para `/etc/wecare-site.env` e `/etc/wecare-site-dev.env`. O script da Meta só entra no navegador depois que o visitante aceita cookies de Marketing. O e-mail do encarregado na política de privacidade é o placeholder `[e-mail do encarregado]` — troque no texto da página antes de publicar.
+
 ## Operação
 ```bash
 ssh wecare-vps

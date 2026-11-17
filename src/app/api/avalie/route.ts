@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { estimar, quartosValidos, type Input, type Regiao } from "@/lib/avaliador";
 import { hashIp, salvarLead, validarContato } from "@/lib/avaliador-leads";
+import { camposUtm, lerUtmDeCorpo, temUtm } from "@/lib/privacidade/utm";
 
 export const runtime = "nodejs";
 
@@ -25,7 +26,8 @@ export async function POST(req: Request) {
   const input = { regiao: b.regiao as Regiao, tipo: b.tipo as Input["tipo"], quartos, bairro: String(b.bairro ?? "").slice(0, 80) };
   if (lead) {
     const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "0").trim();
-    await salvarLead(lead, hashIp(ip), input);
+    const utm = lerUtmDeCorpo(b);
+    await salvarLead(lead, hashIp(ip), input, temUtm(utm) ? camposUtm(utm) : undefined);
   }
   return NextResponse.json(estimar(input), { headers: { "Cache-Control": "private, no-store, max-age=0", "X-Avalie-Versao": "referencia-aproximada" } });
 }

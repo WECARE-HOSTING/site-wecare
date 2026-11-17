@@ -77,8 +77,15 @@ export function validarLead(l: unknown): Lead | null {
   return contato;
 }
 
-export async function salvarLead(l: Lead, ipHash: string, simulacao: unknown) {
-  const reg = { quando: new Date().toISOString(), ...l, consentimentoTexto: "LGPD v1 avaliador", ipHash, simulacao };
+export async function salvarLead(l: Lead, ipHash: string, simulacao: unknown, utm?: Record<string, string>) {
+  const origem: Record<string, string> = {};
+  if (utm) {
+    for (const chave of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
+      const valor = utm[chave];
+      if (valor) origem[chave] = valor;
+    }
+  }
+  const reg = { quando: new Date().toISOString(), ...l, consentimentoTexto: "LGPD v1 avaliador", ipHash, simulacao, ...origem };
   try {
     const dir = diretorioDeDados();
     await fs.mkdir(dir, { recursive: true, mode: 0o700 });
@@ -330,6 +337,12 @@ async function enviarEmail(to: string, reg: Record<string, unknown>) {
     `Quando: ${reg.quando}`,
     `Imóvel: ${sim.tipo ?? ""} ${sim.quartos ?? ""} quarto(s), ${sim.bairro || sim.regiao || ""}`,
     "Consentimento: LGPD v1 avaliador",
-  ].join("\n");
-  await enviarTexto(to, `Novo lead do avaliador${reg.nome ? ` — ${reg.nome}` : ""}`, text);
+  ];
+  const origem = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]
+    .map((chave) => (typeof reg[chave] === "string" ? reg[chave] : ""))
+    .filter(Boolean)
+    .join(" / ");
+  if (origem) text.push(`Origem: ${origem}`);
+  const corpo = text.join("\n");
+  await enviarTexto(to, `Novo lead do avaliador${reg.nome ? ` — ${reg.nome}` : ""}`, corpo);
 }
