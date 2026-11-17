@@ -4,15 +4,19 @@
 
 import { useSyncExternalStore } from "react";
 
-export const CHAVE_CONSENTIMENTO = "wc_consent_v1";
+export const CHAVE_CONSENTIMENTO = "wc_consent_v2";
 export const EVENTO_ABRIR_PREFERENCIAS = "wc-open-cookie-prefs";
 const EVENTO_CONSENTIMENTO = "wc-consent-changed";
 const SNAPSHOT_SERVIDOR = "servidor";
 
-export type Consentimento = {
-  v: 1;
-  necessary: true;
+export type EscolhaCookies = {
+  medicao: boolean;
   marketing: boolean;
+};
+
+export type Consentimento = EscolhaCookies & {
+  v: 2;
+  necessary: true;
   updatedAt: string;
 };
 
@@ -29,8 +33,14 @@ export function interpretarConsentimento(bruto: string): Consentimento | null | 
   if (!bruto) return null;
   try {
     const j = JSON.parse(bruto) as Partial<Consentimento> | null;
-    if (!j || j.v !== 1 || typeof j.marketing !== "boolean") return null;
-    return { v: 1, necessary: true, marketing: j.marketing, updatedAt: String(j.updatedAt ?? "") };
+    if (!j || j.v !== 2 || typeof j.marketing !== "boolean" || typeof j.medicao !== "boolean") return null;
+    return {
+      v: 2,
+      necessary: true,
+      medicao: j.medicao,
+      marketing: j.marketing,
+      updatedAt: String(j.updatedAt ?? ""),
+    };
   } catch {
     return null;
   }
@@ -56,11 +66,12 @@ export function useConsentimento(): Consentimento | null | undefined {
   return interpretarConsentimento(bruto);
 }
 
-export function gravarConsentimento(marketing: boolean): Consentimento {
+export function gravarConsentimento(escolha: EscolhaCookies): Consentimento {
   const consentimento: Consentimento = {
-    v: 1,
+    v: 2,
     necessary: true,
-    marketing,
+    medicao: escolha.medicao,
+    marketing: escolha.marketing,
     updatedAt: new Date().toISOString(),
   };
   localStorage.setItem(CHAVE_CONSENTIMENTO, JSON.stringify(consentimento));

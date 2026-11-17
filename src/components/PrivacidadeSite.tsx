@@ -8,6 +8,7 @@ import {
   lerConsentimento,
   useConsentimento,
 } from "@/lib/privacidade/consentimento";
+import { ativarMedicao, definirMedicaoAtiva } from "@/lib/privacidade/google-analytics";
 import { ativarPixel, definirPixelAtivo, obterPixelId, rastrearLead } from "@/lib/privacidade/meta-pixel-browser";
 import { aplicarUtmNoDocumento, capturarUtmFirstTouch, ehLinkCaptacao } from "@/lib/privacidade/utm";
 
@@ -18,10 +19,12 @@ export default function PrivacidadeSite() {
   const bannerRef = useRef<HTMLDivElement>(null);
   const consent = useConsentimento();
   const [prefsAbertas, setPrefsAbertas] = useState(false);
+  const [rascunhoMedicao, setRascunhoMedicao] = useState(false);
   const [rascunhoMarketing, setRascunhoMarketing] = useState(false);
 
   const mostrarBanner = consent === null && !prefsAbertas;
   const aguardando = consent === undefined;
+  const medicao = consent?.medicao === true;
   const marketing = consent?.marketing === true;
 
   useLayoutEffect(() => {
@@ -70,7 +73,9 @@ export default function PrivacidadeSite() {
 
   useEffect(() => {
     function abrir() {
-      setRascunhoMarketing(lerConsentimento()?.marketing ?? false);
+      const salvo = lerConsentimento();
+      setRascunhoMedicao(salvo?.medicao ?? false);
+      setRascunhoMarketing(salvo?.marketing ?? false);
       setPrefsAbertas(true);
     }
     window.addEventListener(EVENTO_ABRIR_PREFERENCIAS, abrir);
@@ -96,6 +101,16 @@ export default function PrivacidadeSite() {
 
   useEffect(() => {
     if (aguardando) return;
+    if (!medicao) {
+      definirMedicaoAtiva(false);
+      return;
+    }
+    definirMedicaoAtiva(true);
+    ativarMedicao(pathname);
+  }, [aguardando, medicao, pathname]);
+
+  useEffect(() => {
+    if (aguardando) return;
     if (!marketing) {
       definirPixelAtivo(false);
       return;
@@ -114,7 +129,7 @@ export default function PrivacidadeSite() {
     if (!prefsAbertas) return;
     const antes = document.activeElement as HTMLElement | null;
     const dialog = dialogRef.current;
-    const focoInicial = dialog?.querySelector<HTMLElement>("#wc-marketing");
+    const focoInicial = dialog?.querySelector<HTMLElement>("#wc-medicao");
     focoInicial?.focus();
     function aoTeclar(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -145,12 +160,13 @@ export default function PrivacidadeSite() {
     };
   }, [prefsAbertas]);
 
-  function salvar(aceitaMarketing: boolean) {
-    gravarConsentimento(aceitaMarketing);
+  function salvar(aceitaMedicao: boolean, aceitaMarketing: boolean) {
+    gravarConsentimento({ medicao: aceitaMedicao, marketing: aceitaMarketing });
     setPrefsAbertas(false);
   }
 
   function abrirPrefs() {
+    setRascunhoMedicao(consent?.medicao ?? false);
     setRascunhoMarketing(consent?.marketing ?? false);
     setPrefsAbertas(true);
   }
@@ -163,18 +179,18 @@ export default function PrivacidadeSite() {
             Cookies
           </p>
           <p>
-            Usamos um registro necessário para lembrar esta escolha. Se você permitir, o Meta Pixel mede a visita e o
-            interesse em falar com a gente. Dá para aceitar, recusar o marketing ou ajustar as preferências.{" "}
+            Usamos um registro necessário para lembrar esta escolha. Medição e Marketing ficam desligados até você
+            aceitar. Dá para aceitar os dois, recusar ou ajustar cada um.{" "}
             <a href="/politica-de-privacidade">Política de Privacidade</a>
           </p>
           <div className="wc-consent-actions">
             <button type="button" className="wc-consent-prefs" onClick={abrirPrefs}>
               Preferências
             </button>
-            <button type="button" className="wc-consent-reject" onClick={() => salvar(false)}>
+            <button type="button" className="wc-consent-reject" onClick={() => salvar(false, false)}>
               Recusar
             </button>
-            <button type="button" className="wc-consent-accept" onClick={() => salvar(true)}>
+            <button type="button" className="wc-consent-accept" onClick={() => salvar(true, true)}>
               Aceitar
             </button>
           </div>
@@ -199,8 +215,8 @@ export default function PrivacidadeSite() {
             </p>
             <h2 id={tituloPrefs}>Preferências de cookies</h2>
             <p className="wc-consent-lead">
-              Os necessários ficam sempre ligados. Marketing só entra se você aceitar — e o script da Meta não carrega
-              antes disso.
+              Os necessários ficam sempre ligados. Medição e Marketing começam desligados: o script do Google ou da Meta
+              só carrega se você ligar a categoria.
             </p>
 
             <fieldset>
@@ -212,6 +228,21 @@ export default function PrivacidadeSite() {
                   <span>
                     Lembram esta escolha, o idioma da área de reservas e, nesta sessão, a origem da visita para o pedido
                     de contato. Não são cookies de terceiros.
+                  </span>
+                </span>
+              </label>
+              <label className="wc-consent-row">
+                <input
+                  id="wc-medicao"
+                  type="checkbox"
+                  checked={rascunhoMedicao}
+                  onChange={(event) => setRascunhoMedicao(event.target.checked)}
+                />
+                <span>
+                  <strong>Medição</strong>
+                  <span>
+                    Google Analytics. Mede visitas e o uso do site para melhorar as páginas. O script do Google só
+                    carrega com esta opção ligada.
                   </span>
                 </span>
               </label>
@@ -236,7 +267,7 @@ export default function PrivacidadeSite() {
               <button type="button" className="wc-consent-ghost" onClick={() => setPrefsAbertas(false)}>
                 Cancelar
               </button>
-              <button type="button" className="wc-consent-accept" onClick={() => salvar(rascunhoMarketing)}>
+              <button type="button" className="wc-consent-accept" onClick={() => salvar(rascunhoMedicao, rascunhoMarketing)}>
                 Salvar
               </button>
             </div>

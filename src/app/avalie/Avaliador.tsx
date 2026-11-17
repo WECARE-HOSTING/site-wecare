@@ -9,6 +9,7 @@ import {
   type Resultado,
   type UtmOrigem,
 } from "@/lib/avaliador";
+import { medicaoEstaAtiva } from "@/lib/privacidade/google-analytics";
 import { camposUtm, capturarUtmFirstTouch } from "@/lib/privacidade/utm";
 
 declare global {
@@ -56,6 +57,7 @@ function capturarUtms(): UtmOrigem {
 
 function registrarEvento(nome: string, params: Record<string, unknown>) {
   try {
+    if (!medicaoEstaAtiva()) return;
     window.gtag?.("event", nome, params);
   } catch {
     /* sem GA nesta visita */

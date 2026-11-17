@@ -169,17 +169,18 @@ export default function PoliticaDePrivacidadePage() {
                   precisamos cumprir o que foi combinado com você.
                 </li>
                 <li>
-                  <strong>Legítimo interesse (art. 7º, IX).</strong> Vale para medir, de forma agregada, como o site é
-                  usado (Google Analytics) e para organizar o atendimento do contato que você iniciou. Esse interesse
-                  não se sobrepõe aos seus direitos. Você pode se opor a esse uso pelo canal no final desta página.
+                  <strong>Legítimo interesse (art. 7º, IX).</strong> Vale para organizar o atendimento do contato que
+                  você iniciou. Esse interesse não se sobrepõe aos seus direitos. Você pode se opor a esse uso pelo
+                  canal no final desta página.
                 </li>
                 <li>
                   <strong>Cumprimento de obrigação legal (art. 7º, II).</strong> Vale quando uma lei exige que a gente
                   guarde algum registro.
                 </li>
                 <li>
-                  <strong>Consentimento (art. 7º, I).</strong> Vale para o Meta Pixel, e só se você aceitar a categoria
-                  Marketing. Recusar não impede o uso do site nem o pedido de contato.
+                  <strong>Consentimento (art. 7º, I).</strong> Vale para a Medição (Google Analytics) e para o Marketing
+                  (Meta Pixel). Cada uma só funciona se você aceitar a categoria. As duas começam desligadas. Recusar
+                  desliga as duas. Recusar não impede o uso do site nem o pedido de contato.
                 </li>
               </ul>
 
@@ -200,7 +201,8 @@ export default function PoliticaDePrivacidadePage() {
                   de atendimento. Elas recebem só o necessário para essa conversa.
                 </li>
                 <li>
-                  <strong>Google.</strong> O Google Analytics recebe dados de navegação, descritos na seção de cookies.
+                  <strong>Google.</strong> O Google Analytics só recebe dados de navegação se você aceitar a categoria
+                  Medição, descrita na seção de cookies. Antes desse aceite, o script do Google não carrega.
                 </li>
                 <li>
                   <strong>Pagamento e reserva.</strong> Na reserva online, a InfinitePay recebe nome, e-mail e telefone
@@ -208,8 +210,11 @@ export default function PoliticaDePrivacidadePage() {
                 </li>
               </ul>
               <p>
-                A Meta e o Google podem tratar dados fora do Brasil. Essa transferência acontece para as finalidades
-                desta política e nas hipóteses em que a LGPD permite transferência internacional (art. 33).
+                A Meta, no Meta Pixel (quando você aceita Marketing) e nos dados recebidos pelo formulário de cadastro
+                Lead Ads, e o Google, no Google Analytics (quando você aceita Medição), podem tratar dados fora do
+                Brasil. Essa transferência internacional se apoia no art. 33 da LGPD, inclusive nas salvaguardas
+                contratuais que a Meta e o Google adotam para esse tratamento. As políticas dessas empresas, linkadas
+                nesta página, descrevem essas salvaguardas.
               </p>
 
               <h2>Por quanto tempo guardamos</h2>
@@ -226,9 +231,10 @@ export default function PoliticaDePrivacidadePage() {
               </p>
               <p>
                 O cookie de idioma da área de reservas dura até 1 ano. A escolha de cookies fica no navegador até você
-                apagá-la ou mudá-la. A origem da visita (UTM) dura só a sessão da aba. Os cookies do Google Analytics
-                ficam no seu navegador até você apagá-los ou até expirarem, conforme a configuração do Google. Os
-                cookies do Meta Pixel, quando você aceita Marketing, seguem a configuração da Meta.
+                apagá-la ou mudá-la. A origem da visita (UTM) dura só a sessão da aba. Os cookies do Google Analytics,
+                só depois que você aceita Medição, ficam no navegador até você apagá-los ou até expirarem, conforme a
+                configuração do Google. Os cookies do Meta Pixel, quando você aceita Marketing, seguem a configuração da
+                Meta.
               </p>
 
               <h2>Os seus direitos</h2>
@@ -291,9 +297,9 @@ export default function PoliticaDePrivacidadePage() {
               <h3>Necessários</h3>
               <ul>
                 <li>
-                  <strong>Escolha de cookies</strong> (<code>wc_consent_v1</code>, armazenamento local deste site).
-                  Guarda se você aceitou ou recusou a categoria Marketing, para não perguntar de novo e para respeitar a
-                  recusa. Fica até você limpar os dados do site ou mudar a escolha. Não é cookie de terceiro.
+                  <strong>Escolha de cookies</strong> (<code>wc_consent_v2</code>, armazenamento local deste site).
+                  Guarda se você ligou Medição e Marketing, para não perguntar de novo e para respeitar a recusa. Fica
+                  até você limpar os dados do site ou mudar a escolha. Não é cookie de terceiro.
                 </li>
                 <li>
                   <strong>Origem da visita</strong> (<code>wc_utm_v1</code>, armazenamento de sessão deste site). Na
@@ -309,22 +315,23 @@ export default function PoliticaDePrivacidadePage() {
                   você escolheu na área de reservas. Não identifica você para anúncio.
                 </li>
               </ul>
-              <h3>Medição do site</h3>
+              <h3>Medição — Google Analytics</h3>
               <p>
-                O site usa o Google Analytics. Ao navegar, o Google Analytics grava cookies no seu navegador para
-                reconhecer visitas, ver quais páginas foram abertas e entender o uso do site, inclusive aparelho e
-                região de forma aproximada. Usamos isso para melhorar as páginas. Não usamos esses cookies para montar
-                um anúncio personalizado seu dentro do site.
+                A categoria Medição começa desligada. O Google Analytics só carrega se você aceitar essa categoria, no
+                botão Aceitar ou marcando Medição em Preferências. Antes disso, o script do Google não entra na página
+                e não grava cookie de medição.
               </p>
               <p>
-                O script do Google Analytics carrega junto com as páginas. Se você não quiser esse cookie, pode
-                bloqueá-lo ou apagá-lo nas configurações do navegador, ou instalar o{" "}
-                <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">
-                  complemento de desativação do Google Analytics
-                </a>
-                . O site continua acessível. A forma como o Google trata esses dados está na{" "}
+                Com o aceite, o Google Analytics grava cookies no seu navegador para reconhecer visitas, ver quais
+                páginas foram abertas e entender o uso do site, inclusive aparelho e região de forma aproximada. Usamos
+                isso para melhorar as páginas. Não usamos esses cookies para montar um anúncio personalizado seu dentro
+                do site. A forma como o Google trata esses dados está na{" "}
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
                   política de privacidade do Google
+                </a>
+                . Você também pode instalar o{" "}
+                <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">
+                  complemento de desativação do Google Analytics
                 </a>
                 .
               </p>
@@ -346,14 +353,15 @@ export default function PoliticaDePrivacidadePage() {
               </p>
               <h3>Como recusar ou alterar</h3>
               <p>
-                Na primeira visita, um aviso oferece três caminhos: <strong>Aceitar</strong> (liga Marketing),{" "}
-                <strong>Recusar</strong> (deixa o Marketing desligado) e <strong>Preferências</strong> (você liga ou
-                desliga Marketing; os necessários continuam ativos).
+                Na primeira visita, um aviso oferece três caminhos: <strong>Aceitar</strong> (liga Medição e Marketing),{" "}
+                <strong>Recusar</strong> (deixa Medição e Marketing desligadas) e <strong>Preferências</strong>. Em
+                Preferências aparecem Necessários (sempre ativos), Medição e Marketing. Medição e Marketing começam
+                desmarcadas; você liga só o que quiser.
               </p>
               <p>
                 Dá para mudar depois, em qualquer página, pelo controle <strong>Preferências de cookies</strong> no
-                rodapé. Você também pode apagar ou bloquear cookies nas configurações do navegador. O site continua
-                acessível se você recusar o Marketing.
+                rodapé: dá para desligar Medição, Marketing ou as duas. Você também pode apagar ou bloquear cookies nas
+                configurações do navegador. O site continua acessível se você recusar Medição e Marketing.
               </p>
               <div style={{ margin: "0 0 20px" }}>
                 <AbrirPreferenciasCookies>Abrir preferências de cookies</AbrirPreferenciasCookies>

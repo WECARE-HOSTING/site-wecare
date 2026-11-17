@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { medicaoEstaAtiva } from "@/lib/privacidade/google-analytics";
 
 declare global {
   interface Window {
@@ -16,7 +17,7 @@ export default function GtagLeadTracker() {
     function handleClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
       const anchor = target?.closest?.('a[href*="wa.me"]');
-      if (!anchor) return;
+      if (!anchor || !medicaoEstaAtiva()) return;
       window.gtag?.("event", "generate_lead", {
         link_url: (anchor as HTMLAnchorElement).href,
         page_location: window.location.href,
