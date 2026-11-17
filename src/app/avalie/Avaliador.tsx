@@ -9,6 +9,7 @@ import {
   type Resultado,
   type UtmOrigem,
 } from "@/lib/avaliador";
+import { camposUtm, capturarUtmFirstTouch } from "@/lib/privacidade/utm";
 
 declare global {
   interface Window {
@@ -25,7 +26,6 @@ type R = any;
 const box = { padding: 12, fontSize: 16, width: "100%", marginTop: 6, border: "1px solid var(--stone-400)", borderRadius: 8, background: "#fff", color: "var(--text-strong)", fontFamily: "var(--font-sans)" } as const;
 const btn = { padding: "14px 16px", fontSize: 16, border: 0, borderRadius: 8, fontWeight: 600, cursor: "pointer", width: "100%", fontFamily: "var(--font-sans)" } as const;
 const CHAVE_CONTATO = "wc_av_v2_contato";
-const CHAVE_UTM = "wc_av_utm";
 
 type ContatoSalvo = { email: string; telefone: string; consentimento: true };
 
@@ -51,29 +51,7 @@ function guardarContato(email: string, telefone: string) {
 }
 
 function capturarUtms(): UtmOrigem {
-  if (typeof window === "undefined") return {};
-  const q = new URLSearchParams(window.location.search);
-  const daUrl: UtmOrigem = {
-    source: q.get("utm_source")?.trim() || "",
-    medium: q.get("utm_medium")?.trim() || "",
-    campaign: q.get("utm_campaign")?.trim() || "",
-    content: q.get("utm_content")?.trim() || "",
-  };
-  if (Object.values(daUrl).some(Boolean)) {
-    try {
-      sessionStorage.setItem(CHAVE_UTM, JSON.stringify(daUrl));
-    } catch {
-      /* segue com o que veio na URL */
-    }
-    return daUrl;
-  }
-  try {
-    const salvo = JSON.parse(sessionStorage.getItem(CHAVE_UTM) || "null") as UtmOrigem | null;
-    if (salvo && typeof salvo === "object") return salvo;
-  } catch {
-    /* sem storage */
-  }
-  return {};
+  return capturarUtmFirstTouch();
 }
 
 function registrarEvento(nome: string, params: Record<string, unknown>) {
@@ -95,6 +73,7 @@ function parametrosEvento(f: { regiao: string; tipo: string; quartos: number | "
     utm_medium: utm.medium || undefined,
     utm_campaign: utm.campaign || undefined,
     utm_content: utm.content || undefined,
+    utm_term: utm.term || undefined,
   };
 }
 
@@ -163,7 +142,7 @@ export default function Avaliador() {
     setErro("");
     let res: Response;
     try {
-      res = await fetch("/api/avalie", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(corpoBase) });
+      res = await fetch("/api/avalie", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...corpoBase, ...camposUtm(capturarUtmFirstTouch()) }) });
     } catch {
       setErro("Não foi possível falar com o servidor. Tente de novo.");
       return;
@@ -197,7 +176,7 @@ export default function Avaliador() {
       res = await fetch("/api/avalie/entrega", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...corpoBase, canal: c, contato: { ...dados, nome: "" } }),
+        body: JSON.stringify({ ...corpoBase, canal: c, contato: { ...dados, nome: "" }, ...camposUtm(capturarUtmFirstTouch()) }),
       });
     } catch {
       setErroModal("Não foi possível falar com o servidor. Tente de novo.");

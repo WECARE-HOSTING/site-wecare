@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { estimar, linkWhatsapp, quartosValidos, resumoTexto, type Input, type Regiao, type TipoImovel } from "@/lib/avaliador";
 import { hashIp, salvarLead, validarContato, enviarTexto } from "@/lib/avaliador-leads";
+import { camposUtm, lerUtmDeCorpo, temUtm } from "@/lib/privacidade/utm";
 import { pdfEstimativa } from "@/lib/avaliador-pdf";
 
 export const runtime = "nodejs";
@@ -32,7 +33,8 @@ export async function POST(req: Request) {
   const input = { regiao: b.regiao as Regiao, tipo: b.tipo as TipoImovel, quartos, bairro: String(b.bairro ?? "").slice(0, 80) };
   const resultado = estimar(input);
   const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "0").trim();
-  await salvarLead(contato, hashIp(ip), { ...input, canal });
+  const utm = lerUtmDeCorpo(b);
+  await salvarLead(contato, hashIp(ip), { ...input, canal }, temUtm(utm) ? camposUtm(utm) : undefined);
 
   const resumo = resumoTexto(input, resultado);
   if (canal === "pdf") {

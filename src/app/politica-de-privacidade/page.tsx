@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import AbrirPreferenciasCookies from "@/components/AbrirPreferenciasCookies";
 
 const CNPJ = "30.870.784/0001-70";
 const EMAIL_PRIVACIDADE = "contato@wecarehosting.com.br";
@@ -65,14 +66,14 @@ export default function PoliticaDePrivacidadePage() {
             </h1>
 
             <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.8rem", color: "var(--text-muted)", margin: "0 0 48px" }}>
-              Atualizada em 03/11/2026 · WeCare Hosting
+              Atualizada em 17/11/2026 · WeCare Hosting
             </p>
 
             <div className="wc-prose">
               <p>
                 Esta página explica como a WeCare Hosting trata os dados pessoais que você nos informa. Ela vale para o
                 site wecarehosting.com.br, para os formulários deste site e para os formulários de anúncios da Meta
-                (Facebook e Instagram).
+                (Facebook e Instagram), inclusive o formulário de cadastro do Meta (Lead Ads).
               </p>
 
               <h2>Quem é o controlador</h2>
@@ -108,7 +109,7 @@ export default function PoliticaDePrivacidadePage() {
                 </li>
               </ul>
               <p>
-                O encarregado pelo tratamento de dados pessoais é contatado pelo e-mail de privacidade indicado acima.
+                O encarregado pelo tratamento de dados pessoais é contatado em [e-mail do encarregado].
               </p>
 
               <h2>Quais dados coletamos</h2>
@@ -122,6 +123,12 @@ export default function PoliticaDePrivacidadePage() {
                 <li>se o imóvel já é alugado por temporada;</li>
                 <li>se o imóvel é seu.</li>
               </ul>
+              <p>
+                No formulário de cadastro do Meta (Lead Ads), você preenche os dados no Facebook ou no Instagram. A Meta
+                nos envia o que você informou nesse cadastro — em geral nome, e-mail, telefone ou WhatsApp e as
+                respostas sobre o imóvel. O uso é o mesmo de um formulário deste site: responder o seu pedido de contato
+                e avaliar o imóvel.
+              </p>
               <p>
                 Esses dados servem para a gente te responder. Nesses formulários, não pedimos dados sobre saúde,
                 religião, opinião política ou biometria.
@@ -170,6 +177,10 @@ export default function PoliticaDePrivacidadePage() {
                   <strong>Cumprimento de obrigação legal (art. 7º, II).</strong> Vale quando uma lei exige que a gente
                   guarde algum registro.
                 </li>
+                <li>
+                  <strong>Consentimento (art. 7º, I).</strong> Vale para o Meta Pixel, e só se você aceitar a categoria
+                  Marketing. Recusar não impede o uso do site nem o pedido de contato.
+                </li>
               </ul>
 
               <h2>Com quem compartilhamos</h2>
@@ -181,7 +192,8 @@ export default function PoliticaDePrivacidadePage() {
                   <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer">
                     política de privacidade da Meta
                   </a>
-                  . No atendimento, usamos o WhatsApp, que é um serviço da Meta.
+                  . No atendimento, usamos o WhatsApp, que é um serviço da Meta. O Meta Pixel só é carregado se você aceitar
+                  cookies de marketing, como explica a seção de cookies.
                 </li>
                 <li>
                   <strong>Ferramentas de atendimento.</strong> Para ler o seu pedido e te responder, usamos ferramentas
@@ -203,7 +215,9 @@ export default function PoliticaDePrivacidadePage() {
               <h2>Por quanto tempo guardamos</h2>
               <p>
                 Guardamos os dados do contato e da avaliação do imóvel enquanto essa conversa e essa avaliação estiverem
-                em andamento. Se o contato virar um contrato, guardamos pelo tempo do contrato.
+                em andamento. Se o contato virar um contrato, guardamos pelo tempo do contrato. Se você é proprietário,
+                pediu esse contato e não chega a haver contrato, guardamos o lead por 12 meses a partir do último
+                contato e, em seguida, apagamos ou anonimizamos.
               </p>
               <p>
                 Quando a finalidade acaba, apagamos ou anonimizamos os dados, salvo se uma obrigação legal pedir a
@@ -211,8 +225,10 @@ export default function PoliticaDePrivacidadePage() {
                 direito em processo.
               </p>
               <p>
-                O cookie de idioma da área de reservas dura até 1 ano. Os cookies do Google Analytics ficam no seu
-                navegador até você apagá-los ou até expirarem, conforme a configuração do Google.
+                O cookie de idioma da área de reservas dura até 1 ano. A escolha de cookies fica no navegador até você
+                apagá-la ou mudá-la. A origem da visita (UTM) dura só a sessão da aba. Os cookies do Google Analytics
+                ficam no seu navegador até você apagá-los ou até expirarem, conforme a configuração do Google. Os
+                cookies do Meta Pixel, quando você aceita Marketing, seguem a configuração da Meta.
               </p>
 
               <h2>Os seus direitos</h2>
@@ -233,7 +249,10 @@ export default function PoliticaDePrivacidadePage() {
                 </li>
                 <li>revogação do consentimento.</li>
               </ul>
-              <p>Para exercer um desses direitos:</p>
+              <p>
+                Para pedir acesso ou exclusão dos seus dados, escreva para [e-mail do encarregado].
+              </p>
+              <p>Para exercer um desses direitos, você também pode usar os canais abaixo:</p>
               <ol>
                 <li>
                   Escreva para <a href={`mailto:${EMAIL_PRIVACIDADE}`}>{EMAIL_PRIVACIDADE}</a> dizendo o que você quer
@@ -264,7 +283,33 @@ export default function PoliticaDePrivacidadePage() {
                 .
               </p>
 
-              <h2>Cookies e analytics</h2>
+              <h2>Cookies</h2>
+              <p>
+                O site usa cookies e dois armazenamentos do próprio navegador. Abaixo, o que cada um faz e como recusar
+                ou mudar.
+              </p>
+              <h3>Necessários</h3>
+              <ul>
+                <li>
+                  <strong>Escolha de cookies</strong> (<code>wc_consent_v1</code>, armazenamento local deste site).
+                  Guarda se você aceitou ou recusou a categoria Marketing, para não perguntar de novo e para respeitar a
+                  recusa. Fica até você limpar os dados do site ou mudar a escolha. Não é cookie de terceiro.
+                </li>
+                <li>
+                  <strong>Origem da visita</strong> (<code>wc_utm_v1</code>, armazenamento de sessão deste site). Na
+                  primeira página da visita, guardamos <code>utm_source</code>, <code>utm_medium</code>,{" "}
+                  <code>utm_campaign</code>, <code>utm_content</code> e <code>utm_term</code>, em letras minúsculas,
+                  quando esses parâmetros vêm na URL. Servem para informar a origem quando você pede contato pelo
+                  WhatsApp de captação ou por um formulário. Some ao fechar a aba. Isso não depende do consentimento de
+                  marketing: é dado de primeira parte, necessário para atender o pedido que você faz. Não usamos cookie
+                  de terceiro para isso.
+                </li>
+                <li>
+                  <strong>Idioma das reservas</strong> (cookie <code>rs-lang</code>, até 1 ano). Só lembra o idioma que
+                  você escolheu na área de reservas. Não identifica você para anúncio.
+                </li>
+              </ul>
+              <h3>Medição do site</h3>
               <p>
                 O site usa o Google Analytics. Ao navegar, o Google Analytics grava cookies no seu navegador para
                 reconhecer visitas, ver quais páginas foram abertas e entender o uso do site, inclusive aparelho e
@@ -283,22 +328,48 @@ export default function PoliticaDePrivacidadePage() {
                 </a>
                 .
               </p>
+              <h3>Marketing — Meta Pixel</h3>
               <p>
-                Na área de reservas, se você escolhe um idioma, gravamos o cookie <strong>rs-lang</strong> por até um
-                ano, só para lembrar essa preferência. Ele não identifica você para anúncio.
+                O Meta Pixel só carrega se você aceitar a categoria Marketing. Antes desse aceite, o script da Meta não
+                entra na página. Se o Pixel não estiver configurado no site, ele também não carrega, mesmo com o
+                aceite.
               </p>
+              <p>
+                Com o aceite, a Meta pode gravar cookies como <code>_fbp</code> para reconhecer o navegador, medir a
+                visita (PageView) e registrar um Lead quando você clica no WhatsApp de captação (+55 11 96976-0183) ou
+                envia o formulário de avaliação. Isso serve para medir campanhas. A forma como a Meta trata esses dados
+                está na{" "}
+                <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer">
+                  política de privacidade da Meta
+                </a>
+                .
+              </p>
+              <h3>Como recusar ou alterar</h3>
+              <p>
+                Na primeira visita, um aviso oferece três caminhos: <strong>Aceitar</strong> (liga Marketing),{" "}
+                <strong>Recusar</strong> (deixa o Marketing desligado) e <strong>Preferências</strong> (você liga ou
+                desliga Marketing; os necessários continuam ativos).
+              </p>
+              <p>
+                Dá para mudar depois, em qualquer página, pelo controle <strong>Preferências de cookies</strong> no
+                rodapé. Você também pode apagar ou bloquear cookies nas configurações do navegador. O site continua
+                acessível se você recusar o Marketing.
+              </p>
+              <div style={{ margin: "0 0 20px" }}>
+                <AbrirPreferenciasCookies>Abrir preferências de cookies</AbrirPreferenciasCookies>
+              </div>
 
               <h2>Atualização desta política</h2>
               <p>
-                Esta política foi atualizada em 03/11/2026. Quando o texto mudar, a data no topo desta página muda
+                Esta política foi atualizada em 17/11/2026. Quando o texto mudar, a data no topo desta página muda
                 junto.
               </p>
 
               <h2>Como falar com a gente</h2>
               <p>
-                Para exercer um direito ou tirar uma dúvida sobre os seus dados, escreva para{" "}
-                <a href={`mailto:${EMAIL_PRIVACIDADE}`}>{EMAIL_PRIVACIDADE}</a>. Você também pode usar o telefone e o
-                WhatsApp indicados acima.
+                Para pedir acesso ou exclusão dos seus dados, escreva para [e-mail do encarregado]. Para outras dúvidas
+                sobre esta política, escreva para <a href={`mailto:${EMAIL_PRIVACIDADE}`}>{EMAIL_PRIVACIDADE}</a>. Você
+                também pode usar o telefone e o WhatsApp indicados acima.
               </p>
             </div>
           </div>

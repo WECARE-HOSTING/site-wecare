@@ -553,5 +553,193 @@ details[open] .faq-chevron {
 /* On a listing page the booking bar sits at the bottom on phones: stay clear of it. */
 @media (max-width: 880px) { body:has(.rs-book-bar) .wc-wa-float { bottom: 96px; } }
 
+/* Consentimento LGPD — cartão discreto, paleta do rodapé */
+.wc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.wc-inline-prefs {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--gold-500);
+  padding: 0 0 1px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--navy-800);
+  cursor: pointer;
+}
+.wc-inline-prefs:hover { color: var(--gold-700); border-bottom-color: var(--gold-700); }
+.wc-inline-prefs:focus-visible { outline: 2px solid var(--gold-700); outline-offset: 3px; }
+
+.wc-cookie-prefs-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 0.76rem;
+  color: var(--ivory-100);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.wc-cookie-prefs-link:hover,
+.wc-cookie-prefs-link:focus-visible { color: var(--gold-300); }
+.wc-cookie-prefs-link:focus-visible { outline: 2px solid var(--gold-300); outline-offset: 3px; }
+
+.wc-consent {
+  position: fixed;
+  z-index: 80;
+  left: 16px;
+  bottom: 16px;
+  width: min(420px, calc(100vw - 96px));
+  background: var(--navy-900);
+  color: var(--ivory-100);
+  border: 1px solid var(--line-soft-dark);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: 16px 16px 14px;
+  font-family: var(--font-sans);
+}
+.wc-consent p {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ivory-100);
+}
+.wc-consent a {
+  color: var(--gold-300);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.wc-consent a:hover { color: var(--ivory-100); }
+.wc-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.wc-consent-actions button {
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wc-consent-accept {
+  background: var(--ivory-100);
+  color: var(--navy-900);
+  border: 0;
+}
+.wc-consent-accept:hover { background: #fff; }
+.wc-consent-reject {
+  background: transparent;
+  color: var(--ivory-100);
+  border: 1px solid rgba(242, 234, 217, 0.45);
+}
+.wc-consent-reject:hover { border-color: var(--ivory-100); }
+.wc-consent-prefs {
+  background: transparent;
+  color: var(--gold-300);
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.wc-consent-actions button:focus-visible {
+  outline: 2px solid var(--gold-300);
+  outline-offset: 2px;
+}
+.wc-consent-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(8, 23, 32, 0.48);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.wc-consent-dialog {
+  width: min(480px, 100%);
+  max-height: min(92vh, 680px);
+  overflow: auto;
+  background: var(--surface-card);
+  color: var(--text-body);
+  border-radius: var(--radius-md);
+  padding: 22px 22px 16px;
+  box-shadow: var(--shadow);
+}
+.wc-consent-dialog h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--text-strong);
+  margin: 0 0 10px;
+}
+.wc-consent-lead { margin: 0 0 16px; font-size: 0.95rem; line-height: 1.55; }
+.wc-consent-dialog fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.wc-consent-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--ivory-50);
+}
+.wc-consent-row input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--navy-800);
+  flex-shrink: 0;
+}
+.wc-consent-row span { display: grid; gap: 4px; font-size: 0.88rem; line-height: 1.45; color: var(--text-body); }
+.wc-consent-row strong { color: var(--text-strong); font-size: 0.92rem; }
+.wc-consent-actions-light { justify-content: flex-end; }
+.wc-consent-ghost {
+  background: transparent;
+  color: var(--navy-800);
+  border: 1px solid var(--stone-400);
+}
+.wc-consent-note { margin: 12px 0 0; font-size: 0.82rem; }
+.wc-consent-note a { color: var(--navy-800); font-weight: 600; }
+@media (max-width: 720px) {
+  .wc-consent {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    padding: 14px 14px 12px;
+  }
+  .wc-consent p { font-size: 0.84rem; }
+  .wc-consent-actions { flex-direction: row; align-items: stretch; }
+  .wc-consent-actions button { flex: 1 1 0; width: auto; padding: 10px 8px; font-size: 0.78rem; }
+  .wc-consent-actions-light { flex-direction: column-reverse; }
+  .wc-consent-actions-light button { width: 100%; flex: none; font-size: 0.84rem; }
+  body:has(.wc-consent) .wc-wa-float { bottom: calc(var(--wc-consent-h, 220px) + 12px); }
+  .wc-consent-modal { place-items: end center; padding: 0; }
+  .wc-consent-dialog { border-radius: 16px 16px 0 0; max-height: 92vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-consent, .wc-consent-dialog { scroll-behavior: auto; }
+}
+
 /* Faixa do ambiente de testes (só aparece quando SITE_ENV_LABEL está definido, ou seja, nunca em produção) */
 .wc-env-banner { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 9999; background: #b45309; color: #fff; font: 700 11px/1 system-ui, sans-serif; letter-spacing: 0.06em; padding: 4px 14px 5px; border-radius: 0 0 8px 8px; pointer-events: none; text-transform: uppercase; }

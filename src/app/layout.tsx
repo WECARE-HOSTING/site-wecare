@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import GtagLeadTracker from "@/components/GtagLeadTracker";
+import PrivacidadeSite from "@/components/PrivacidadeSite";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
         {process.env.SITE_ENV_LABEL && <div className="wc-env-banner">{process.env.SITE_ENV_LABEL}</div>}
         {children}
         <GtagLeadTracker />
+        <PrivacidadeSite />
         <WhatsAppFloat />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}

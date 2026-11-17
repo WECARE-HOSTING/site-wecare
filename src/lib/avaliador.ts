@@ -208,12 +208,13 @@ export type UtmOrigem = {
   medium?: string;
   campaign?: string;
   content?: string;
+  term?: string;
 };
 
 export function textoOrigem(utm?: UtmOrigem | null): string | null {
   if (!utm) return null;
-  const partes = [utm.source, utm.medium, utm.campaign, utm.content]
-    .map((s) => (s ?? "").trim())
+  const partes = [utm.source, utm.medium, utm.campaign, utm.content, utm.term]
+    .map((s) => (s ?? "").trim().toLowerCase())
     .filter(Boolean);
   return partes.length ? partes.join(" / ") : null;
 }
@@ -240,7 +241,7 @@ export function mensagemWhatsappEspecialista(i: Input, r: Resultado, utm?: UtmOr
     }
     linhas.push("Valor bruto, antes de taxas. Não é garantia de receita.");
   }
-  if (origem) linhas.push(`Origem: ${origem}.`);
+  if (origem) linhas.push(`Origem: ${origem}`);
   return linhas.join("\n");
 }
 
